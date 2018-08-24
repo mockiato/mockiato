@@ -1,0 +1,11 @@
+[[package]]
+name = "mockiato"
+version = "0.1.0"
+dependencies = [
+ "mockiato_codegen 0.1.0",
+]
+
+[[package]]
+name = "mockiato_codegen"
+version = "0.1.0"
+

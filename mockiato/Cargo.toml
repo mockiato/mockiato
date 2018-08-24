@@ -1,0 +1,10 @@
+cargo-features = ["edition"]
+
+[package]
+name = "mockiato"
+version = "0.1.0"
+authors = ["Ruben Schmidmeister <ruben.schmidmeister@icloud.com>"]
+edition = "2018"
+
+[dependencies]
+mockiato_codegen = { path = "../mockiato_codegen" }
