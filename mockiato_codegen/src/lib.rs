@@ -23,7 +23,7 @@ impl MultiItemDecorator for Mockable {
         item: &Annotatable,
         push: &mut dyn FnMut(Annotatable),
     ) {
-        cx.parse_sess.span_diagnostic.span_note_without_error(sp, "Let's brew you some macchiato");
+        cx.parse_sess.span_diagnostic.span_note_without_error(item.span(), "Let's brew you some macchiato");
     }
 }
 
