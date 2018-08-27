@@ -1,5 +1,5 @@
 use syntax::ast::{GenericBounds, Generics, Ident, IsAuto, ItemKind, TraitItem, Unsafety};
-use syntax::ext::base::Annotatable;
+use syntax::ext::base::{Annotatable, ExtCtxt};
 use syntax_pos::Span;
 
 #[derive(Debug)]
@@ -7,14 +7,13 @@ pub(crate) struct TraitDecl<'a> {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
     pub(crate) is_auto: &'a IsAuto,
-    pub(crate) unsafety: &'a Unsafety,
     pub(crate) generics: &'a Generics,
     pub(crate) generic_bounds: &'a GenericBounds,
     pub(crate) items: &'a [TraitItem],
 }
 
 impl<'a> TraitDecl<'a> {
-    pub(crate) fn parse(annotated: &'a Annotatable) -> Result<Self, Span> {
+    pub(crate) fn parse(cx: &mut ExtCtxt, annotated: &'a Annotatable) -> Result<Self, ()> {
         if let Annotatable::Item(ref item) = annotated {
             let span = item.span;
             let ident = item.ident;
@@ -27,11 +26,15 @@ impl<'a> TraitDecl<'a> {
                 ref items,
             ) = item.node
             {
+                if unsafety == &Unsafety::Unsafe {
+                    cx.span_err(span, "#[mockable] does not work with unsafe traits");
+                    return Err(());
+                }
+
                 return Ok(TraitDecl {
                     ident,
                     span,
                     is_auto,
-                    unsafety,
                     generics,
                     generic_bounds,
                     items,
@@ -39,6 +42,7 @@ impl<'a> TraitDecl<'a> {
             }
         }
 
-        Err(annotated.span())
+        cx.span_err(annotated.span(), "#[mockable] can only be used with traits");
+        Err(())
     }
 }

@@ -1,4 +1,4 @@
-use syntax::ast::{self, Ident, Unsafety, VariantData, DUMMY_NODE_ID};
+use syntax::ast::{self, Ident, VariantData, DUMMY_NODE_ID};
 use syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
 use syntax::ext::build::AstBuilder;
 use syntax::ptr::P;
@@ -19,18 +19,10 @@ impl MultiItemDecorator for Mockable {
         item: &Annotatable,
         push: &mut dyn FnMut(Annotatable),
     ) {
-        let trait_decl = match TraitDecl::parse(item) {
+        let trait_decl = match TraitDecl::parse(cx, item) {
             Ok(trait_decl) => trait_decl,
-            Err(span) => {
-                cx.span_err(span, "#[mockable] can only be used on traits");
-                return;
-            }
+            Err(_) => return,
         };
-
-        if trait_decl.unsafety == &Unsafety::Unsafe {
-            cx.span_err(item.span(), "#[mockable] does not support unsafe traits");
-            return;
-        }
 
         let mockable_attr = match MockableAttr::parse(cx, meta_item) {
             Some(mockable_attr) => mockable_attr,
