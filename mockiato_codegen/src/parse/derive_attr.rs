@@ -17,8 +17,11 @@ impl DeriveAttr {
                 list,
             })
         } else {
-            // TODO: make more helpful
-            cx.span_err(meta_item.span(), "Syntax not supported");
+            cx.parse_sess
+                .span_diagnostic
+                .mut_span_err(meta_item.span, "#[mockable(derive(..)] must contain a list")
+                .help("Example usage: #[mockable(derive(Eq, PartialEq))]")
+                .emit();
             None
         }
     }

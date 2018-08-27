@@ -12,30 +12,24 @@ pub(crate) struct NameAttr {
 
 impl NameAttr {
     pub(crate) fn parse(cx: &mut ExtCtxt, meta_item: MetaItem) -> Option<Self> {
-        macro emit_error($cx: expr, $span:expr) {
-            $cx.parse_sess
-                .span_diagnostic
-                .mut_span_err($span, "`name` should be a string literal")
-                .help("Use something like #[mocked(name = \"FooMock\")]")
-                .emit();
-        };
-
-        match meta_item.node {
-            MetaItemKind::NameValue(Spanned { node, span }) => match node {
-                LitKind::Str(symbol, _) => Some(Self {
+        if let MetaItemKind::NameValue(Spanned { node, span }) = meta_item.node {
+            if let LitKind::Str(symbol, _) = node {
+                return Some(Self {
                     symbol,
                     symbol_span: span,
-                }),
-                _ => {
-                    emit_error!(cx, meta_item.span);
-                    None
-                }
-            },
-            _ => {
-                emit_error!(cx, meta_item.span);
-                None
+                });
             }
         }
+
+        cx.parse_sess
+            .span_diagnostic
+            .mut_span_err(
+                meta_item.span,
+                "#[mockable(name = \"...\") expects a string literal",
+            ).help("Example usage: #[mockable(name = \"FooMock\")]")
+            .emit();
+
+        None
     }
 
     pub(crate) fn expand(self) -> Ident {

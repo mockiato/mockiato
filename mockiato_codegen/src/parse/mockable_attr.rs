@@ -28,8 +28,8 @@ impl MockableAttr {
                                 // TODO: make more helpful
                                 cx.parse_sess
                                     .span_diagnostic
-                                    .mut_span_err(nested.span(), "Unsupported syntax for #[mocked]")
-                                    .help("Use something like #[mocked(name = \"FooMock\", derive(Debug))]")
+                                    .mut_span_err(nested.span(), "Unsupported syntax for #[mockable]")
+                                    .help("Example usage: #[mockable(name = \"FooMock\", derive(Debug))]")
                                     .emit();
                                 None
                             }
@@ -40,16 +40,19 @@ impl MockableAttr {
                     match item {
                         Some(item) => if item.ident == "derive" {
                             if derive_attr.is_some() {
-                                cx.span_warn(item.span(), "`derive` is specified more than once. The latter definition will overwrite the former.");
+                                cx.span_warn(item.span(), "`derive` is specified more than once. The latter definition will take precedence.");
                             }
                             derive_attr = DeriveAttr::parse(cx, item.clone());
                         } else if item.ident == "name" {
                             if name_attr.is_some() {
-                                cx.span_warn(item.span(), "`name` is specified more than once. The latter definition will overwrite the former.");
+                                cx.span_warn(item.span(), "`name` is specified more than once. The latter definition will take precedence.");
                             }
                             name_attr = NameAttr::parse(cx, item.clone());
                         } else {
-                            cx.span_err(item.span(), "Syntax not supported");
+                            cx.span_err(
+                                item.span(),
+                                "This attribute property is not supported by #[mockable]",
+                            );
                             return None;
                         },
                         None => return None,
