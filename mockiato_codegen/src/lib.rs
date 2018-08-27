@@ -193,6 +193,16 @@ impl NameAttr {
             }
         }
     }
+
+    fn expand(self) -> Ident {
+        Ident::new(self.symbol, self.symbol_span)
+    }
+}
+
+fn mock_struct_ident(trait_decl: &TraitDecl, name_attr: Option<NameAttr>) -> Ident {
+    name_attr
+        .map(|attr| attr.expand())
+        .unwrap_or_else(|| Ident::from_str(&format!("{}Mock", trait_decl.ident)))
 }
 
 struct Mockable;
@@ -224,10 +234,7 @@ impl MultiItemDecorator for Mockable {
             None => return,
         };
 
-        let mock_struct_ident = mockable_attr
-            .name_attr
-            .map(|attr| Ident::new(attr.symbol, attr.symbol_span))
-            .unwrap_or_else(|| Ident::from_str(&format!("{}Mock", trait_decl.ident)));
+        let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
 
         let mut mock_struct = cx
             .item_struct(
