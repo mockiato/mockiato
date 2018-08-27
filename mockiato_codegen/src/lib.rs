@@ -4,9 +4,9 @@
     concat_idents,
     plugin_registrar,
     rustc_private,
-    decl_macro
+    decl_macro,
+    custom_attribute
 )]
-#![feature(custom_attribute)]
 
 use rustc_plugin::Registry;
 use syntax::ext::base::SyntaxExtension;
