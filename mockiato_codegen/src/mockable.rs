@@ -6,6 +6,7 @@ use syntax_pos::Span;
 
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
+use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
 
 pub(crate) struct Mockable;
@@ -29,7 +30,10 @@ impl MultiItemDecorator for Mockable {
             None => return,
         };
 
+        let trait_bounds = TraitBounds::parse(&trait_decl);
+
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
+        println!("{:#?}", trait_decl.generic_bounds);
 
         let mut mock_struct = cx
             .item_struct(
