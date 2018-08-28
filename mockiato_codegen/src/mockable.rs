@@ -30,7 +30,7 @@ impl MultiItemDecorator for Mockable {
             None => return,
         };
 
-        let trait_bounds = TraitBounds::parse(&trait_decl);
+        let _trait_bounds = TraitBounds::parse(&trait_decl);
 
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
         println!("{:#?}", trait_decl.generic_bounds);
