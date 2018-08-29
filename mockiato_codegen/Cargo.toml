@@ -9,3 +9,6 @@ license = "MIT"
 
 [lib]
 plugin = true
+
+[depedencies]
+lazy_static = "1.1.0"
