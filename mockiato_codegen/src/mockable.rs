@@ -16,10 +16,31 @@ pub(crate) struct Mockable {
     trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>,
 }
 
+const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is poisoned";
+
 impl Mockable {
     fn new(trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>) -> Self {
         Self {
             trait_bound_resolver,
+        }
+    }
+
+    fn register_current_trait(&self, trait_bound_def_id: DefId, trait_decl: TraitDecl) {
+        self.trait_bound_resolver
+            .write()
+            .expect(TRAIT_BOUND_RESOLVER_ERR)
+            .register_mocked_trait(trait_bound_def_id, &trait_decl);
+    }
+
+    fn mock_trait_bounds(&self, trait_decl: &TraitDecl) {
+        let trait_bounds = TraitBounds::parse(trait_decl);
+        for trait_bound in trait_bounds.0 {
+            let identifier = trait_bound.identifier;
+            let trait_bound_type = self
+                .trait_bound_resolver
+                .read()
+                .expect(TRAIT_BOUND_RESOLVER_ERR)
+                .resolve_trait_bound(&identifier);
         }
     }
 }
@@ -42,22 +63,6 @@ impl MultiItemDecorator for Mockable {
             Some(mockable_attr) => mockable_attr,
             None => return,
         };
-
-        let identifier = DefId();
-        const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is poisoned";
-        self.trait_bound_resolver
-            .write()
-            .expect(TRAIT_BOUND_RESOLVER_ERR)
-            .register_mocked_trait(&identifier, &trait_decl);
-        let trait_bounds = TraitBounds::parse(&trait_decl);
-        for trait_bound in trait_bounds.0 {
-            let identifier = trait_bound.identifier;
-            let _trait_bound = self
-                .trait_bound_resolver
-                .read()
-                .expect(TRAIT_BOUND_RESOLVER_ERR)
-                .resolve_trait_bound(&identifier);
-        }
 
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
         println!("{:#?}", trait_decl.generic_bounds);

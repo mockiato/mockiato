@@ -2,7 +2,7 @@ use syntax::ast::{GenericBounds, Generics, Ident, IsAuto, ItemKind, TraitItem, U
 use syntax::ext::base::{Annotatable, ExtCtxt};
 use syntax_pos::Span;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct TraitDecl {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
