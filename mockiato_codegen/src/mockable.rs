@@ -19,9 +19,9 @@ pub(crate) struct Mockable {
 const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is poisoned";
 
 impl Mockable {
-    fn new(trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>) -> Self {
+    pub(crate) fn new(trait_bound_resolver: Box<dyn TraitBoundResolver>) -> Self {
         Self {
-            trait_bound_resolver,
+            trait_bound_resolver: RwLock::new(trait_bound_resolver),
         }
     }
 

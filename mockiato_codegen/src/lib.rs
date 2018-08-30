@@ -18,11 +18,14 @@ mod path_resolver;
 mod trait_bound_resolver;
 
 use self::mockable::Mockable;
+use self::trait_bound_resolver::TraitBoundResolverImpl;
 
 #[plugin_registrar]
 pub fn plugin_registrar(reg: &mut Registry) {
     reg.register_syntax_extension(
         Symbol::intern("mockable"),
-        SyntaxExtension::MultiDecorator(Box::new(Mockable)),
+        SyntaxExtension::MultiDecorator(Box::new(Mockable::new(Box::new(
+            TraitBoundResolverImpl::new(),
+        )))),
     );
 }
