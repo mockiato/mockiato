@@ -80,7 +80,6 @@ impl MultiItemDecorator for Mockable {
         };
 
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
-        println!("{:#?}", trait_decl.generic_bounds);
 
         let mut mock_struct = cx
             .item_struct(
