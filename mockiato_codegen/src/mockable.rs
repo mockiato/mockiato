@@ -10,7 +10,7 @@ use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
 use crate::path_resolver::DefId;
-use crate::trait_bound_resolver::TraitBoundResolver;
+use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundType};
 
 pub(crate) struct Mockable {
     trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>,
@@ -32,15 +32,30 @@ impl Mockable {
             .register_mocked_trait(trait_bound_def_id, &trait_decl);
     }
 
-    fn mock_trait_bounds(&self, trait_decl: &TraitDecl) {
-        let trait_bounds = TraitBounds::parse(trait_decl);
-        for trait_bound in trait_bounds.0 {
+    fn mock_trait_bounds(&self, cx: &mut ExtCtxt, trait_decl: &TraitDecl) {
+        let trait_bounds = TraitBounds::parse(trait_decl).0;
+        for trait_bound in trait_bounds {
             let identifier = trait_bound.identifier;
-            let trait_bound_type = self
+            let trait_bound_resolver = self
                 .trait_bound_resolver
                 .read()
-                .expect(TRAIT_BOUND_RESOLVER_ERR)
+                .expect(TRAIT_BOUND_RESOLVER_ERR);
+            let trait_bound_type = trait_bound_resolver
                 .resolve_trait_bound(&identifier);
+            self.mock_trait_bound_type(cx, trait_bound.span, &trait_bound_type);
+        }
+    }
+
+    fn mock_trait_bound_type(&self, cx: &mut ExtCtxt, sp: Span, trait_bound_type: &Option<TraitBoundType>) {
+        match *trait_bound_type {
+            None => {
+                cx.parse_sess
+                .span_diagnostic
+                .mut_span_err(sp, "The referenced trait has has not been marked as #[mockable] or doesn't exist")
+                .help("Mockable traits are handled from top to bottom, try declaring this trait earlier.")
+                .emit();
+            },
+            _ => {}
         }
     }
 }

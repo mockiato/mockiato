@@ -1,6 +1,7 @@
 use super::trait_decl::TraitDecl;
 use syntax::ast::{GenericBound, PathSegment};
 use syntax::symbol::LocalInternedString;
+use syntax_pos::Span;
 
 #[derive(Debug)]
 pub(crate) struct TraitBounds<'a>(pub(crate) Vec<TraitBound<'a>>);
@@ -9,6 +10,7 @@ pub(crate) struct TraitBounds<'a>(pub(crate) Vec<TraitBound<'a>>);
 pub(crate) struct TraitBound<'a> {
     pub(crate) identifier: LocalInternedString,
     pub(crate) segments: &'a [PathSegment],
+    pub(crate) span: Span,
 }
 
 impl<'a> TraitBounds<'a> {
@@ -30,6 +32,7 @@ impl<'a> TraitBounds<'a> {
                         Some(TraitBound {
                             identifier: last_segment.ident.name.as_str(),
                             segments: &path.segments,
+                            span: last_segment.ident.span
                         })
                     } else {
                         None

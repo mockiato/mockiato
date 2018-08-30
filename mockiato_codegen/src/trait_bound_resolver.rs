@@ -3,13 +3,15 @@ use crate::path_resolver::DefId;
 
 pub(crate) trait TraitBoundResolver {
     fn register_mocked_trait<'a>(&mut self, identifier: DefId, mocked_trait: &TraitDecl);
-    fn resolve_trait_bound<'a>(&self, identifier: &str) -> Option<TraitBound<'_>>;
+    fn resolve_trait_bound<'a>(&self, identifier: &str) -> Option<TraitBoundType<'_>>;
 }
 
-pub(crate) enum TraitBound<'a> {
+pub(crate) enum TraitBoundType<'a> {
     Derivable(String),
     AlreadyMockedTrait(&'a TraitDecl),
 }
+
+
 
 pub(crate) struct TraitBoundResolverImpl;
 impl TraitBoundResolverImpl {
@@ -17,10 +19,11 @@ impl TraitBoundResolverImpl {
         Self {}
     }
 }
+
 impl TraitBoundResolver for TraitBoundResolverImpl {
     fn register_mocked_trait<'a>(&mut self, identifier: DefId, mocked_trait: &TraitDecl) {}
 
-    fn resolve_trait_bound<'a>(&self, identifier: &str) -> Option<TraitBound<'_>> {
+    fn resolve_trait_bound<'a>(&self, identifier: &str) -> Option<TraitBoundType<'_>> {
         None
     }
 }
