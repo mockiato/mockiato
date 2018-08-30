@@ -3,17 +3,16 @@ use syntax::ext::base::{Annotatable, ExtCtxt};
 use syntax_pos::Span;
 
 #[derive(Debug)]
-pub(crate) struct TraitDecl<'a> {
+pub(crate) struct TraitDecl {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
-    pub(crate) is_auto: &'a IsAuto,
-    pub(crate) generics: &'a Generics,
-    pub(crate) generic_bounds: &'a GenericBounds,
-    pub(crate) items: &'a [TraitItem],
+    pub(crate) generics: Generics,
+    pub(crate) generic_bounds: GenericBounds,
+    pub(crate) items: Vec<TraitItem>,
 }
 
-impl<'a> TraitDecl<'a> {
-    pub(crate) fn parse(cx: &mut ExtCtxt, annotated: &'a Annotatable) -> Result<Self, ()> {
+impl TraitDecl {
+    pub(crate) fn parse(cx: &mut ExtCtxt, annotated: &Annotatable) -> Result<Self, ()> {
         if let Annotatable::Item(ref item) = annotated {
             let span = item.span;
             let ident = item.ident;
@@ -31,13 +30,17 @@ impl<'a> TraitDecl<'a> {
                     return Err(());
                 }
 
+                if is_auto == &IsAuto::Yes {
+                    cx.span_err(span, "#[mockable] does not work with auto traits");
+                    return Err(());
+                }
+
                 return Ok(TraitDecl {
                     ident,
                     span,
-                    is_auto,
-                    generics,
-                    generic_bounds,
-                    items,
+                    generics: generics.clone(),
+                    generic_bounds: generic_bounds.clone(),
+                    items: items.clone(),
                 });
             }
         }
