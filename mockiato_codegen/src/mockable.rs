@@ -25,14 +25,14 @@ impl Mockable {
         }
     }
 
-    fn register_current_trait(&self, trait_bound_def_id: DefId, trait_decl: TraitDecl) {
+    fn register_current_trait(&self, trait_bound_def_id: DefId, trait_decl: &TraitDecl) {
         self.trait_bound_resolver
             .write()
             .expect(TRAIT_BOUND_RESOLVER_ERR)
             .register_mocked_trait(trait_bound_def_id, &trait_decl);
     }
 
-    fn mock_trait_bounds(&self, cx: &mut ExtCtxt, trait_decl: &TraitDecl) {
+    fn mock_trait_bound_impls(&self, cx: &mut ExtCtxt, trait_decl: &TraitDecl) {
         let trait_bounds = TraitBounds::parse(trait_decl).0;
         for trait_bound in trait_bounds {
             let identifier = trait_bound.identifier;
@@ -79,6 +79,8 @@ impl MultiItemDecorator for Mockable {
             None => return,
         };
 
+        // self.register_current_trait(ruben_give_id, &trait_decl);
+        
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
 
         let mut mock_struct = cx
@@ -93,6 +95,8 @@ impl MultiItemDecorator for Mockable {
         }
 
         push(Annotatable::Item(P(mock_struct)));
+
+        // self.mock_trait_bound_impls(&mut cx, &trait_decl);
     }
 }
 
