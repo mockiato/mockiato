@@ -1,10 +1,12 @@
 #![feature(custom_attribute, plugin)]
 #![plugin(mockiato_codegen)]
 
-use std::fmt::{Debug, Display};
+use std::fmt::{self, Display};
+
+trait Debug {}
 
 #[mockable(derive(Debug))]
-trait Greeter<D>: Debug
+trait Greeter<D>: fmt::Debug
 where
     D: Display,
 {
