@@ -1,3 +1,4 @@
+use std::sync::RwLock;
 use syntax::ast::{self, Ident, VariantData, DUMMY_NODE_ID};
 use syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
 use syntax::ext::build::AstBuilder;
@@ -8,8 +9,19 @@ use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
+use crate::trait_bound_resolver::TraitBoundResolver;
 
-pub(crate) struct Mockable;
+pub(crate) struct Mockable {
+    trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>,
+}
+
+impl Mockable {
+    fn new(trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>) -> Self {
+        Self {
+            trait_bound_resolver,
+        }
+    }
+}
 
 impl MultiItemDecorator for Mockable {
     fn expand(
@@ -30,7 +42,21 @@ impl MultiItemDecorator for Mockable {
             None => return,
         };
 
-        let _trait_bounds = TraitBounds::parse(&trait_decl);
+        let identifier = "RUBEN GIVE ID";
+        const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is poisoned";
+        self.trait_bound_resolver
+            .write()
+            .expect(TRAIT_BOUND_RESOLVER_ERR)
+            .register_mocked_trait(&identifier, &trait_decl);
+        let trait_bounds = TraitBounds::parse(&trait_decl);
+        for trait_bound in trait_bounds.0 {
+            let identifier = trait_bound.identifier;
+            let _trait_bound = self
+                .trait_bound_resolver
+                .read()
+                .expect(TRAIT_BOUND_RESOLVER_ERR)
+                .resolve_trait_bound(&identifier);
+        }
 
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
         println!("{:#?}", trait_decl.generic_bounds);

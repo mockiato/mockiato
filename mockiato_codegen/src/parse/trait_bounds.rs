@@ -3,7 +3,7 @@ use syntax::ast::{GenericBound, PathSegment};
 use syntax::symbol::LocalInternedString;
 
 #[derive(Debug)]
-pub(crate) struct TraitBounds<'a>(Vec<TraitBound<'a>>);
+pub(crate) struct TraitBounds<'a>(pub(crate) Vec<TraitBound<'a>>);
 
 #[derive(Debug)]
 pub(crate) struct TraitBound<'a> {
