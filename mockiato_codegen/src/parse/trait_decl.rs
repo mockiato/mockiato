@@ -6,7 +6,6 @@ use syntax_pos::Span;
 pub(crate) struct TraitDecl<'a> {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
-    pub(crate) is_auto: &'a IsAuto,
     pub(crate) generics: &'a Generics,
     pub(crate) generic_bounds: &'a GenericBounds,
     pub(crate) items: &'a [TraitItem],
@@ -31,10 +30,14 @@ impl<'a> TraitDecl<'a> {
                     return Err(());
                 }
 
+                if is_auto == &IsAuto::Yes {
+                    cx.span_err(span, "#[mockable] does not work with auto traits");
+                    return Err(());
+                }
+
                 return Ok(TraitDecl {
                     ident,
                     span,
-                    is_auto,
                     generics,
                     generic_bounds,
                     items,
