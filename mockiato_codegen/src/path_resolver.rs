@@ -4,7 +4,7 @@ use syntax::ast::Path;
 use syntax::ext::base::ExtCtxt;
 use syntax_pos::DUMMY_SP;
 
-#[derive(Eq, PartialEq, Hash, Debug)]
+#[derive(Eq, PartialEq, Hash, Debug, Copy, Clone)]
 pub(crate) struct DefId(rustc::hir::def_id::DefId);
 
 pub(crate) trait PathResolver {

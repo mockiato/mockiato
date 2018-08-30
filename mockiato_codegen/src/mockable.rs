@@ -9,6 +9,7 @@ use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
+use crate::path_resolver::DefId;
 use crate::trait_bound_resolver::TraitBoundResolver;
 
 pub(crate) struct Mockable {
@@ -42,7 +43,7 @@ impl MultiItemDecorator for Mockable {
             None => return,
         };
 
-        let identifier = "RUBEN GIVE ID";
+        let identifier = DefId();
         const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is poisoned";
         self.trait_bound_resolver
             .write()
