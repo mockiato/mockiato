@@ -13,6 +13,14 @@ where
     fn say_hello(&self, name: D) -> String;
 }
 
+#[mockable(derive(Debug))]
+trait PoliteGreeter<D>: Greeter<D>
+where
+    D: Display,
+{
+    fn say_hello_politely(&self, name: D) -> String;
+}
+
 // #[derive(Debug)]
 // #[mockable]
 // struct GreeterMock {}
