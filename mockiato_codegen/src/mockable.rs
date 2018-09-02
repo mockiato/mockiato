@@ -6,6 +6,7 @@ use syntax::ptr::P;
 use syntax_pos::Span;
 
 use crate::definition_id::DefId;
+use crate::definition_id::Predictor;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
@@ -83,8 +84,6 @@ impl MultiItemDecorator for Mockable {
             None => return,
         };
 
-        // self.register_current_trait(ruben_give_id, &trait_decl);
-
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
 
         let mut mock_struct = cx
@@ -99,6 +98,9 @@ impl MultiItemDecorator for Mockable {
         }
 
         push(Annotatable::Item(P(mock_struct)));
+
+        // TODO: this also needs to include auto-generated derives (e.g. Debug)
+        self.register_current_trait(cx.predict_next_id(0), &trait_decl);
 
         // self.mock_trait_bound_impls(&mut cx, &trait_decl);
     }
