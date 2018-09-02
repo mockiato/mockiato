@@ -13,9 +13,9 @@ use rustc_plugin::Registry;
 use syntax::ext::base::SyntaxExtension;
 use syntax::symbol::Symbol;
 
+mod definition_id;
 mod mockable;
 mod parse;
-mod definition_id;
 mod trait_bound_resolver;
 
 use self::mockable::Mockable;

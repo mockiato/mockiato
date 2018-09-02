@@ -5,11 +5,11 @@ use syntax::ext::build::AstBuilder;
 use syntax::ptr::P;
 use syntax_pos::Span;
 
+use crate::definition_id::DefId;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
-use crate::definition_id::DefId;
 use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundType};
 
 pub(crate) struct Mockable {
@@ -40,13 +40,17 @@ impl Mockable {
                 .trait_bound_resolver
                 .read()
                 .expect(TRAIT_BOUND_RESOLVER_ERR);
-            let trait_bound_type = trait_bound_resolver
-                .resolve_trait_bound(&identifier);
+            let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&identifier);
             self.mock_trait_bound_type(cx, trait_bound.span, &trait_bound_type);
         }
     }
 
-    fn mock_trait_bound_type(&self, cx: &mut ExtCtxt, sp: Span, trait_bound_type: &Option<TraitBoundType>) {
+    fn mock_trait_bound_type(
+        &self,
+        cx: &mut ExtCtxt,
+        sp: Span,
+        trait_bound_type: &Option<TraitBoundType>,
+    ) {
         match *trait_bound_type {
             None => {
                 cx.parse_sess
@@ -54,7 +58,7 @@ impl Mockable {
                 .mut_span_err(sp, "The referenced trait has has not been marked as #[mockable] or doesn't exist")
                 .help("Mockable traits are handled from top to bottom, try declaring this trait earlier.")
                 .emit();
-            },
+            }
             _ => {}
         }
     }
@@ -80,7 +84,7 @@ impl MultiItemDecorator for Mockable {
         };
 
         // self.register_current_trait(ruben_give_id, &trait_decl);
-        
+
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
 
         let mut mock_struct = cx

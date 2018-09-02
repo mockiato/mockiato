@@ -32,7 +32,7 @@ impl<'a> TraitBounds<'a> {
                         Some(TraitBound {
                             identifier: last_segment.ident.name.as_str(),
                             segments: &path.segments,
-                            span: last_segment.ident.span
+                            span: last_segment.ident.span,
                         })
                     } else {
                         None

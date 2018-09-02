@@ -40,8 +40,8 @@ impl<'a> Predictor for ExtCtxt<'a> {
     fn predict_next_id(&mut self, generated_items: u32) -> DefId {
         let address_space = {
             let self_id = self
-            .resolve_path(Path::from_ident(Ident::from_str("self")))
-            .expect("unable to resolve self");
+                .resolve_path(Path::from_ident(Ident::from_str("self")))
+                .expect("unable to resolve self");
 
             self_id.0.index.address_space()
         };
@@ -52,8 +52,9 @@ impl<'a> Predictor for ExtCtxt<'a> {
             .definitions()
             .def_path_table()
             .next_id(address_space);
-        
-        let corrected_def_index = def_id::DefIndex::from_raw_u32(def_index.as_raw_u32() + 1 + generated_items);
+
+        let corrected_def_index =
+            def_id::DefIndex::from_raw_u32(def_index.as_raw_u32() + 1 + generated_items);
 
         DefId(def_id::DefId::local(corrected_def_index))
     }
