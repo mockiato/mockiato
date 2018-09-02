@@ -14,7 +14,7 @@ use syntax::symbol::Symbol;
 
 mod mockable;
 mod parse;
-mod path_resolver;
+mod definition_id;
 mod trait_bound_resolver;
 
 use self::mockable::Mockable;
