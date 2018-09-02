@@ -5,7 +5,8 @@
     plugin_registrar,
     rustc_private,
     decl_macro,
-    custom_attribute
+    custom_attribute,
+    underscore_imports,
 )]
 
 use rustc_plugin::Registry;

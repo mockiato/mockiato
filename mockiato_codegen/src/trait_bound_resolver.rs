@@ -1,5 +1,5 @@
 use crate::parse::trait_decl::TraitDecl;
-use crate::path_resolver::DefId;
+use crate::definition_id::DefId;
 
 pub(crate) trait TraitBoundResolver {
     fn register_mocked_trait<'a>(&mut self, identifier: DefId, mocked_trait: &TraitDecl);

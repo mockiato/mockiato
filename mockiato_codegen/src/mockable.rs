@@ -9,7 +9,7 @@ use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
-use crate::path_resolver::DefId;
+use crate::definition_id::DefId;
 use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundType};
 
 pub(crate) struct Mockable {
