@@ -1,5 +1,4 @@
 use rustc::hir::def_id;
-use rustc::hir::def_id::DefIndexAddressSpace;
 use rustc::hir::lowering::Resolver as LoweringResolver;
 use rustc_resolve::Resolver as ResolverImpl;
 use syntax::ast::{Ident, Path};
