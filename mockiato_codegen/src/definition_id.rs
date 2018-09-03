@@ -6,10 +6,14 @@ use syntax::ext::base::{ExtCtxt, Resolver as SyntaxResolver};
 use syntax_pos::DUMMY_SP;
 
 #[derive(Eq, PartialEq, Hash, Debug, Copy, Clone)]
-pub(crate) struct DefId(def_id::DefId);
+pub(crate) struct DefId(pub(crate) def_id::DefId);
 
 pub(crate) trait Resolver {
-    fn resolve_path(&mut self, path: Path) -> Option<DefId>;
+    fn resolve_path(&mut self, path: Path) -> Option<DefId> {
+        self.resolve_str_path(&path.to_string())
+    }
+
+    fn resolve_str_path(&mut self, path: &str) -> Option<DefId>;
 }
 
 pub(crate) trait Predictor {
@@ -22,11 +26,11 @@ fn transmute_resolver(mut resolver: &mut SyntaxResolver) -> &mut &mut ResolverIm
 }
 
 impl<'a> Resolver for ExtCtxt<'a> {
-    fn resolve_path(&mut self, path: Path) -> Option<DefId> {
+    fn resolve_str_path(&mut self, path: &str) -> Option<DefId> {
         let resolver = transmute_resolver(self.resolver);
 
         let path = resolver
-            .resolve_str_path_error(DUMMY_SP, &path.to_string(), false)
+            .resolve_str_path_error(DUMMY_SP, path, false)
             .ok()?;
 
         let def_id = path.def.def_id();
