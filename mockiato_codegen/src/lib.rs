@@ -14,6 +14,7 @@ use syntax::ext::base::SyntaxExtension;
 use syntax::symbol::Symbol;
 
 mod definition_id;
+mod derive_resolver;
 mod mockable;
 mod parse;
 mod trait_bound_resolver;
