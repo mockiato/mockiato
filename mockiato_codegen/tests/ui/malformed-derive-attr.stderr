@@ -1,0 +1,10 @@
+error: #[mockable(derive(..)] must contain a list
+ --> $DIR/malformed-derive-attr.rs:4:12
+  |
+4 | #[mockable(derive = "Foo")]
+  |            ^^^^^^^^^^^^^^
+  |
+  = help: Example usage: #[mockable(derive(Eq, PartialEq))]
+
+error: aborting due to previous error
+
