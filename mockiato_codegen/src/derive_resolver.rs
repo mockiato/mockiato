@@ -30,25 +30,30 @@ impl DeriveResolver for DeriveResolverImpl {
 mod test {
     use super::*;
     use syntax::ast::Ident;
+    use syntax_pos::{Globals, GLOBALS};
 
     #[test]
     fn test_is_automatically_derivable_works() {
         let derive_resolver = DeriveResolverImpl::new();
 
-        assert_eq!(
-            true,
-            derive_resolver.is_automatically_derivable(&Path::from_ident(Ident::from_str("Clone")))
-        );
+        GLOBALS.set(&Globals::new(), || {
+            assert_eq!(
+                true,
+                derive_resolver
+                    .is_automatically_derivable(&Path::from_ident(Ident::from_str("Clone")))
+            );
 
-        assert_eq!(
-            true,
-            derive_resolver.is_automatically_derivable(&Path::from_ident(Ident::from_str("Debug")))
-        );
+            assert_eq!(
+                true,
+                derive_resolver
+                    .is_automatically_derivable(&Path::from_ident(Ident::from_str("Debug")))
+            );
 
-        assert_eq!(
-            false,
-            derive_resolver
-                .is_automatically_derivable(&Path::from_ident(Ident::from_str("Display")))
-        );
+            assert_eq!(
+                false,
+                derive_resolver
+                    .is_automatically_derivable(&Path::from_ident(Ident::from_str("Display")))
+            );
+        });
     }
 }
