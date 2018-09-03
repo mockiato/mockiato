@@ -1,3 +1,7 @@
+//!
+//! Shamelessly stolen from:
+//! https://github.com/SergioBenitez/Rocket/blob/master/core/codegen/tests/compiletest.rs
+//!
 extern crate compiletest_rs as compiletest;
 
 use std::path::{Path, PathBuf};
