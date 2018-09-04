@@ -45,7 +45,7 @@ mod test {
     #[test]
     fn test_registers_mocked_trait() {
         GLOBALS.set(&Globals::new(), || {
-            let identifier = DefId::mock(1234);
+            let identifier = DefId::dummy(1234);
 
             let mocked_trait = TraitDecl {
                 span: DUMMY_SP,
