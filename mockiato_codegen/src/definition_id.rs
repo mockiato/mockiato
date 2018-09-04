@@ -8,6 +8,13 @@ use syntax_pos::DUMMY_SP;
 #[derive(Eq, PartialEq, Hash, Debug, Copy, Clone)]
 pub(crate) struct DefId(pub(crate) def_id::DefId);
 
+#[cfg(test)]
+impl DefId {
+    pub(crate) fn dummy(value: u32) -> Self {
+        DefId(def_id::DefId::local(def_id::DefIndex::from_raw_u32(22)))
+    }
+}
+
 pub(crate) trait Resolver {
     fn resolve_path(&mut self, path: Path) -> Option<DefId> {
         self.resolve_str_path(&path.to_string())

@@ -57,7 +57,6 @@ impl DeriveResolver for DeriveResolverImpl {
 mod test {
     use super::*;
     use crate::definition_id::DefId;
-    use rustc::hir::def_id::{self, DefIndex};
     use syntax_pos::{Globals, GLOBALS};
 
     #[test]
@@ -92,7 +91,7 @@ mod test {
         impl Resolver for ResolverMock {
             fn resolve_str_path(&mut self, path: &str) -> Option<DefId> {
                 if path == "Debug1234" || path == "std::fmt::Debug" {
-                    return Some(DefId(def_id::DefId::local(DefIndex::from_raw_u32(22))));
+                    return Some(DefId::dummy(22));
                 }
 
                 None
