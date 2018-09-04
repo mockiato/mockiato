@@ -46,17 +46,40 @@ impl<'a> Resolver for ExtCtxt<'a> {
     }
 }
 
-impl<'a> Predictor for ExtCtxt<'a> {
+pub(crate) struct ContextPredictor<'a> {
+    context: &'a mut ExtCtxt<'a>,
+}
+impl<'a> ContextPredictor<'a> {
+    pub(crate) fn new(context: &'a mut ExtCtxt<'a>) -> Self {
+        Self { context }
+    }
+}
+
+pub(crate) trait PredictorFactory<'a> {
+    fn build(&self, context: &'a mut ExtCtxt<'a>) -> Box<dyn Predictor + 'a>;
+}
+
+#[derive(Default)]
+pub(crate) struct ContextPredictorFactory;
+
+impl<'a> PredictorFactory<'a> for ContextPredictorFactory {
+    fn build(&self, context: &'a mut ExtCtxt<'a>) -> Box<dyn Predictor + 'a> {
+        Box::new(ContextPredictor::new(context))
+    }
+}
+
+impl<'a> Predictor for ContextPredictor<'a> {
     fn predict_next_id(&mut self, generated_items: u32) -> DefId {
         let address_space = {
             let self_id = self
+                .context
                 .resolve_path(Path::from_ident(Ident::from_str("self")))
                 .expect("unable to resolve self");
 
             self_id.0.index.address_space()
         };
 
-        let resolver = transmute_resolver(self.resolver);
+        let resolver = transmute_resolver(self.context.resolver);
 
         let def_index = resolver
             .definitions()

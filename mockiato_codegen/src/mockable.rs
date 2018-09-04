@@ -5,24 +5,28 @@ use syntax::ext::build::AstBuilder;
 use syntax::ptr::P;
 use syntax_pos::Span;
 
-use crate::definition_id::DefId;
-use crate::definition_id::Predictor;
+use crate::definition_id::{DefId, PredictorFactory};
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
 use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundType};
 
-pub(crate) struct Mockable {
+pub(crate) struct Mockable<'a> {
     trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>,
+    predictor_factory: Box<dyn PredictorFactory<'a> + 'a>,
 }
 
 const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is poisoned";
 
-impl Mockable {
-    pub(crate) fn new(trait_bound_resolver: Box<dyn TraitBoundResolver>) -> Self {
+impl<'a> Mockable<'a> {
+    pub(crate) fn new(
+        trait_bound_resolver: Box<dyn TraitBoundResolver>,
+        predictor_factory: Box<dyn PredictorFactory<'a> + 'a>,
+    ) -> Self {
         Self {
             trait_bound_resolver: RwLock::new(trait_bound_resolver),
+            predictor_factory,
         }
     }
 
@@ -41,8 +45,8 @@ impl Mockable {
                 .trait_bound_resolver
                 .read()
                 .expect(TRAIT_BOUND_RESOLVER_ERR);
-            let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&identifier);
-            self.mock_trait_bound_type(cx, trait_bound.span, &trait_bound_type);
+            //let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&identifier);
+            //self.mock_trait_bound_type(cx, trait_bound.span, &trait_bound_type);
         }
     }
 
@@ -65,7 +69,7 @@ impl Mockable {
     }
 }
 
-impl MultiItemDecorator for Mockable {
+impl<'a> MultiItemDecorator for Mockable<'a> {
     fn expand(
         &self,
         cx: &mut ExtCtxt,
@@ -99,8 +103,9 @@ impl MultiItemDecorator for Mockable {
 
         push(Annotatable::Item(P(mock_struct)));
 
+        let predictor = self.predictor_factory.build(&mut cx);
         // TODO: this also needs to include auto-generated derives (e.g. Debug)
-        self.register_current_trait(cx.predict_next_id(0), &trait_decl);
+        self.register_current_trait(predictor.predict_next_id(0), &trait_decl);
 
         // self.mock_trait_bound_impls(&mut cx, &trait_decl);
     }
