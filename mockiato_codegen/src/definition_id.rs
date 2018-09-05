@@ -1,3 +1,4 @@
+use crate::context::Context;
 use rustc::hir::def_id;
 use rustc::hir::lowering::Resolver as LoweringResolver;
 use rustc_resolve::Resolver as ResolverImpl;
@@ -23,7 +24,7 @@ pub(crate) trait Resolver {
     fn resolve_str_path(&mut self, path: &str) -> Option<DefId>;
 }
 
-pub(crate) trait Predictor {
+pub(crate) trait Predictor<'a, 'b: 'a> {
     fn predict_next_id(&mut self, generated_items: u32) -> DefId;
 }
 
@@ -46,40 +47,43 @@ impl<'a> Resolver for ExtCtxt<'a> {
     }
 }
 
-pub(crate) struct ContextPredictor<'a> {
-    context: &'a mut ExtCtxt<'a>,
+pub(crate) struct ContextPredictor<'a, 'b: 'a> {
+    context: Context<'a, 'b>,
 }
-impl<'a> ContextPredictor<'a> {
-    pub(crate) fn new(context: &'a mut ExtCtxt<'a>) -> Self {
+
+impl<'a, 'b: 'a> ContextPredictor<'a, 'b> {
+    pub(crate) fn new(context: Context<'a, 'b>) -> Self {
         Self { context }
     }
 }
 
-pub(crate) trait PredictorFactory<'a> {
-    fn build(&self, context: &'a mut ExtCtxt<'a>) -> Box<dyn Predictor + 'a>;
+pub(crate) trait PredictorFactory {
+    fn build<'a, 'b: 'a>(&self, context: Context<'a, 'b>) -> Box<dyn Predictor<'a, 'b> + 'a>;
 }
 
 #[derive(Default)]
 pub(crate) struct ContextPredictorFactory;
 
-impl<'a> PredictorFactory<'a> for ContextPredictorFactory {
-    fn build(&self, context: &'a mut ExtCtxt<'a>) -> Box<dyn Predictor + 'a> {
+impl PredictorFactory for ContextPredictorFactory {
+    fn build<'a, 'b: 'a>(&self, context: Context<'a, 'b>) -> Box<dyn Predictor<'a, 'b> + 'a> {
         Box::new(ContextPredictor::new(context))
     }
 }
 
-impl<'a> Predictor for ContextPredictor<'a> {
+impl<'a, 'b> Predictor<'a, 'b> for ContextPredictor<'a, 'b> {
     fn predict_next_id(&mut self, generated_items: u32) -> DefId {
         let address_space = {
             let self_id = self
                 .context
+                .into_inner()
                 .resolve_path(Path::from_ident(Ident::from_str("self")))
                 .expect("unable to resolve self");
 
             self_id.0.index.address_space()
         };
 
-        let resolver = transmute_resolver(self.context.resolver);
+        let mut inner_context = self.context.into_inner();
+        let resolver = transmute_resolver(&mut *inner_context.resolver);
 
         let def_index = resolver
             .definitions()

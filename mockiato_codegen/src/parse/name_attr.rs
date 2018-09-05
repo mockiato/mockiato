@@ -1,3 +1,4 @@
+use crate::context::Context;
 use syntax::ast::{Ident, LitKind, MetaItem, MetaItemKind};
 use syntax::ext::base::ExtCtxt;
 use syntax::source_map::Spanned;
@@ -11,7 +12,7 @@ pub(crate) struct NameAttr {
 }
 
 impl NameAttr {
-    pub(crate) fn parse(cx: &mut ExtCtxt, meta_item: MetaItem) -> Option<Self> {
+    pub(crate) fn parse(cx: Context, meta_item: MetaItem) -> Option<Self> {
         if let MetaItemKind::NameValue(Spanned { node, span }) = meta_item.node {
             if let LitKind::Str(symbol, _) = node {
                 return Some(Self {
@@ -21,7 +22,8 @@ impl NameAttr {
             }
         }
 
-        cx.parse_sess
+        cx.into_inner()
+            .parse_sess
             .span_diagnostic
             .mut_span_err(
                 meta_item.span,

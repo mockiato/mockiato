@@ -5,6 +5,7 @@ use syntax::ext::build::AstBuilder;
 use syntax::ptr::P;
 use syntax_pos::Span;
 
+use crate::context::Context;
 use crate::definition_id::{DefId, PredictorFactory};
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
@@ -14,7 +15,7 @@ use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundType};
 
 pub(crate) struct Mockable<'a> {
     trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>,
-    predictor_factory: Box<dyn PredictorFactory<'a> + 'a>,
+    predictor_factory: Box<dyn PredictorFactory + 'a>,
 }
 
 const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is poisoned";
@@ -22,7 +23,7 @@ const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is 
 impl<'a> Mockable<'a> {
     pub(crate) fn new(
         trait_bound_resolver: Box<dyn TraitBoundResolver>,
-        predictor_factory: Box<dyn PredictorFactory<'a> + 'a>,
+        predictor_factory: Box<dyn PredictorFactory + 'a>,
     ) -> Self {
         Self {
             trait_bound_resolver: RwLock::new(trait_bound_resolver),
@@ -78,12 +79,14 @@ impl<'a> MultiItemDecorator for Mockable<'a> {
         item: &Annotatable,
         push: &mut dyn FnMut(Annotatable),
     ) {
-        let trait_decl = match TraitDecl::parse(cx, item) {
+        let cx = Context::new(cx);
+
+        let trait_decl = match TraitDecl::parse(cx.clone(), item) {
             Ok(trait_decl) => trait_decl,
             Err(_) => return,
         };
 
-        let mockable_attr = match MockableAttr::parse(cx, meta_item) {
+        let mockable_attr = match MockableAttr::parse(cx.clone(), meta_item) {
             Some(mockable_attr) => mockable_attr,
             None => return,
         };
@@ -91,6 +94,7 @@ impl<'a> MultiItemDecorator for Mockable<'a> {
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
 
         let mut mock_struct = cx
+            .into_inner()
             .item_struct(
                 meta_item.span,
                 mock_struct_ident,
@@ -98,12 +102,12 @@ impl<'a> MultiItemDecorator for Mockable<'a> {
             ).into_inner();
 
         if let Some(derive_attr) = mockable_attr.derive_attr {
-            mock_struct.attrs.push(derive_attr.expand(cx));
+            mock_struct.attrs.push(derive_attr.expand(cx.clone()));
         }
 
         push(Annotatable::Item(P(mock_struct)));
 
-        let predictor = self.predictor_factory.build(&mut cx);
+        let mut predictor = self.predictor_factory.build(cx.clone());
         // TODO: this also needs to include auto-generated derives (e.g. Debug)
         self.register_current_trait(predictor.predict_next_id(0), &trait_decl);
 
