@@ -13,6 +13,7 @@ use rustc_plugin::Registry;
 use syntax::ext::base::SyntaxExtension;
 use syntax::symbol::Symbol;
 
+mod context;
 mod definition_id;
 mod derive_resolver;
 mod mockable;
