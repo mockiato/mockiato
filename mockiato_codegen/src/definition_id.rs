@@ -2,6 +2,7 @@ use crate::context::Context;
 use rustc::hir::def_id;
 use rustc::hir::lowering::Resolver as LoweringResolver;
 use rustc_resolve::Resolver as ResolverImpl;
+use std::ops::DerefMut;
 use syntax::ast::{Ident, Path};
 use syntax::ext::base::{ExtCtxt, Resolver as SyntaxResolver};
 use syntax_pos::DUMMY_SP;
@@ -83,7 +84,8 @@ impl<'a, 'b> Predictor<'a, 'b> for ContextPredictor<'a, 'b> {
         };
 
         let mut inner_context = self.context.into_inner();
-        let resolver = transmute_resolver(&mut *inner_context.resolver);
+
+        let resolver = transmute_resolver(inner_context.deref_mut().resolver);
 
         let def_index = resolver
             .definitions()

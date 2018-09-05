@@ -1,6 +1,5 @@
 use crate::context::Context;
 use syntax::ast::{Ident, LitKind, MetaItem, MetaItemKind};
-use syntax::ext::base::ExtCtxt;
 use syntax::source_map::Spanned;
 use syntax::symbol::Symbol;
 use syntax_pos::Span;
