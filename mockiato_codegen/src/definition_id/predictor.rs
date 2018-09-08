@@ -6,22 +6,22 @@ use rustc::hir::lowering::Resolver as LoweringResolver;
 use std::ops::DerefMut;
 use syntax::ast::{Ident, Path};
 
-pub(crate) trait Predictor<'a, 'b: 'a> {
+pub(crate) trait Predictor {
     fn predict_next_id(&mut self, generated_items: u32) -> DefId;
 }
 
 pub(crate) struct ContextPredictor<'a, 'b: 'a> {
     context: Context<'a, 'b>,
-    resolver: Box<dyn Resolver<'a, 'b> + 'a>,
+    resolver: Box<dyn Resolver + 'a>,
 }
 
 impl<'a, 'b: 'a> ContextPredictor<'a, 'b> {
-    pub(crate) fn new(context: Context<'a, 'b>, resolver: Box<dyn Resolver<'a, 'b> + 'a>) -> Self {
+    pub(crate) fn new(context: Context<'a, 'b>, resolver: Box<dyn Resolver + 'a>) -> Self {
         Self { context, resolver }
     }
 }
 
-impl<'a, 'b> Predictor<'a, 'b> for ContextPredictor<'a, 'b> {
+impl<'a, 'b> Predictor for ContextPredictor<'a, 'b> {
     fn predict_next_id(&mut self, generated_items: u32) -> DefId {
         let address_space = {
             let self_id = self
