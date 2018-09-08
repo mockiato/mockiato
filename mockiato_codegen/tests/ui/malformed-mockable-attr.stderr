@@ -1,0 +1,10 @@
+error: Unsupported syntax for #[mockable]
+ --> $DIR/malformed-mockable-attr.rs:4:12
+  |
+4 | #[mockable("Bar")]
+  |            ^^^^^
+  |
+  = help: Example usage: #[mockable(name = "FooMock", derive(Debug))]
+
+error: aborting due to previous error
+
