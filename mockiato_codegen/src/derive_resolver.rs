@@ -86,9 +86,12 @@ mod test {
 
     #[test]
     fn test_resolve_derivable_name_works() {
-        struct ResolverMock;
+        #[derive(Default)]
+        struct ResolverMock<'a, 'b: 'a> {
+            marker: std::marker::PhantomData<&'a &'b ()>,
+        }
 
-        impl Resolver for ResolverMock {
+        impl<'a, 'b: 'a> Resolver<'a, 'b> for ResolverMock<'a, 'b> {
             fn resolve_str_path(&mut self, path: &str) -> Option<DefId> {
                 if path == "Debug1234" || path == "std::fmt::Debug" {
                     return Some(DefId::dummy(22));
@@ -98,7 +101,7 @@ mod test {
             }
         }
 
-        let mut resolver = ResolverMock;
+        let mut resolver = ResolverMock::default();
         let derive_resolver = DeriveResolverImpl;
 
         GLOBALS.set(&Globals::new(), || {

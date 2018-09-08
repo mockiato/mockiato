@@ -20,7 +20,6 @@ mod mockable;
 mod parse;
 mod trait_bound_resolver;
 
-use self::definition_id::ContextPredictorFactory;
 use self::mockable::Mockable;
 use self::trait_bound_resolver::TraitBoundResolverImpl;
 
@@ -28,9 +27,8 @@ use self::trait_bound_resolver::TraitBoundResolverImpl;
 pub fn plugin_registrar(reg: &mut Registry) {
     reg.register_syntax_extension(
         Symbol::intern("mockable"),
-        SyntaxExtension::MultiDecorator(Box::new(Mockable::new(
-            Box::new(TraitBoundResolverImpl::new()),
-            Box::new(ContextPredictorFactory::default()),
-        ))),
+        SyntaxExtension::MultiDecorator(Box::new(Mockable::new(Box::new(
+            TraitBoundResolverImpl::new(),
+        )))),
     );
 }
