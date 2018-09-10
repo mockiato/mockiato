@@ -1,5 +1,5 @@
+use crate::context::Context;
 use syntax::ast::{Attribute, Ident, MetaItem, MetaItemKind, NestedMetaItem, Path};
-use syntax::ext::base::ExtCtxt;
 use syntax::ext::build::AstBuilder;
 use syntax_pos::Span;
 
@@ -10,14 +10,15 @@ pub(crate) struct DeriveAttr {
 }
 
 impl DeriveAttr {
-    pub(crate) fn parse(cx: &mut ExtCtxt, meta_item: MetaItem) -> Option<Self> {
+    pub(crate) fn parse(cx: &Context, meta_item: MetaItem) -> Option<Self> {
         if let MetaItemKind::List(list) = meta_item.node {
             Some(DeriveAttr {
                 span: meta_item.span,
                 list,
             })
         } else {
-            cx.parse_sess
+            cx.into_inner()
+                .parse_sess
                 .span_diagnostic
                 .mut_span_err(meta_item.span, "#[mockable(derive(..)] must contain a list")
                 .help("Example usage: #[mockable(derive(Eq, PartialEq))]")
@@ -26,8 +27,8 @@ impl DeriveAttr {
         }
     }
 
-    pub(crate) fn expand(self, cx: &mut ExtCtxt) -> Attribute {
-        cx.attribute(
+    pub(crate) fn expand(self, cx: &Context) -> Attribute {
+        cx.into_inner().attribute(
             self.span,
             MetaItem {
                 ident: Path::from_ident(Ident::from_str("derive")),

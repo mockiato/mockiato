@@ -1,5 +1,5 @@
+use crate::context::Context;
 use syntax::ast::{self, MetaItemKind, NestedMetaItemKind};
-use syntax::ext::base::ExtCtxt;
 
 use super::derive_attr::DeriveAttr;
 use super::name_attr::NameAttr;
@@ -11,7 +11,7 @@ pub(crate) struct MockableAttr {
 }
 
 impl MockableAttr {
-    pub(crate) fn parse(cx: &mut ExtCtxt, meta_item: &ast::MetaItem) -> Option<Self> {
+    pub(crate) fn parse(cx: &Context, meta_item: &ast::MetaItem) -> Option<Self> {
         let mut derive_attr = None;
         let mut name_attr = None;
 
@@ -26,7 +26,7 @@ impl MockableAttr {
                             NestedMetaItemKind::MetaItem(ref meta_item) => Some(meta_item),
                             NestedMetaItemKind::Literal(_) => {
                                 // TODO: make more helpful
-                                cx.parse_sess
+                                cx.into_inner().parse_sess
                                     .span_diagnostic
                                     .mut_span_err(nested.span(), "Unsupported syntax for #[mockable]")
                                     .help("Example usage: #[mockable(name = \"FooMock\", derive(Debug))]")
@@ -40,16 +40,16 @@ impl MockableAttr {
                     match item {
                         Some(item) => if item.ident == "derive" {
                             if derive_attr.is_some() {
-                                cx.span_warn(item.span(), "`derive` is specified more than once. The latter definition will take precedence.");
+                                cx.into_inner().span_warn(item.span(), "`derive` is specified more than once. The latter definition will take precedence.");
                             }
-                            derive_attr = DeriveAttr::parse(cx, item.clone());
+                            derive_attr = DeriveAttr::parse(&cx, item.clone());
                         } else if item.ident == "name" {
                             if name_attr.is_some() {
-                                cx.span_warn(item.span(), "`name` is specified more than once. The latter definition will take precedence.");
+                                cx.into_inner().span_warn(item.span(), "`name` is specified more than once. The latter definition will take precedence.");
                             }
-                            name_attr = NameAttr::parse(cx, item.clone());
+                            name_attr = NameAttr::parse(&cx, item.clone());
                         } else {
-                            cx.span_err(
+                            cx.into_inner().span_err(
                                 item.span(),
                                 "This attribute property is not supported by #[mockable]",
                             );
