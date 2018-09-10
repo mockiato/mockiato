@@ -13,7 +13,7 @@ pub(crate) struct TraitDecl {
 }
 
 impl TraitDecl {
-    pub(crate) fn parse(cx: Context, annotated: &Annotatable) -> Result<Self, ()> {
+    pub(crate) fn parse(cx: &Context, annotated: &Annotatable) -> Result<Self, ()> {
         if let Annotatable::Item(ref item) = annotated {
             let span = item.span;
             let ident = item.ident;

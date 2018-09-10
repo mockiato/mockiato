@@ -20,9 +20,11 @@ pub(crate) trait DeriveResolver {
     fn is_automatically_derivable(&self, path: &Path) -> bool;
 }
 
+#[allow(dead_code)]
 pub(crate) struct DeriveResolverImpl;
 
 impl DeriveResolverImpl {
+    #[allow(dead_code)]
     pub(crate) fn new() -> Self {
         DeriveResolverImpl
     }

@@ -11,7 +11,7 @@ pub(crate) struct MockableAttr {
 }
 
 impl MockableAttr {
-    pub(crate) fn parse(cx: Context, meta_item: &ast::MetaItem) -> Option<Self> {
+    pub(crate) fn parse(cx: &Context, meta_item: &ast::MetaItem) -> Option<Self> {
         let mut derive_attr = None;
         let mut name_attr = None;
 
@@ -42,12 +42,12 @@ impl MockableAttr {
                             if derive_attr.is_some() {
                                 cx.into_inner().span_warn(item.span(), "`derive` is specified more than once. The latter definition will take precedence.");
                             }
-                            derive_attr = DeriveAttr::parse(cx.clone(), item.clone());
+                            derive_attr = DeriveAttr::parse(&cx, item.clone());
                         } else if item.ident == "name" {
                             if name_attr.is_some() {
                                 cx.into_inner().span_warn(item.span(), "`name` is specified more than once. The latter definition will take precedence.");
                             }
-                            name_attr = NameAttr::parse(cx.clone(), item.clone());
+                            name_attr = NameAttr::parse(&cx, item.clone());
                         } else {
                             cx.into_inner().span_err(
                                 item.span(),

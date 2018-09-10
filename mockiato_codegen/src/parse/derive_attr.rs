@@ -10,7 +10,7 @@ pub(crate) struct DeriveAttr {
 }
 
 impl DeriveAttr {
-    pub(crate) fn parse(cx: Context, meta_item: MetaItem) -> Option<Self> {
+    pub(crate) fn parse(cx: &Context, meta_item: MetaItem) -> Option<Self> {
         if let MetaItemKind::List(list) = meta_item.node {
             Some(DeriveAttr {
                 span: meta_item.span,
@@ -27,7 +27,7 @@ impl DeriveAttr {
         }
     }
 
-    pub(crate) fn expand(self, cx: Context) -> Attribute {
+    pub(crate) fn expand(self, cx: &Context) -> Attribute {
         cx.into_inner().attribute(
             self.span,
             MetaItem {

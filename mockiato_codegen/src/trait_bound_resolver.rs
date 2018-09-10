@@ -1,17 +1,13 @@
 use crate::definition_id::DefId;
-use crate::definition_id::Resolver;
 use crate::parse::trait_decl::TraitDecl;
 use syntax::ast::Path;
 
 pub(crate) trait TraitBoundResolver {
-    fn register_mocked_trait<'a>(&mut self, identifier: DefId, mocked_trait: &TraitDecl);
-    fn resolve_trait_bound<'a>(
-        &self,
-        resolver: &mut dyn Resolver,
-        path: &Path,
-    ) -> Option<TraitBoundType<'_>>;
+    fn register_mocked_trait(&mut self, identifier: DefId, mocked_trait: &TraitDecl);
+    fn resolve_trait_bound(&self, path: &Path) -> Option<TraitBoundType<'_>>;
 }
 
+#[allow(dead_code)]
 pub(crate) enum TraitBoundType<'a> {
     Derivable(String),
     AlreadyMockedTrait(&'a TraitDecl),
@@ -25,13 +21,11 @@ impl TraitBoundResolverImpl {
 }
 
 impl TraitBoundResolver for TraitBoundResolverImpl {
-    fn register_mocked_trait<'a>(&mut self, identifier: DefId, mocked_trait: &TraitDecl) {}
+    fn register_mocked_trait(&mut self, _identifier: DefId, _mocked_trait: &TraitDecl) {
+        unimplemented!();
+    }
 
-    fn resolve_trait_bound<'a>(
-        &self,
-        resolver: &mut dyn Resolver,
-        path: &Path,
-    ) -> Option<TraitBoundType<'_>> {
+    fn resolve_trait_bound(&self, _path: &Path) -> Option<TraitBoundType<'_>> {
         None
     }
 }

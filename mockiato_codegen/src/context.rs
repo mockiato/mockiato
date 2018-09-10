@@ -9,6 +9,7 @@ impl<'a, 'b: 'a> Context<'a, 'b> {
         Context(Arc::new(RwLock::new(inner)))
     }
 
+    #[allow(clippy::wrong_self_convention)]
     pub(crate) fn into_inner(&self) -> RwLockWriteGuard<&'a mut ExtCtxt<'b>> {
         self.0.write().unwrap()
     }

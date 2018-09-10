@@ -11,7 +11,7 @@ pub(crate) struct NameAttr {
 }
 
 impl NameAttr {
-    pub(crate) fn parse(cx: Context, meta_item: MetaItem) -> Option<Self> {
+    pub(crate) fn parse(cx: &Context, meta_item: MetaItem) -> Option<Self> {
         if let MetaItemKind::NameValue(Spanned { node, span }) = meta_item.node {
             if let LitKind::Str(symbol, _) = node {
                 return Some(Self {

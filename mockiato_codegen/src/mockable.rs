@@ -1,5 +1,5 @@
 use std::sync::RwLock;
-use syntax::ast::{self, Ident, VariantData, DUMMY_NODE_ID};
+use syntax::ast::{self, Ident, Path, VariantData, DUMMY_NODE_ID};
 use syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
 use syntax::ext::build::AstBuilder;
 use syntax::ptr::P;
@@ -33,7 +33,7 @@ impl Mockable {
             .register_mocked_trait(trait_bound_def_id, &trait_decl);
     }
 
-    fn mock_trait_bound_impls(&self, cx: &mut ExtCtxt, trait_decl: &TraitDecl) {
+    fn mock_trait_bound_impls(&self, cx: &Context, trait_decl: &TraitDecl) {
         let trait_bounds = TraitBounds::parse(trait_decl).0;
         for trait_bound in trait_bounds {
             let identifier = trait_bound.identifier;
@@ -41,26 +41,25 @@ impl Mockable {
                 .trait_bound_resolver
                 .read()
                 .expect(TRAIT_BOUND_RESOLVER_ERR);
-            //let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&identifier);
-            //self.mock_trait_bound_type(cx, trait_bound.span, &trait_bound_type);
+            let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&Path::from_ident(
+                Ident::from_interned_str(identifier.as_interned_str()),
+            ));
+            self.mock_trait_bound_type(&cx, trait_bound.span, &trait_bound_type);
         }
     }
 
     fn mock_trait_bound_type(
         &self,
-        cx: &mut ExtCtxt,
+        cx: &Context,
         sp: Span,
         trait_bound_type: &Option<TraitBoundType>,
     ) {
-        match *trait_bound_type {
-            None => {
-                cx.parse_sess
+        if trait_bound_type.is_none() {
+            cx.into_inner().parse_sess
                 .span_diagnostic
                 .mut_span_err(sp, "The referenced trait has has not been marked as #[mockable] or doesn't exist")
                 .help("Mockable traits are handled from top to bottom, try declaring this trait earlier.")
                 .emit();
-            }
-            _ => {}
         }
     }
 }
@@ -78,12 +77,12 @@ impl<'a> MultiItemDecorator for Mockable {
         let resolver = ContextResolver::new(cx.clone());
         let mut predictor = ContextPredictor::new(cx.clone(), Box::new(resolver.clone()));
 
-        let trait_decl = match TraitDecl::parse(cx.clone(), item) {
+        let trait_decl = match TraitDecl::parse(&cx, item) {
             Ok(trait_decl) => trait_decl,
             Err(_) => return,
         };
 
-        let mockable_attr = match MockableAttr::parse(cx.clone(), meta_item) {
+        let mockable_attr = match MockableAttr::parse(&cx, meta_item) {
             Some(mockable_attr) => mockable_attr,
             None => return,
         };
@@ -99,12 +98,12 @@ impl<'a> MultiItemDecorator for Mockable {
             ).into_inner();
 
         if let Some(derive_attr) = mockable_attr.derive_attr {
-            mock_struct.attrs.push(derive_attr.expand(cx.clone()));
+            mock_struct.attrs.push(derive_attr.expand(&cx));
         }
 
         push(Annotatable::Item(P(mock_struct)));
 
-        // self.mock_trait_bound_impls(&mut cx, &trait_decl);
+        self.mock_trait_bound_impls(&cx, &trait_decl);
 
         // TODO: this also needs to include auto-generated derives (e.g. Debug)
         self.register_current_trait(predictor.predict_next_id(0), &trait_decl);

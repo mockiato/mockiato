@@ -7,6 +7,7 @@
     decl_macro,
     custom_attribute,
     underscore_imports,
+    tool_lints,
 )]
 
 use rustc_plugin::Registry;

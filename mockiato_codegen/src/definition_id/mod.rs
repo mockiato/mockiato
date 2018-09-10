@@ -20,5 +20,5 @@ impl DefId {
 
 fn transmute_resolver(mut resolver: &mut SyntaxResolver) -> &mut &mut ResolverImpl {
     // Behold — The mighty transmutation
-    unsafe { std::mem::transmute(&mut resolver) }
+    unsafe { &mut *(&mut resolver as *mut &mut dyn SyntaxResolver as *mut &mut ResolverImpl) }
 }
