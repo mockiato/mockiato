@@ -14,7 +14,7 @@ pub(crate) struct DefId(pub(crate) def_id::DefId);
 #[cfg(test)]
 impl DefId {
     pub(crate) fn dummy(value: u32) -> Self {
-        DefId(def_id::DefId::local(def_id::DefIndex::from_raw_u32(22)))
+        DefId(def_id::DefId::local(def_id::DefIndex::from_raw_u32(value)))
     }
 }
 
