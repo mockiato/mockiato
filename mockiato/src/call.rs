@@ -1,4 +1,4 @@
-use crate::matcher::CallMatcher;
+use crate::arguments::ArgumentsMatcher;
 use crate::return_value::{CloneValue, ReturnValue};
 use std::fmt;
 use std::sync::{Arc, RwLock};
@@ -9,12 +9,18 @@ use std::sync::{Arc, RwLock};
 ///
 #[derive(Debug, Clone)]
 #[doc(hidden)]
-pub struct Calls<'a, I: 'a, O: 'a> {
+pub struct Calls<'a, I: 'a, O: 'a, A>
+where
+    A: ArgumentsMatcher<I>,
+{
     name: &'static str,
-    calls: Arc<RwLock<Vec<Call<'a, I, O>>>>,
+    calls: Arc<RwLock<Vec<Call<'a, I, O, A>>>>,
 }
 
-impl<'a, I: 'a, O: 'a> Calls<'a, I, O> {
+impl<'a, I: 'a, O: 'a, A> Calls<'a, I, O, A>
+where
+    A: ArgumentsMatcher<I>,
+{
     pub fn new(name: &'static str) -> Self {
         Self {
             name,
@@ -33,7 +39,7 @@ impl<'a, I: 'a, O: 'a> Calls<'a, I, O> {
         }
     }
 
-    pub fn add(&self, call: Call<'a, I, O>) {
+    pub fn add(&self, call: Call<'a, I, O, A>) {
         self.calls
             .write()
             .expect("unable to aquire write lock for calls")
@@ -48,7 +54,7 @@ impl<'a, I: 'a, O: 'a> Calls<'a, I, O> {
 
         let matching_call = calls
             .iter_mut()
-            .find(|call| call.matcher.matches_call(&args))
+            .find(|call| call.matcher.matches_args(&args))
             .expect(&format!(
                 "
 
@@ -74,23 +80,32 @@ Return value was not specified for {}
     }
 }
 
-pub struct Call<'a, I: 'a, O: 'a> {
+pub struct Call<'a, I: 'a, O: 'a, A>
+where
+    A: ArgumentsMatcher<I>,
+{
     name: &'static str,
-    matcher: Box<dyn CallMatcher<I> + 'a>,
+    matcher: A,
     return_value: Option<Box<dyn ReturnValue<I, O> + 'a>>,
     expected_calls: u64,
     actual_calls: u64,
 }
 
-impl<'a, I, O> fmt::Debug for Call<'a, I, O> {
+impl<'a, I, O, A> fmt::Debug for Call<'a, I, O, A>
+where
+    A: ArgumentsMatcher<I>,
+{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Call").finish()
     }
 }
 
-impl<'a, I: 'a, O: 'a> Call<'a, I, O> {
+impl<'a, I: 'a, O: 'a, A> Call<'a, I, O, A>
+where
+    A: ArgumentsMatcher<I>,
+{
     #[doc(hidden)]
-    pub fn new(name: &'static str, matcher: Box<dyn CallMatcher<I> + 'a>) -> Self {
+    pub fn new(name: &'static str, matcher: A) -> Self {
         Self {
             name,
             matcher,
@@ -135,36 +150,4 @@ Was actually called {} times.
 #[cfg(test)]
 mod test {
     use super::*;
-
-    struct CallMatcherMock;
-
-    impl crate::private::Sealed for CallMatcherMock {}
-
-    impl<I> CallMatcher<I> for CallMatcherMock {
-        fn matches_call(&self, _: &I) -> bool {
-            panic!("unexpected call to matches_call");
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_verify_panicks_if_not_called_enough_times() {
-        let mut call: Call<'_, (), ()> = Call::new("foo", Box::new(CallMatcherMock));
-
-        call.times(2);
-        call.record_call();
-
-        call.verify();
-    }
-
-    #[test]
-    fn test_verify_does_not_panic_if_called_enough_times() {
-        let mut call: Call<'_, (), ()> = Call::new("foo", Box::new(CallMatcherMock));
-
-        call.times(2);
-        call.record_call();
-        call.record_call();
-
-        call.verify();
-    }
 }

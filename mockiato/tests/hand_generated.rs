@@ -12,7 +12,8 @@ struct GreeterMock<'mock, D>
 where
     D: Display,
 {
-    say_hello_calls: mockiato::Calls<'mock, (D,), String>,
+    say_hello_calls:
+        mockiato::Calls<'mock, (D,), String, (Box<dyn mockiato::arguments::ArgumentMatcher<D>>,)>,
 }
 
 impl<'mock, D> GreeterMock<'mock, D>
@@ -25,17 +26,23 @@ where
         }
     }
 
-    pub fn expect_say_hello<F>(
+    pub fn expect_say_hello<F, A0: mockiato::arguments::ArgumentMatcher<D>>(
         &mut self,
-        matcher: Box<dyn mockiato::CallMatcher<(D,)> + 'mock>,
+        arg0: A0,
         with_fn: F,
     ) where
-        F: FnOnce(&mut mockiato::Call<'mock, (D,), String>),
+        A0: mockiato::arguments::ArgumentMatcher<D>,
+        F: FnOnce(
+            &mut mockiato::Call<
+                'mock,
+                (D,),
+                String,
+                (Box<dyn mockiato::arguments::ArgumentMatcher<D>>,),
+            >,
+        ),
     {
-        let mut call = mockiato::Call::new("say_hello", matcher);
-
+        let mut call = mockiato::Call::new("say_hello", (Box::new(arg0),));
         with_fn(&mut call);
-
         self.say_hello_calls.add(call);
     }
 }
@@ -66,6 +73,10 @@ fn test() {
 
     let mock: GreeterMock<&str> = {
         let mut mock = GreeterMock::new();
+
+        mock.expect_say_hello("foo", |call| {
+            // call.will_return();
+        });
 
         mock.expect_say_hello(args(("foo",)), |call| {
             call.will_return(String::from("Hello foo")).times(1);
