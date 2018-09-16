@@ -1,3 +1,11 @@
+root = true
+
+[*]
+insert_final_newline = true
+
 [Jenkinsfile]
 indent_style = space
 indent_size = 2
+
+[*.stderr]
+insert_final_newline = false
