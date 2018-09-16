@@ -1,19 +1,19 @@
 #![feature(custom_attribute, plugin)]
 #![plugin(mockiato_codegen)]
 
-use std::fmt::{self, Display};
+use std::fmt::Display;
 
 trait Debug {}
 
-#[mockable(derive(Debug))]
-trait Greeter<D>: fmt::Debug
+// #[mockable(derive(Debug))]
+trait Greeter<D>
 where
     D: Display,
 {
     fn say_hello(&self, name: D) -> String;
 }
 
-#[mockable(derive(Debug))]
+// #[mockable(derive(Debug))]
 trait PoliteGreeter<D>: Greeter<D>
 where
     D: Display,
@@ -35,5 +35,5 @@ where
 //}
 #[test]
 fn test() {
-    let _mock = GreeterMock;
+    //    let _mock = GreeterMock;
 }
