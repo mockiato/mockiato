@@ -6,6 +6,7 @@ use crate::syntax_pos::Span;
 
 use crate::context::Context;
 use crate::definition_id::{ContextPredictor, ContextResolver, DefId, Predictor};
+use crate::derive_resolver::DeriveResolverImpl;
 use crate::mocked_trait_registry::MockedTraitRegistry;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
@@ -39,6 +40,7 @@ impl Mockable {
         trait_decl: &TraitDecl,
     ) {
         let trait_bounds = TraitBounds::parse(trait_decl).0;
+
         for trait_bound in trait_bounds {
             let identifier = trait_bound.identifier;
             let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&Path::from_ident(
@@ -76,8 +78,11 @@ impl<'a> MultiItemDecorator for Mockable {
         let cx = Context::new(cx);
         let resolver = ContextResolver::new(cx.clone());
         let mut predictor = ContextPredictor::new(cx.clone(), Box::new(resolver.clone()));
-        let trait_bound_resolver =
-            TraitBoundResolverImpl::new((self.mocked_trait_registry_factory)());
+        let trait_bound_resolver = TraitBoundResolverImpl::new(
+            (self.mocked_trait_registry_factory)(),
+            Box::new(DeriveResolverImpl::new()),
+            Box::new(resolver.clone()),
+        );
 
         let trait_decl = match TraitDecl::parse(&cx, item) {
             Ok(trait_decl) => trait_decl,

@@ -26,7 +26,7 @@ impl<'a, 'b> Predictor for ContextPredictor<'a, 'b> {
         let address_space = {
             let self_id = self
                 .resolver
-                .resolve_path(Path::from_ident(Ident::from_str("self")))
+                .resolve_path(&Path::from_ident(Ident::from_str("self")))
                 .expect("unable to resolve self");
 
             self_id.0.index.address_space()

@@ -32,7 +32,7 @@ impl DeriveResolverImpl {
 
 impl DeriveResolver for DeriveResolverImpl {
     fn resolve_derivable_name(&self, resolver: &mut dyn Resolver, path: &Path) -> Option<Path> {
-        let def_id = resolver.resolve_path(path.clone())?;
+        let def_id = resolver.resolve_path(path)?;
 
         let derivable_trait = DERIVABLE_TRAITS.iter().find(|(_, path)| {
             let comp_dev_id = match resolver.resolve_str_path(path) {
@@ -91,7 +91,7 @@ mod test {
         struct ResolverMock;
 
         impl Resolver for ResolverMock {
-            fn resolve_str_path(&mut self, path: &str) -> Option<DefId> {
+            fn resolve_str_path(&self, path: &str) -> Option<DefId> {
                 if path == "Debug1234" || path == "std::fmt::Debug" {
                     return Some(DefId::dummy(22));
                 }

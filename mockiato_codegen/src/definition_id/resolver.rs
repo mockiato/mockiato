@@ -5,11 +5,11 @@ use crate::syntax_pos::DUMMY_SP;
 use std::ops::DerefMut;
 
 pub(crate) trait Resolver {
-    fn resolve_path(&mut self, path: Path) -> Option<DefId> {
+    fn resolve_path(&self, path: &Path) -> Option<DefId> {
         self.resolve_str_path(&path.to_string())
     }
 
-    fn resolve_str_path(&mut self, path: &str) -> Option<DefId>;
+    fn resolve_str_path(&self, path: &str) -> Option<DefId>;
 }
 
 #[derive(Clone)]
@@ -24,7 +24,7 @@ impl<'a, 'b: 'a> ContextResolver<'a, 'b> {
 }
 
 impl<'a, 'b: 'a> Resolver for ContextResolver<'a, 'b> {
-    fn resolve_str_path(&mut self, path: &str) -> Option<DefId> {
+    fn resolve_str_path(&self, path: &str) -> Option<DefId> {
         let mut context = self.context.into_inner();
         let resolver = transmute_resolver(context.deref_mut().resolver);
 

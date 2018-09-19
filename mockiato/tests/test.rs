@@ -36,4 +36,5 @@ where
 #[test]
 fn test() {
     let _mock = GreeterMock;
+    let _mock2 = PoliteGreeterMock;
 }
