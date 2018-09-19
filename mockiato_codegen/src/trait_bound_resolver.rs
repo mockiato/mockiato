@@ -1,6 +1,7 @@
 use crate::definition_id::DefId;
 use crate::parse::trait_decl::TraitDecl;
 use crate::syntax::ast::Path;
+use std::collections::HashMap;
 
 pub(crate) trait TraitBoundResolver {
     fn register_mocked_trait(&mut self, identifier: DefId, mocked_trait: &TraitDecl);
@@ -13,20 +14,25 @@ pub(crate) enum TraitBoundType<'a> {
     AlreadyMockedTrait(&'a TraitDecl),
 }
 
-pub(crate) struct TraitBoundResolverImpl;
+pub(crate) struct TraitBoundResolverImpl {
+    mocked_traits: HashMap<DefId, TraitDecl>,
+}
+
 impl TraitBoundResolverImpl {
     pub(crate) fn new() -> Self {
-        Self {}
+        Self {
+            mocked_traits: HashMap::new(),
+        }
     }
 }
 
 impl TraitBoundResolver for TraitBoundResolverImpl {
-    fn register_mocked_trait(&mut self, _identifier: DefId, _mocked_trait: &TraitDecl) {
-        unimplemented!();
+    fn register_mocked_trait(&mut self, identifier: DefId, mocked_trait: &TraitDecl) {
+        self.mocked_traits.insert(identifier, mocked_trait.clone());
     }
 
     fn resolve_trait_bound(&self, _path: &Path) -> Option<TraitBoundType<'_>> {
-        None
+        unimplemented!();
     }
 }
 
@@ -52,7 +58,7 @@ mod test {
             let mut resolver = TraitBoundResolverImpl::new();
 
             resolver.register_mocked_trait(identifier, &mocked_trait);
-            /*
+
             match resolver
                 .resolve_trait_bound(&Path::from_ident(Ident::from_str("Test")))
                 .unwrap()
@@ -62,7 +68,6 @@ mod test {
                 }
                 TraitBoundType::Derivable(_) => panic!("Exected an already mocked trait"),
             };
-            */
         });
     }
 }
