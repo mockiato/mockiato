@@ -1,9 +1,9 @@
+use crate::syntax::ast::{self, Ident, Path, VariantData, DUMMY_NODE_ID};
+use crate::syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
+use crate::syntax::ext::build::AstBuilder;
+use crate::syntax::ptr::P;
+use crate::syntax_pos::Span;
 use std::sync::RwLock;
-use syntax::ast::{self, Ident, Path, VariantData, DUMMY_NODE_ID};
-use syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
-use syntax::ext::build::AstBuilder;
-use syntax::ptr::P;
-use syntax_pos::Span;
 
 use crate::context::Context;
 use crate::definition_id::{ContextPredictor, ContextResolver, DefId, Predictor};

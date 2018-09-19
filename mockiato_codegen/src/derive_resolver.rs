@@ -1,5 +1,5 @@
 use crate::definition_id::Resolver;
-use syntax::ast::{Ident, Path};
+use crate::syntax::ast::{Ident, Path};
 
 const DERIVABLE_TRAITS: [(&str, &str); 9] = [
     ("Clone", "std::clone::Clone"),
@@ -59,7 +59,7 @@ impl DeriveResolver for DeriveResolverImpl {
 mod test {
     use super::*;
     use crate::definition_id::DefId;
-    use syntax_pos::{Globals, GLOBALS};
+    use crate::syntax_pos::{Globals, GLOBALS};
 
     #[test]
     fn test_is_automatically_derivable_works() {

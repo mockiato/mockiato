@@ -1,7 +1,7 @@
 use crate::context::Context;
-use syntax::ast::{GenericBounds, Generics, Ident, IsAuto, ItemKind, TraitItem, Unsafety};
-use syntax::ext::base::Annotatable;
-use syntax_pos::Span;
+use crate::syntax::ast::{GenericBounds, Generics, Ident, IsAuto, ItemKind, TraitItem, Unsafety};
+use crate::syntax::ext::base::Annotatable;
+use crate::syntax_pos::Span;
 
 #[derive(Debug, Clone)]
 pub(crate) struct TraitDecl {

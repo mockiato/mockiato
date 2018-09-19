@@ -1,6 +1,6 @@
 use crate::definition_id::DefId;
 use crate::parse::trait_decl::TraitDecl;
-use syntax::ast::Path;
+use crate::syntax::ast::Path;
 
 pub(crate) trait TraitBoundResolver {
     fn register_mocked_trait(&mut self, identifier: DefId, mocked_trait: &TraitDecl);
@@ -33,8 +33,8 @@ impl TraitBoundResolver for TraitBoundResolverImpl {
 #[cfg(test)]
 mod test {
     use super::*;
-    use syntax::ast::{Generics, Ident};
-    use syntax_pos::{Globals, DUMMY_SP, GLOBALS};
+    use crate::syntax::ast::{Generics, Ident};
+    use crate::syntax_pos::{Globals, DUMMY_SP, GLOBALS};
 
     #[test]
     fn test_registers_mocked_trait() {

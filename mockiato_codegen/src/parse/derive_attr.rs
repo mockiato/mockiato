@@ -1,7 +1,7 @@
 use crate::context::Context;
-use syntax::ast::{Attribute, Ident, MetaItem, MetaItemKind, NestedMetaItem, Path};
-use syntax::ext::build::AstBuilder;
-use syntax_pos::Span;
+use crate::syntax::ast::{Attribute, Ident, MetaItem, MetaItemKind, NestedMetaItem, Path};
+use crate::syntax::ext::build::AstBuilder;
+use crate::syntax_pos::Span;
 
 #[derive(Debug)]
 pub(crate) struct DeriveAttr {

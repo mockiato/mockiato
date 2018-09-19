@@ -10,9 +10,15 @@
     tool_lints,
 )]
 
-use rustc_plugin::Registry;
-use syntax::ext::base::SyntaxExtension;
-use syntax::symbol::Symbol;
+extern crate rustc;
+extern crate rustc_plugin;
+extern crate rustc_resolve;
+extern crate syntax;
+extern crate syntax_pos;
+
+use crate::rustc_plugin::Registry;
+use crate::syntax::ext::base::SyntaxExtension;
+use crate::syntax::symbol::Symbol;
 
 mod context;
 mod definition_id;

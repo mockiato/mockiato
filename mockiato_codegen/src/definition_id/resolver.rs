@@ -1,8 +1,8 @@
 use super::{transmute_resolver, DefId};
 use crate::context::Context;
+use crate::syntax::ast::Path;
+use crate::syntax_pos::DUMMY_SP;
 use std::ops::DerefMut;
-use syntax::ast::Path;
-use syntax_pos::DUMMY_SP;
 
 pub(crate) trait Resolver {
     fn resolve_path(&mut self, path: Path) -> Option<DefId> {

@@ -1,6 +1,6 @@
-use rustc::hir::def_id;
-use rustc_resolve::Resolver as ResolverImpl;
-use syntax::ext::base::Resolver as SyntaxResolver;
+use crate::rustc::hir::def_id;
+use crate::rustc_resolve::Resolver as ResolverImpl;
+use crate::syntax::ext::base::Resolver as SyntaxResolver;
 
 mod predictor;
 mod resolver;

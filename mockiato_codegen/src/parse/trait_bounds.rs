@@ -1,7 +1,7 @@
 use super::trait_decl::TraitDecl;
-use syntax::ast::{GenericBound, PathSegment};
-use syntax::symbol::LocalInternedString;
-use syntax_pos::Span;
+use crate::syntax::ast::{GenericBound, PathSegment};
+use crate::syntax::symbol::LocalInternedString;
+use crate::syntax_pos::Span;
 
 #[derive(Debug)]
 pub(crate) struct TraitBounds<'a>(pub(crate) Vec<TraitBound<'a>>);

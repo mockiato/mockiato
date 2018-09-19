@@ -1,10 +1,10 @@
 use super::Resolver;
 use super::{transmute_resolver, DefId};
 use crate::context::Context;
-use rustc::hir::def_id;
-use rustc::hir::lowering::Resolver as LoweringResolver;
+use crate::rustc::hir::def_id;
+use crate::rustc::hir::lowering::Resolver as LoweringResolver;
+use crate::syntax::ast::{Ident, Path};
 use std::ops::DerefMut;
-use syntax::ast::{Ident, Path};
 
 pub(crate) trait Predictor {
     fn predict_next_id(&mut self, generated_items: u32) -> DefId;

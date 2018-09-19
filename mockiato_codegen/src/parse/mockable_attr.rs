@@ -1,5 +1,5 @@
 use crate::context::Context;
-use syntax::ast::{self, MetaItemKind, NestedMetaItemKind};
+use crate::syntax::ast::{self, MetaItemKind, NestedMetaItemKind};
 
 use super::derive_attr::DeriveAttr;
 use super::name_attr::NameAttr;

@@ -1,8 +1,8 @@
 use crate::context::Context;
-use syntax::ast::{Ident, LitKind, MetaItem, MetaItemKind};
-use syntax::source_map::Spanned;
-use syntax::symbol::Symbol;
-use syntax_pos::Span;
+use crate::syntax::ast::{Ident, LitKind, MetaItem, MetaItemKind};
+use crate::syntax::source_map::Spanned;
+use crate::syntax::symbol::Symbol;
+use crate::syntax_pos::Span;
 
 #[derive(Debug)]
 pub(crate) struct NameAttr {

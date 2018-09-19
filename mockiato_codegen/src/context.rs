@@ -1,5 +1,5 @@
+use crate::syntax::ext::base::ExtCtxt;
 use std::sync::{Arc, RwLock, RwLockWriteGuard};
-use syntax::ext::base::ExtCtxt;
 
 #[derive(Clone)]
 pub(crate) struct Context<'a, 'b: 'a>(Arc<RwLock<&'a mut ExtCtxt<'b>>>);
