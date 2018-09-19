@@ -24,18 +24,21 @@ mod context;
 mod definition_id;
 mod derive_resolver;
 mod mockable;
+mod mocked_trait_registry;
 mod parse;
 mod trait_bound_resolver;
 
 use self::mockable::Mockable;
-use self::trait_bound_resolver::TraitBoundResolverImpl;
+use self::mocked_trait_registry::MockedTraitRegistryImpl;
 
 #[plugin_registrar]
 pub fn plugin_registrar(reg: &mut Registry) {
+    let mocked_trait_registry = MockedTraitRegistryImpl::new();
+
     reg.register_syntax_extension(
         Symbol::intern("mockable"),
-        SyntaxExtension::MultiDecorator(Box::new(Mockable::new(Box::new(
-            TraitBoundResolverImpl::new(),
-        )))),
+        SyntaxExtension::MultiDecorator(Box::new(Mockable::new(Box::new(move || {
+            Box::new(mocked_trait_registry.clone())
+        })))),
     );
 }

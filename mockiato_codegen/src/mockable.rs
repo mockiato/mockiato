@@ -3,44 +3,44 @@ use crate::syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
 use crate::syntax::ext::build::AstBuilder;
 use crate::syntax::ptr::P;
 use crate::syntax_pos::Span;
-use std::sync::RwLock;
 
 use crate::context::Context;
 use crate::definition_id::{ContextPredictor, ContextResolver, DefId, Predictor};
+use crate::mocked_trait_registry::MockedTraitRegistry;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
-use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundType};
+use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundResolverImpl, TraitBoundType};
+use std::clone::Clone;
+
+type MockedTraitRegistryFactory = dyn Fn() -> Box<dyn MockedTraitRegistry>;
 
 pub(crate) struct Mockable {
-    trait_bound_resolver: RwLock<Box<dyn TraitBoundResolver>>,
+    mocked_trait_registry_factory: Box<MockedTraitRegistryFactory>,
 }
 
-const TRAIT_BOUND_RESOLVER_ERR: &str = "Internal Error: Trait Bound Resolver is poisoned";
-
 impl Mockable {
-    pub(crate) fn new(trait_bound_resolver: Box<dyn TraitBoundResolver>) -> Self {
+    pub(crate) fn new(mocked_trait_registry_factory: Box<MockedTraitRegistryFactory>) -> Self {
         Self {
-            trait_bound_resolver: RwLock::new(trait_bound_resolver),
+            mocked_trait_registry_factory,
         }
     }
 
     fn register_current_trait(&self, trait_bound_def_id: DefId, trait_decl: &TraitDecl) {
-        self.trait_bound_resolver
-            .write()
-            .expect(TRAIT_BOUND_RESOLVER_ERR)
-            .register_mocked_trait(trait_bound_def_id, &trait_decl);
+        (self.mocked_trait_registry_factory)()
+            .register_mocked_trait(trait_bound_def_id, trait_decl.clone());
     }
 
-    fn mock_trait_bound_impls(&self, cx: &Context, trait_decl: &TraitDecl) {
+    fn mock_trait_bound_impls(
+        &self,
+        trait_bound_resolver: &'_ dyn TraitBoundResolver,
+        cx: &Context,
+        trait_decl: &TraitDecl,
+    ) {
         let trait_bounds = TraitBounds::parse(trait_decl).0;
         for trait_bound in trait_bounds {
             let identifier = trait_bound.identifier;
-            let trait_bound_resolver = self
-                .trait_bound_resolver
-                .read()
-                .expect(TRAIT_BOUND_RESOLVER_ERR);
             let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&Path::from_ident(
                 Ident::from_interned_str(identifier.as_interned_str()),
             ));
@@ -76,6 +76,8 @@ impl<'a> MultiItemDecorator for Mockable {
         let cx = Context::new(cx);
         let resolver = ContextResolver::new(cx.clone());
         let mut predictor = ContextPredictor::new(cx.clone(), Box::new(resolver.clone()));
+        let trait_bound_resolver =
+            TraitBoundResolverImpl::new((self.mocked_trait_registry_factory)());
 
         let trait_decl = match TraitDecl::parse(&cx, item) {
             Ok(trait_decl) => trait_decl,
@@ -103,7 +105,7 @@ impl<'a> MultiItemDecorator for Mockable {
 
         push(Annotatable::Item(P(mock_struct)));
 
-        self.mock_trait_bound_impls(&cx, &trait_decl);
+        self.mock_trait_bound_impls(&trait_bound_resolver, &cx, &trait_decl);
 
         // TODO: this also needs to include auto-generated derives (e.g. Debug)
         self.register_current_trait(predictor.predict_next_id(0), &trait_decl);

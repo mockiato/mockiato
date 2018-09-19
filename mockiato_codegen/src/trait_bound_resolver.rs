@@ -1,10 +1,8 @@
-use crate::definition_id::DefId;
+use crate::mocked_trait_registry::MockedTraitRegistry;
 use crate::parse::trait_decl::TraitDecl;
 use crate::syntax::ast::Path;
-use std::collections::HashMap;
 
 pub(crate) trait TraitBoundResolver {
-    fn register_mocked_trait(&mut self, identifier: DefId, mocked_trait: &TraitDecl);
     fn resolve_trait_bound(&self, path: &Path) -> Option<TraitBoundType<'_>>;
 }
 
@@ -15,22 +13,18 @@ pub(crate) enum TraitBoundType<'a> {
 }
 
 pub(crate) struct TraitBoundResolverImpl {
-    mocked_traits: HashMap<DefId, TraitDecl>,
+    mocked_trait_registry: Box<dyn MockedTraitRegistry>,
 }
 
 impl TraitBoundResolverImpl {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(mocked_trait_registry: Box<dyn MockedTraitRegistry>) -> Self {
         Self {
-            mocked_traits: HashMap::new(),
+            mocked_trait_registry,
         }
     }
 }
 
 impl TraitBoundResolver for TraitBoundResolverImpl {
-    fn register_mocked_trait(&mut self, identifier: DefId, mocked_trait: &TraitDecl) {
-        self.mocked_traits.insert(identifier, mocked_trait.clone());
-    }
-
     fn resolve_trait_bound(&self, _path: &Path) -> Option<TraitBoundType<'_>> {
         unimplemented!();
     }
@@ -39,14 +33,14 @@ impl TraitBoundResolver for TraitBoundResolverImpl {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::definition_id::DefId;
     use crate::syntax::ast::{Generics, Ident};
     use crate::syntax_pos::{Globals, DUMMY_SP, GLOBALS};
+    use std::cell::RefCell;
 
     #[test]
-    fn test_registers_mocked_trait() {
+    fn test_resolves_mocked_trait() {
         GLOBALS.set(&Globals::new(), || {
-            let identifier = DefId::dummy(1234);
-
             let mocked_trait = TraitDecl {
                 span: DUMMY_SP,
                 ident: Ident::from_str("Test"),
@@ -55,9 +49,40 @@ mod test {
                 items: Vec::new(),
             };
 
-            let mut resolver = TraitBoundResolverImpl::new();
+            struct MockedTraitRegistryMock {
+                called: RefCell<bool>,
+            }
 
-            resolver.register_mocked_trait(identifier, &mocked_trait);
+            impl Drop for MockedTraitRegistryMock {
+                fn drop(&mut self) {
+                    if !std::thread::panicking() {
+                        assert!(*self.called.borrow())
+                    }
+                }
+            }
+
+            impl MockedTraitRegistry for MockedTraitRegistryMock {
+                fn register_mocked_trait(&self, _identifier: DefId, _mocked_trait: TraitDecl) {
+                    panic!("Unexpected call to register_mocked_trait()");
+                }
+                fn get_mocked_trait(&self, identifier: DefId) -> Option<TraitDecl> {
+                    self.called.replace(true);
+
+                    assert_eq!(identifier, DefId::dummy(1234));
+
+                    Some(TraitDecl {
+                        span: DUMMY_SP,
+                        ident: Ident::from_str("Test"),
+                        generics: Generics::default(),
+                        generic_bounds: Vec::new(),
+                        items: Vec::new(),
+                    })
+                }
+            }
+
+            let resolver = TraitBoundResolverImpl::new(Box::new(MockedTraitRegistryMock {
+                called: RefCell::default(),
+            }));
 
             match resolver
                 .resolve_trait_bound(&Path::from_ident(Ident::from_str("Test")))
