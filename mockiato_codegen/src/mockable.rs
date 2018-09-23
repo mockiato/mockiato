@@ -1,4 +1,4 @@
-use crate::syntax::ast::{self, Ident, Path, VariantData, DUMMY_NODE_ID};
+use crate::syntax::ast::{self, Ident, VariantData, DUMMY_NODE_ID};
 use crate::syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
 use crate::syntax::ext::build::AstBuilder;
 use crate::syntax::ptr::P;
@@ -30,10 +30,7 @@ impl Mockable {
         let trait_bounds = TraitBounds::parse(trait_decl).0;
 
         for trait_bound in trait_bounds {
-            let identifier = trait_bound.identifier;
-            let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&Path::from_ident(
-                Ident::from_interned_str(identifier.as_interned_str()),
-            ));
+            let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&trait_bound.path);
             self.mock_trait_bound_type(&cx, trait_bound.span, &trait_bound_type);
         }
     }
@@ -64,7 +61,7 @@ impl<'a> MultiItemDecorator for Mockable {
         push: &mut dyn FnMut(Annotatable),
     ) {
         let cx = Context::new(cx);
-        let resolver = ContextResolver::new(cx.clone());
+        let _resolver = ContextResolver::new(cx.clone());
         let trait_bound_resolver = TraitBoundResolverImpl::new(Box::new(DeriveResolverImpl::new()));
 
         let trait_decl = match TraitDecl::parse(&cx, item) {
