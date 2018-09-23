@@ -5,9 +5,8 @@ use crate::syntax::ptr::P;
 use crate::syntax_pos::Span;
 
 use crate::context::Context;
-use crate::definition_id::{ContextPredictor, ContextResolver, DefId, Predictor};
+use crate::definition_id::ContextResolver;
 use crate::derive_resolver::DeriveResolverImpl;
-use crate::mocked_trait_registry::MockedTraitRegistry;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_bounds::TraitBounds;
@@ -15,22 +14,11 @@ use crate::parse::trait_decl::TraitDecl;
 use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundResolverImpl, TraitBoundType};
 use std::clone::Clone;
 
-type MockedTraitRegistryFactory = dyn Fn() -> Box<dyn MockedTraitRegistry>;
-
-pub(crate) struct Mockable {
-    mocked_trait_registry_factory: Box<MockedTraitRegistryFactory>,
-}
+pub(crate) struct Mockable {}
 
 impl Mockable {
-    pub(crate) fn new(mocked_trait_registry_factory: Box<MockedTraitRegistryFactory>) -> Self {
-        Self {
-            mocked_trait_registry_factory,
-        }
-    }
-
-    fn register_current_trait(&self, trait_bound_def_id: DefId, trait_decl: &TraitDecl) {
-        (self.mocked_trait_registry_factory)()
-            .register_mocked_trait(trait_bound_def_id, trait_decl.clone());
+    pub(crate) fn new() -> Self {
+        Self {}
     }
 
     fn mock_trait_bound_impls(
@@ -59,8 +47,8 @@ impl Mockable {
         if trait_bound_type.is_none() {
             cx.into_inner().parse_sess
                 .span_diagnostic
-                .mut_span_err(sp, "The referenced trait has has not been marked as #[mockable] or doesn't exist")
-                .help("Mockable traits are handled from top to bottom, try declaring this trait earlier.")
+                .mut_span_err(sp, "The referenced trait is not a derivable trait")
+                .help("Currently only traits that are automatically derivable are supported as supertrait")
                 .emit();
         }
     }
@@ -77,12 +65,7 @@ impl<'a> MultiItemDecorator for Mockable {
     ) {
         let cx = Context::new(cx);
         let resolver = ContextResolver::new(cx.clone());
-        let mut predictor = ContextPredictor::new(cx.clone(), Box::new(resolver.clone()));
-        let trait_bound_resolver = TraitBoundResolverImpl::new(
-            (self.mocked_trait_registry_factory)(),
-            Box::new(DeriveResolverImpl::new()),
-            Box::new(resolver.clone()),
-        );
+        let trait_bound_resolver = TraitBoundResolverImpl::new(Box::new(DeriveResolverImpl::new()));
 
         let trait_decl = match TraitDecl::parse(&cx, item) {
             Ok(trait_decl) => trait_decl,
@@ -111,9 +94,6 @@ impl<'a> MultiItemDecorator for Mockable {
         push(Annotatable::Item(P(mock_struct)));
 
         self.mock_trait_bound_impls(&trait_bound_resolver, &cx, &trait_decl);
-
-        // TODO: this also needs to include auto-generated derives (e.g. Debug)
-        self.register_current_trait(predictor.predict_next_id(0), &trait_decl);
     }
 }
 
