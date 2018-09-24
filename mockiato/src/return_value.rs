@@ -7,7 +7,7 @@ where
     fn return_value(&self, input: &A) -> R;
 }
 
-pub struct Cloned<T>(T)
+pub struct Cloned<T>(pub(crate) T)
 where
     T: Clone;
 

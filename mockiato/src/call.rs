@@ -1,6 +1,30 @@
 use crate::arguments::Arguments;
-use crate::return_value::ReturnValue;
+use crate::return_value::{self, ReturnValue};
+use std::ops::DerefMut;
 use std::sync::{Arc, RwLock};
+
+pub struct CallBuilder<'mock, A, R>
+where
+    A: Arguments<'mock>,
+{
+    call: Arc<RwLock<Call<'mock, A, R>>>,
+}
+
+impl<'mock, A, R> CallBuilder<'mock, A, R>
+where
+    A: Arguments<'mock>,
+{
+    pub fn will_return(&self, return_value: R) -> &Self
+    where
+        R: Clone + 'mock,
+    {
+        let mut call = self.call.write().expect("unable to write call");
+
+        call.deref_mut().return_value = Some(Box::new(return_value::Cloned(return_value)));
+
+        self
+    }
+}
 
 pub struct Calls<'mock, A, R>
 where
@@ -20,6 +44,18 @@ where
             calls: Default::default(),
         }
     }
+
+    #[must_use]
+    pub fn expect(&self, matcher: A::Matcher) -> CallBuilder<'mock, A, R> {
+        let call = Arc::new(RwLock::new(Call::new(matcher)));
+
+        self.calls
+            .write()
+            .expect("unable to write calls")
+            .push(call.clone());
+
+        CallBuilder { call }
+    }
 }
 
 pub struct Call<'mock, A, R>
@@ -29,7 +65,7 @@ where
     expected_calls: u64,
     actual_calls: u64,
     matcher: A::Matcher,
-    return_value: Option<Box<dyn ReturnValue<'mock, A, R>>>,
+    return_value: Option<Box<dyn ReturnValue<'mock, A, R> + 'mock>>,
 }
 
 impl<'mock, A, R> Call<'mock, A, R>
