@@ -1,5 +1,32 @@
 use crate::arguments::Arguments;
 
+pub trait DefaultReturnValue {
+    fn default_return_value<'mock, A>() -> Option<Box<dyn ReturnValue<'mock, A, Self> + 'mock>>
+    where
+        Self: Sized,
+        A: Arguments<'mock>;
+}
+
+impl<T> DefaultReturnValue for T {
+    default fn default_return_value<'mock, A>() -> Option<Box<dyn ReturnValue<'mock, A, T> + 'mock>>
+    where
+        Self: Sized,
+        A: Arguments<'mock>,
+    {
+        None
+    }
+}
+
+impl DefaultReturnValue for () {
+    fn default_return_value<'mock, A>() -> Option<Box<dyn ReturnValue<'mock, A, ()> + 'mock>>
+    where
+        Self: Sized,
+        A: Arguments<'mock>,
+    {
+        Some(Box::new(Cloned(())))
+    }
+}
+
 pub trait ReturnValue<'mock, A, R>
 where
     A: Arguments<'mock>,

@@ -1,3 +1,5 @@
+#![feature(specialization)]
+
 mod arguments;
 mod call;
 mod expected_calls;

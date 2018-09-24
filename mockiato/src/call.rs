@@ -1,5 +1,6 @@
 use crate::arguments::Arguments;
 use crate::expected_calls::ExpectedCalls;
+use crate::return_value::{self, DefaultReturnValue, ReturnValue};
 use std::ops::DerefMut;
 use std::sync::{Arc, RwLock};
 
@@ -88,7 +89,7 @@ where
             expected_calls: ExpectedCalls::Any,
             actual_number_of_calls: 0,
             matcher,
-            return_value: None,
+            return_value: R::default_return_value(),
         }
     }
 }
