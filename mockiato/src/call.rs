@@ -1,5 +1,5 @@
 use crate::arguments::Arguments;
-use crate::return_value::{self, ReturnValue};
+use crate::expected_calls::ExpectedCalls;
 use std::ops::DerefMut;
 use std::sync::{Arc, RwLock};
 
@@ -21,6 +21,17 @@ where
         let mut call = self.call.write().expect("unable to write call");
 
         call.deref_mut().return_value = Some(Box::new(return_value::Cloned(return_value)));
+
+        self
+    }
+
+    pub fn times<E>(&self, expected_calls: E) -> &Self
+    where
+        E: Into<ExpectedCalls>,
+    {
+        let mut call = self.call.write().expect("unable to write call");
+
+        call.deref_mut().expected_calls = expected_calls.into();
 
         self
     }
@@ -62,8 +73,8 @@ pub struct Call<'mock, A, R>
 where
     A: Arguments<'mock>,
 {
-    expected_calls: u64,
-    actual_calls: u64,
+    expected_calls: ExpectedCalls,
+    actual_number_of_calls: u64,
     matcher: A::Matcher,
     return_value: Option<Box<dyn ReturnValue<'mock, A, R> + 'mock>>,
 }
@@ -74,8 +85,8 @@ where
 {
     pub fn new(matcher: A::Matcher) -> Self {
         Call {
-            expected_calls: 1,
-            actual_calls: 0,
+            expected_calls: ExpectedCalls::Any,
+            actual_number_of_calls: 0,
             matcher,
             return_value: None,
         }
