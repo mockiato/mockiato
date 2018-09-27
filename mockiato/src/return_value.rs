@@ -61,3 +61,23 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = "<panic message>")]
+    fn test_panic_panicks() {
+        let panic = Panic(Some("<panic message>"));
+
+        ReturnValue::<((),), ()>::return_value(&panic, &((),));
+    }
+
+    #[test]
+    fn test_cloned_returns_expected_value() {
+        let cloned = Cloned(String::from("foo"));
+
+        assert_eq!(String::from("foo"), cloned.return_value(&((),)));
+    }
+}
