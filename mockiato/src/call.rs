@@ -86,7 +86,7 @@ where
 {
     pub fn new(matcher: A::Matcher) -> Self {
         Call {
-            expected_calls: ExpectedCalls::Any,
+            expected_calls: ExpectedCalls::default(),
             actual_number_of_calls: 0,
             matcher,
             return_value: R::default_return_value(),
