@@ -82,7 +82,8 @@ impl<'a> MultiItemDecorator for Mockable {
                 meta_item.span,
                 mock_struct_ident,
                 VariantData::Unit(DUMMY_NODE_ID),
-            ).into_inner();
+            )
+            .into_inner();
 
         if let Some(derive_attr) = mockable_attr.derive_attr {
             mock_struct.attrs.push(derive_attr.expand(&cx));

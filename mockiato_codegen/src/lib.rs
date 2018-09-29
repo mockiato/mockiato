@@ -7,7 +7,7 @@
     decl_macro,
     custom_attribute,
     underscore_imports,
-    tool_lints,
+    tool_lints
 )]
 
 extern crate rustc;

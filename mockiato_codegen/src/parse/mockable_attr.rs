@@ -38,23 +38,25 @@ impl MockableAttr {
 
                 for item in meta_items {
                     match item {
-                        Some(item) => if item.ident == "derive" {
-                            if derive_attr.is_some() {
-                                cx.into_inner().span_warn(item.span(), "`derive` is specified more than once. The latter definition will take precedence.");
+                        Some(item) => {
+                            if item.ident == "derive" {
+                                if derive_attr.is_some() {
+                                    cx.into_inner().span_warn(item.span(), "`derive` is specified more than once. The latter definition will take precedence.");
+                                }
+                                derive_attr = DeriveAttr::parse(&cx, item.clone());
+                            } else if item.ident == "name" {
+                                if name_attr.is_some() {
+                                    cx.into_inner().span_warn(item.span(), "`name` is specified more than once. The latter definition will take precedence.");
+                                }
+                                name_attr = NameAttr::parse(&cx, item.clone());
+                            } else {
+                                cx.into_inner().span_err(
+                                    item.span(),
+                                    "This attribute property is not supported by #[mockable]",
+                                );
+                                return None;
                             }
-                            derive_attr = DeriveAttr::parse(&cx, item.clone());
-                        } else if item.ident == "name" {
-                            if name_attr.is_some() {
-                                cx.into_inner().span_warn(item.span(), "`name` is specified more than once. The latter definition will take precedence.");
-                            }
-                            name_attr = NameAttr::parse(&cx, item.clone());
-                        } else {
-                            cx.into_inner().span_err(
-                                item.span(),
-                                "This attribute property is not supported by #[mockable]",
-                            );
-                            return None;
-                        },
+                        }
                         None => return None,
                     }
                 }

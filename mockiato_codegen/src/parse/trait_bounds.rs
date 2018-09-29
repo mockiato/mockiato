@@ -41,7 +41,8 @@ impl TraitBounds {
                     } else {
                         None
                     }
-                }).collect(),
+                })
+                .collect(),
         )
     }
 }

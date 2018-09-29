@@ -109,7 +109,8 @@ mod test {
                     .resolve_derivable_name(
                         &mut resolver,
                         &Path::from_ident(Ident::from_str("Debug1234"))
-                    ).unwrap(),
+                    )
+                    .unwrap(),
                 "Debug"
             );
         });

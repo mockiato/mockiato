@@ -27,7 +27,8 @@ impl NameAttr {
             .mut_span_err(
                 meta_item.span,
                 "#[mockable(name = \"...\") expects a string literal",
-            ).help("Example usage: #[mockable(name = \"FooMock\")]")
+            )
+            .help("Example usage: #[mockable(name = \"FooMock\")]")
             .emit();
 
         None
