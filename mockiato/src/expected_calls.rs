@@ -19,7 +19,7 @@ impl ExpectedCalls {
             ExpectedCallsKind::AtLeast(min) => value >= min,
             ExpectedCallsKind::AtMost(max) => value <= max,
             ExpectedCallsKind::Between { start, end } => value >= start && value < end,
-            ExpectedCallsKind::BetweenInclusive { .. } => unimplemented!(),
+            ExpectedCallsKind::BetweenInclusive { start, end } => value >= start && value <= end,
         }
     }
 }
@@ -155,5 +155,57 @@ mod test {
         assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(11));
         assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(15));
         assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(19));
+    }
+
+    #[test]
+    fn between_inclusive_does_not_match_values_outside_of_range() {
+        assert!(
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
+                .matches_value(0)
+        );
+        assert!(
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
+                .matches_value(9)
+        );
+        assert!(
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
+                .matches_value(21)
+        );
+        assert!(
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
+                .matches_value(40)
+        );
+    }
+
+    #[test]
+    fn between_inclusive_matches_end_value() {
+        assert!(
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 1, end: 3 })
+                .matches_value(3)
+        );
+    }
+
+    #[test]
+    fn between_inclusive_matches_start_value() {
+        assert!(
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 1, end: 3 })
+                .matches_value(1)
+        );
+    }
+
+    #[test]
+    fn between_inclusive_matches_values_in_range() {
+        assert!(
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
+                .matches_value(11)
+        );
+        assert!(
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
+                .matches_value(15)
+        );
+        assert!(
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
+                .matches_value(19)
+        );
     }
 }
