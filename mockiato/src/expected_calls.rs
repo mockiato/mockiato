@@ -1,7 +1,9 @@
 use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive};
 
+#[derive(Eq, PartialEq, Debug)]
 pub struct ExpectedCalls(ExpectedCallsKind);
 
+#[derive(Eq, PartialEq, Debug)]
 enum ExpectedCallsKind {
     Any,
     Exact(u64),
@@ -207,5 +209,45 @@ mod test {
             ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
                 .matches_value(19)
         );
+    }
+
+    #[test]
+    fn can_be_converted_from_int() {
+        assert_eq!(
+            ExpectedCalls(ExpectedCallsKind::Exact(5)),
+            ExpectedCalls::from(5)
+        );
+    }
+
+    #[test]
+    fn can_be_converted_from_range() {
+        assert_eq!(
+            ExpectedCalls(ExpectedCallsKind::Between { start: 3, end: 7 }),
+            ExpectedCalls::from(3..7)
+        );
+    }
+
+    #[test]
+    fn can_be_converted_from_range_from() {
+        assert_eq!(
+            ExpectedCalls(ExpectedCallsKind::AtLeast(2)),
+            ExpectedCalls::from(2..)
+        );
+    }
+
+    #[test]
+    fn can_be_converted_from_range_to() {
+        assert_eq!(
+            ExpectedCalls(ExpectedCallsKind::AtMost(4)),
+            ExpectedCalls::from(..=4)
+        );
+    }
+
+    #[test]
+    fn can_be_converted_from_inclusive_range() {
+        assert_eq!(
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 21, end: 56 }),
+            ExpectedCalls::from(21..=56)
+        )
     }
 }
