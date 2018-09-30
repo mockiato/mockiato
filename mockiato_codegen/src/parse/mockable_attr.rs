@@ -1,3 +1,4 @@
+use crate::constant::ATTR_NAME;
 use crate::context::Context;
 use crate::syntax::ast::{self, MetaItemKind, NestedMetaItemKind};
 
@@ -24,8 +25,14 @@ impl MockableAttr {
                             cx.into_inner()
                                 .parse_sess
                                 .span_diagnostic
-                                .mut_span_err(nested.span(), "Unsupported syntax for #[mockable]")
-                                .help("Example usage: #[mockable(name = \"FooMock\")]")
+                                .mut_span_err(
+                                    nested.span(),
+                                    &format!("Unsupported syntax for #[{}]", ATTR_NAME),
+                                )
+                                .help(&format!(
+                                    "Example usage: #[{}(name = \"FooMock\")]",
+                                    ATTR_NAME
+                                ))
                                 .emit();
                             None
                         }
@@ -43,7 +50,10 @@ impl MockableAttr {
                             } else {
                                 cx.into_inner().span_err(
                                     item.span(),
-                                    "This attribute property is not supported by #[mockable]",
+                                    &format!(
+                                        "This attribute property is not supported by #[{}]",
+                                        ATTR_NAME
+                                    ),
                                 );
                                 return None;
                             }

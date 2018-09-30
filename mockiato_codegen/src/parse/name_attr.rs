@@ -1,3 +1,4 @@
+use crate::constant::ATTR_NAME;
 use crate::context::Context;
 use crate::syntax::ast::{Ident, LitKind, MetaItem, MetaItemKind};
 use crate::syntax::source_map::Spanned;
@@ -26,9 +27,12 @@ impl NameAttr {
             .span_diagnostic
             .mut_span_err(
                 meta_item.span,
-                "#[mockable(name = \"...\") expects a string literal",
+                &format!("#[{}(name = \"...\") expects a string literal", ATTR_NAME),
             )
-            .help("Example usage: #[mockable(name = \"FooMock\")]")
+            .help(&format!(
+                "Example usage: #[{}(name = \"FooMock\")]",
+                ATTR_NAME,
+            ))
             .emit();
 
         None
