@@ -1,0 +1,18 @@
+error: The referenced trait is not a derivable trait
+ --> $DIR/trait-bound-not-derivable.rs:7:12
+  |
+7 | trait Foo: Bar + std::fmt::Debug {}
+  |            ^^^
+  |
+  = help: Only traits that are automatically derivable are supported as supertrait
+
+error: The referenced trait is not a derivable trait
+  --> $DIR/trait-bound-not-derivable.rs:10:12
+   |
+10 | trait Baz: std::fmt::Display {}
+   |            ^^^^^^^^^^^^^^^^^
+   |
+   = help: Only traits that are automatically derivable are supported as supertrait
+
+error: aborting due to 2 previous errors
+

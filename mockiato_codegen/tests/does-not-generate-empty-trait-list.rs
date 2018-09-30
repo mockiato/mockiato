@@ -1,5 +1,5 @@
 #![feature(plugin)]
 #![plugin(mockiato_codegen)]
 
-#[mockable(derive = "Foo")]
+#[mockable]
 trait Foo {}

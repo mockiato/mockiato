@@ -1,19 +1,20 @@
-use syntax::ast::{GenericBounds, Generics, Ident, IsAuto, ItemKind, TraitItem, Unsafety};
-use syntax::ext::base::{Annotatable, ExtCtxt};
-use syntax_pos::Span;
+use crate::constant::ATTR_NAME;
+use crate::context::Context;
+use crate::syntax::ast::{GenericBounds, Generics, Ident, IsAuto, ItemKind, TraitItem, Unsafety};
+use crate::syntax::ext::base::Annotatable;
+use crate::syntax_pos::Span;
 
-#[derive(Debug)]
-pub(crate) struct TraitDecl<'a> {
+#[derive(Debug, Clone)]
+pub(crate) struct TraitDecl {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
-    pub(crate) is_auto: &'a IsAuto,
-    pub(crate) generics: &'a Generics,
-    pub(crate) generic_bounds: &'a GenericBounds,
-    pub(crate) items: &'a [TraitItem],
+    pub(crate) generics: Generics,
+    pub(crate) generic_bounds: GenericBounds,
+    pub(crate) items: Vec<TraitItem>,
 }
 
-impl<'a> TraitDecl<'a> {
-    pub(crate) fn parse(cx: &mut ExtCtxt, annotated: &'a Annotatable) -> Result<Self, ()> {
+impl TraitDecl {
+    pub(crate) fn parse(cx: &Context, annotated: &Annotatable) -> Result<Self, ()> {
         if let Annotatable::Item(ref item) = annotated {
             let span = item.span;
             let ident = item.ident;
@@ -27,22 +28,33 @@ impl<'a> TraitDecl<'a> {
             ) = item.node
             {
                 if unsafety == &Unsafety::Unsafe {
-                    cx.span_err(span, "#[mockable] does not work with unsafe traits");
+                    cx.into_inner().span_err(
+                        span,
+                        &format!("#[{}] does not work with unsafe traits", ATTR_NAME),
+                    );
+                    return Err(());
+                }
+
+                if is_auto == &IsAuto::Yes {
+                    cx.into_inner().span_err(
+                        span,
+                        &format!("#[{}] does not work with auto traits", ATTR_NAME),
+                    );
                     return Err(());
                 }
 
                 return Ok(TraitDecl {
                     ident,
                     span,
-                    is_auto,
-                    generics,
-                    generic_bounds,
-                    items,
+                    generics: generics.clone(),
+                    generic_bounds: generic_bounds.clone(),
+                    items: items.clone(),
                 });
             }
         }
 
-        cx.span_err(annotated.span(), "#[mockable] can only be used with traits");
+        cx.into_inner()
+            .span_err(annotated.span(), "#[mockable] can only be used with traits");
         Err(())
     }
 }

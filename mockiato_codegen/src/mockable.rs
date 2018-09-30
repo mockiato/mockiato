@@ -1,16 +1,29 @@
-use syntax::ast::{self, Ident, VariantData, DUMMY_NODE_ID};
-use syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
-use syntax::ext::build::AstBuilder;
-use syntax::ptr::P;
-use syntax_pos::Span;
+use crate::syntax::ast::{self, Ident, VariantData, DUMMY_NODE_ID};
+use crate::syntax::ext::base::{Annotatable, ExtCtxt, MultiItemDecorator};
+use crate::syntax::ext::build::AstBuilder;
+use crate::syntax::ptr::P;
+use crate::syntax_pos::Span;
 
+use crate::context::Context;
+use crate::definition_id::ContextResolver;
+use crate::derive_resolver::DeriveResolverImpl;
+use crate::generate::DeriveAttributeGenerator;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
+use crate::trait_bound_resolver::TraitBoundResolverImpl;
+use std::clone::Clone;
 
+#[derive(Default)]
 pub(crate) struct Mockable;
 
-impl MultiItemDecorator for Mockable {
+impl Mockable {
+    pub(crate) fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl<'a> MultiItemDecorator for Mockable {
     fn expand(
         &self,
         cx: &mut ExtCtxt,
@@ -19,12 +32,19 @@ impl MultiItemDecorator for Mockable {
         item: &Annotatable,
         push: &mut dyn FnMut(Annotatable),
     ) {
-        let trait_decl = match TraitDecl::parse(cx, item) {
+        let cx = Context::new(cx);
+        let resolver = ContextResolver::new(cx.clone());
+        let trait_bound_resolver =
+            TraitBoundResolverImpl::new(Box::new(DeriveResolverImpl::new(Box::new(resolver))));
+        let derive_attr_generator =
+            DeriveAttributeGenerator::new(cx.clone(), Box::new(trait_bound_resolver));
+
+        let trait_decl = match TraitDecl::parse(&cx, item) {
             Ok(trait_decl) => trait_decl,
             Err(_) => return,
         };
 
-        let mockable_attr = match MockableAttr::parse(cx, meta_item) {
+        let mockable_attr = match MockableAttr::parse(&cx, meta_item) {
             Some(mockable_attr) => mockable_attr,
             None => return,
         };
@@ -32,14 +52,17 @@ impl MultiItemDecorator for Mockable {
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
 
         let mut mock_struct = cx
+            .into_inner()
             .item_struct(
                 meta_item.span,
                 mock_struct_ident,
                 VariantData::Unit(DUMMY_NODE_ID),
-            ).into_inner();
+            )
+            .into_inner();
 
-        if let Some(derive_attr) = mockable_attr.derive_attr {
-            mock_struct.attrs.push(derive_attr.expand(cx));
+        match derive_attr_generator.generate_for_trait(&trait_decl) {
+            Some(attr) => mock_struct.attrs.push(attr),
+            None => return,
         }
 
         push(Annotatable::Item(P(mock_struct)));
