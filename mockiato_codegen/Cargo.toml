@@ -7,3 +7,6 @@ license = "MIT"
 
 [lib]
 plugin = true
+
+[dev-dependencies]
+compiletest_rs = "0.3.14"
