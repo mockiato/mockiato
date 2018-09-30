@@ -23,6 +23,7 @@ use crate::syntax::symbol::Symbol;
 mod context;
 mod definition_id;
 mod derive_resolver;
+mod generate;
 mod mockable;
 mod parse;
 mod trait_bound_resolver;
