@@ -16,8 +16,6 @@ const DERIVABLE_TRAITS: [(&str, &str); 9] = [
 pub(crate) trait DeriveResolver {
     /// Resolves a derivable name for a in-code `Path`
     fn resolve_derivable_name(&self, resolver: &mut dyn Resolver, path: &Path) -> Option<Path>;
-    /// `Path` must be a name of a derive() value (e.g. Debug)
-    fn is_automatically_derivable(&self, path: &Path) -> bool;
 }
 
 #[allow(dead_code)]
@@ -45,14 +43,6 @@ impl DeriveResolver for DeriveResolverImpl {
 
         Some(Path::from_ident(Ident::from_str(derivable_trait.0)))
     }
-
-    fn is_automatically_derivable(&self, path: &Path) -> bool {
-        let name = path.segments.first().unwrap().ident;
-
-        DERIVABLE_TRAITS
-            .iter()
-            .any(|(derive, _)| name.as_str() == *derive)
-    }
 }
 
 #[cfg(test)]
@@ -60,31 +50,6 @@ mod test {
     use super::*;
     use crate::definition_id::DefId;
     use crate::syntax_pos::{Globals, GLOBALS};
-
-    #[test]
-    fn test_is_automatically_derivable_works() {
-        let derive_resolver = DeriveResolverImpl::new();
-
-        GLOBALS.set(&Globals::new(), || {
-            assert_eq!(
-                true,
-                derive_resolver
-                    .is_automatically_derivable(&Path::from_ident(Ident::from_str("Clone")))
-            );
-
-            assert_eq!(
-                true,
-                derive_resolver
-                    .is_automatically_derivable(&Path::from_ident(Ident::from_str("Debug")))
-            );
-
-            assert_eq!(
-                false,
-                derive_resolver
-                    .is_automatically_derivable(&Path::from_ident(Ident::from_str("Display")))
-            );
-        });
-    }
 
     #[test]
     fn test_resolve_derivable_name_works() {
