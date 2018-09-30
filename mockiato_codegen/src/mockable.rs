@@ -60,8 +60,8 @@ impl<'a> MultiItemDecorator for Mockable {
             .into_inner();
 
         match derive_attr_generator.generate_for_trait(&trait_decl) {
-            Ok(attr) => mock_struct.attrs.push(attr),
-            Err(_) => return,
+            Some(attr) => mock_struct.attrs.push(attr),
+            None => return,
         }
 
         push(Annotatable::Item(P(mock_struct)));

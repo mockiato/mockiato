@@ -26,12 +26,12 @@ impl<'a, 'ext> DeriveAttributeGenerator<'a, 'ext> {
         }
     }
 
-    pub(crate) fn generate_for_trait(&self, trait_decl: &TraitDecl) -> Result<Attribute, ()> {
+    pub(crate) fn generate_for_trait(&self, trait_decl: &TraitDecl) -> Option<Attribute> {
         let trait_bounds = self.resolve_trait_bounds(trait_decl);
         let inner_context = self.context.into_inner();
 
-        if trait_bounds.iter().any(Option::is_none) {
-            return Err(());
+        if trait_bounds.iter().any(Option::is_none) || trait_bounds.is_empty() {
+            return None;
         }
 
         let list_items = trait_bounds
@@ -48,7 +48,7 @@ impl<'a, 'ext> DeriveAttributeGenerator<'a, 'ext> {
         let list =
             inner_context.meta_list(DUMMY_SP, Symbol::intern(DERIVE_ATTRIBUTE_NAME), list_items);
 
-        Ok(inner_context.attribute(DUMMY_SP, list))
+        Some(inner_context.attribute(DUMMY_SP, list))
     }
 
     fn resolve_trait_bounds(&self, trait_decl: &TraitDecl) -> Vec<Option<TraitBoundType>> {
