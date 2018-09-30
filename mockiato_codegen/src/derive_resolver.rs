@@ -14,26 +14,28 @@ const DERIVABLE_TRAITS: [(&str, &str); 9] = [
 ];
 
 pub(crate) trait DeriveResolver {
-    /// Resolves a derivable name for a in-code `Path`
-    fn resolve_derivable_name(&self, resolver: &mut dyn Resolver, path: &Path) -> Option<Path>;
+    /// Resolves an in-code [`Path`] into a derivable name
+    /// which can be used in a `#[derive(..)]` attribute
+    fn resolve_derivable_name(&self, path: &Path) -> Option<Path>;
 }
 
 #[allow(dead_code)]
-pub(crate) struct DeriveResolverImpl;
+pub(crate) struct DeriveResolverImpl<'a> {
+    resolver: Box<dyn Resolver + 'a>,
+}
 
-impl DeriveResolverImpl {
-    #[allow(dead_code)]
-    pub(crate) fn new() -> Self {
-        DeriveResolverImpl
+impl<'a> DeriveResolverImpl<'a> {
+    pub(crate) fn new(resolver: Box<dyn Resolver + 'a>) -> Self {
+        DeriveResolverImpl { resolver }
     }
 }
 
-impl DeriveResolver for DeriveResolverImpl {
-    fn resolve_derivable_name(&self, resolver: &mut dyn Resolver, path: &Path) -> Option<Path> {
-        let def_id = resolver.resolve_path(path)?;
+impl<'a> DeriveResolver for DeriveResolverImpl<'a> {
+    fn resolve_derivable_name(&self, path: &Path) -> Option<Path> {
+        let def_id = self.resolver.resolve_path(path)?;
 
         let derivable_trait = DERIVABLE_TRAITS.iter().find(|(_, path)| {
-            let comp_dev_id = match resolver.resolve_str_path(path) {
+            let comp_dev_id = match self.resolver.resolve_str_path(path) {
                 Some(value) => value,
                 None => return false,
             };
@@ -65,16 +67,13 @@ mod test {
             }
         }
 
-        let mut resolver = ResolverMock;
-        let derive_resolver = DeriveResolverImpl;
+        let resolver = ResolverMock;
+        let derive_resolver = DeriveResolverImpl::new(Box::new(resolver));
 
         GLOBALS.set(&Globals::new(), || {
             assert_eq!(
                 derive_resolver
-                    .resolve_derivable_name(
-                        &mut resolver,
-                        &Path::from_ident(Ident::from_str("Debug1234"))
-                    )
+                    .resolve_derivable_name(&Path::from_ident(Ident::from_str("Debug1234")))
                     .unwrap(),
                 "Debug"
             );

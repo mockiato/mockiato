@@ -61,8 +61,9 @@ impl<'a> MultiItemDecorator for Mockable {
         push: &mut dyn FnMut(Annotatable),
     ) {
         let cx = Context::new(cx);
-        let _resolver = ContextResolver::new(cx.clone());
-        let trait_bound_resolver = TraitBoundResolverImpl::new(Box::new(DeriveResolverImpl::new()));
+        let resolver = ContextResolver::new(cx.clone());
+        let trait_bound_resolver =
+            TraitBoundResolverImpl::new(Box::new(DeriveResolverImpl::new(Box::new(resolver))));
 
         let trait_decl = match TraitDecl::parse(&cx, item) {
             Ok(trait_decl) => trait_decl,
