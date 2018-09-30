@@ -14,11 +14,12 @@ use crate::parse::trait_decl::TraitDecl;
 use crate::trait_bound_resolver::TraitBoundResolverImpl;
 use std::clone::Clone;
 
-pub(crate) struct Mockable {}
+#[derive(Default)]
+pub(crate) struct Mockable;
 
 impl Mockable {
     pub(crate) fn new() -> Self {
-        Self {}
+        Self::default()
     }
 }
 
