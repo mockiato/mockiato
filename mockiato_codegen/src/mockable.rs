@@ -7,47 +7,19 @@ use crate::syntax_pos::Span;
 use crate::context::Context;
 use crate::definition_id::ContextResolver;
 use crate::derive_resolver::DeriveResolverImpl;
+use crate::generate::DeriveAttributeGenerator;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
-use crate::parse::trait_bounds::TraitBounds;
 use crate::parse::trait_decl::TraitDecl;
-use crate::trait_bound_resolver::{TraitBoundResolver, TraitBoundResolverImpl, TraitBoundType};
+use crate::trait_bound_resolver::TraitBoundResolverImpl;
 use std::clone::Clone;
 
-pub(crate) struct Mockable {}
+#[derive(Default)]
+pub(crate) struct Mockable;
 
 impl Mockable {
     pub(crate) fn new() -> Self {
-        Self {}
-    }
-
-    fn mock_trait_bound_impls(
-        &self,
-        trait_bound_resolver: &'_ dyn TraitBoundResolver,
-        cx: &Context,
-        trait_decl: &TraitDecl,
-    ) {
-        let trait_bounds = TraitBounds::parse(trait_decl).0;
-
-        for trait_bound in trait_bounds {
-            let trait_bound_type = trait_bound_resolver.resolve_trait_bound(&trait_bound.path);
-            self.mock_trait_bound_type(&cx, trait_bound.span, &trait_bound_type);
-        }
-    }
-
-    fn mock_trait_bound_type(
-        &self,
-        cx: &Context,
-        sp: Span,
-        trait_bound_type: &Option<TraitBoundType>,
-    ) {
-        if trait_bound_type.is_none() {
-            cx.into_inner().parse_sess
-                .span_diagnostic
-                .mut_span_err(sp, "The referenced trait is not a derivable trait")
-                .help("Currently only traits that are automatically derivable are supported as supertrait")
-                .emit();
-        }
+        Self::default()
     }
 }
 
@@ -61,8 +33,11 @@ impl<'a> MultiItemDecorator for Mockable {
         push: &mut dyn FnMut(Annotatable),
     ) {
         let cx = Context::new(cx);
-        let _resolver = ContextResolver::new(cx.clone());
-        let trait_bound_resolver = TraitBoundResolverImpl::new(Box::new(DeriveResolverImpl::new()));
+        let resolver = ContextResolver::new(cx.clone());
+        let trait_bound_resolver =
+            TraitBoundResolverImpl::new(Box::new(DeriveResolverImpl::new(Box::new(resolver))));
+        let derive_attr_generator =
+            DeriveAttributeGenerator::new(cx.clone(), Box::new(trait_bound_resolver));
 
         let trait_decl = match TraitDecl::parse(&cx, item) {
             Ok(trait_decl) => trait_decl,
@@ -82,15 +57,15 @@ impl<'a> MultiItemDecorator for Mockable {
                 meta_item.span,
                 mock_struct_ident,
                 VariantData::Unit(DUMMY_NODE_ID),
-            ).into_inner();
+            )
+            .into_inner();
 
-        if let Some(derive_attr) = mockable_attr.derive_attr {
-            mock_struct.attrs.push(derive_attr.expand(&cx));
+        match derive_attr_generator.generate_for_trait(&trait_decl) {
+            Some(attr) => mock_struct.attrs.push(attr),
+            None => return,
         }
 
         push(Annotatable::Item(P(mock_struct)));
-
-        self.mock_trait_bound_impls(&trait_bound_resolver, &cx, &trait_decl);
     }
 }
 

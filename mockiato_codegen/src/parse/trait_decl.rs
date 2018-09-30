@@ -1,3 +1,4 @@
+use crate::constant::ATTR_NAME;
 use crate::context::Context;
 use crate::syntax::ast::{GenericBounds, Generics, Ident, IsAuto, ItemKind, TraitItem, Unsafety};
 use crate::syntax::ext::base::Annotatable;
@@ -27,14 +28,18 @@ impl TraitDecl {
             ) = item.node
             {
                 if unsafety == &Unsafety::Unsafe {
-                    cx.into_inner()
-                        .span_err(span, "#[mockable] does not work with unsafe traits");
+                    cx.into_inner().span_err(
+                        span,
+                        &format!("#[{}] does not work with unsafe traits", ATTR_NAME),
+                    );
                     return Err(());
                 }
 
                 if is_auto == &IsAuto::Yes {
-                    cx.into_inner()
-                        .span_err(span, "#[mockable] does not work with auto traits");
+                    cx.into_inner().span_err(
+                        span,
+                        &format!("#[{}] does not work with auto traits", ATTR_NAME),
+                    );
                     return Err(());
                 }
 
