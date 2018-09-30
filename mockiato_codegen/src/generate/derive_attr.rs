@@ -38,9 +38,7 @@ impl<'a, 'ext> DeriveAttributeGenerator<'a, 'ext> {
             .into_iter()
             .map(Option::unwrap)
             .map(|resolved| {
-                let path = match resolved {
-                    TraitBoundType::Derivable(path) => path,
-                };
+                let TraitBoundType::Derivable(path) = resolved;
                 let ident = path.segments.first().unwrap().ident;
 
                 inner_context.meta_list_item_word(ident.span, ident.name)
