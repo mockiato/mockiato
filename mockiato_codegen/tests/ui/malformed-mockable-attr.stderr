@@ -4,7 +4,7 @@ error: Unsupported syntax for #[mockable]
 4 | #[mockable("Bar")]
   |            ^^^^^
   |
-  = help: Example usage: #[mockable(name = "FooMock", derive(Debug))]
+  = help: Example usage: #[mockable(name = "FooMock")]
 
 error: aborting due to previous error
 
