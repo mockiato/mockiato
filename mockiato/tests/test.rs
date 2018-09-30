@@ -5,7 +5,7 @@ use std::fmt::{self, Display};
 
 trait Debug {}
 
-#[mockable(derive(Debug))]
+#[mockable]
 trait Greeter<D>: fmt::Debug
 where
     D: Display,
