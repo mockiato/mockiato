@@ -24,24 +24,23 @@ fn path_without_generic_args(path: &Path) -> Path {
     }
 }
 
+fn parse_trait_bound(generic_bound: &GenericBound) -> Option<TraitBound> {
+    match generic_bound {
+        GenericBound::Trait(poly_trait_ref, _) => Some(TraitBound {
+            path: path_without_generic_args(&poly_trait_ref.trait_ref.path),
+            span: poly_trait_ref.trait_ref.path.span,
+        }),
+        _ => None,
+    }
+}
+
 impl TraitBounds {
     pub(crate) fn parse(trait_decl: &TraitDecl) -> Self {
         TraitBounds(
             trait_decl
                 .generic_bounds
                 .iter()
-                .filter_map(|generic_bound| {
-                    if let GenericBound::Trait(poly_trait_ref, _trait_bound_modifier) =
-                        generic_bound
-                    {
-                        Some(TraitBound {
-                            path: path_without_generic_args(&poly_trait_ref.trait_ref.path),
-                            span: poly_trait_ref.trait_ref.path.span,
-                        })
-                    } else {
-                        None
-                    }
-                })
+                .filter_map(parse_trait_bound)
                 .collect(),
         )
     }
