@@ -20,19 +20,123 @@ where
     fn matches_call(&self, input: &A) -> bool;
 }
 
-impl<'mock, A> ArgumentsMatcher<'mock, (A,)> for (Box<ArgumentMatcher<A> + 'mock>,) {
-    fn matches_call(&self, input: &(A,)) -> bool {
-        self.0.matches_argument(&input.0)
+macro_rules! arguments_matcher_impl {
+    ($(
+        $Tuple:ident {
+            $(($idx:tt) -> $T:ident)+
+        }
+    )+) => {
+        $(
+            impl<'mock, $($T),+> ArgumentsMatcher<'mock, ($($T,)+)> for ($(Box<dyn ArgumentMatcher<$T> + 'mock>,)+) {
+                fn matches_call(&self, input: &($($T,)+)) -> bool {
+                    $(self.$idx.matches_argument(&input.$idx))&&+
+                }
+            }
+        )+
     }
 }
 
-impl<'mock, A, B> ArgumentsMatcher<'mock, (A, B)>
-    for (
-        Box<ArgumentMatcher<A> + 'mock>,
-        Box<ArgumentMatcher<B> + 'mock>,
-    )
-{
-    fn matches_call(&self, input: &(A, B)) -> bool {
-        self.0.matches_argument(&input.0) && self.1.matches_argument(&input.1)
+arguments_matcher_impl! {
+    Tuple1 {
+        (0) -> A
+    }
+    Tuple2 {
+        (0) -> A
+        (1) -> B
+    }
+    Tuple3 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+    }
+    Tuple4 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+    }
+    Tuple5 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+        (4) -> E
+    }
+    Tuple6 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+        (4) -> E
+        (5) -> F
+    }
+    Tuple7 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+        (4) -> E
+        (5) -> F
+        (6) -> G
+    }
+    Tuple8 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+        (4) -> E
+        (5) -> F
+        (6) -> G
+        (7) -> H
+    }
+    Tuple9 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+        (4) -> E
+        (5) -> F
+        (6) -> G
+        (7) -> H
+        (8) -> I
+    }
+    Tuple10 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+        (4) -> E
+        (5) -> F
+        (6) -> G
+        (7) -> H
+        (8) -> I
+        (9) -> J
+    }
+    Tuple11 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+        (4) -> E
+        (5) -> F
+        (6) -> G
+        (7) -> H
+        (8) -> I
+        (9) -> J
+        (10) -> K
+    }
+    Tuple12 {
+        (0) -> A
+        (1) -> B
+        (2) -> C
+        (3) -> D
+        (4) -> E
+        (5) -> F
+        (6) -> G
+        (7) -> H
+        (8) -> I
+        (9) -> J
+        (10) -> K
+        (11) -> L
     }
 }
