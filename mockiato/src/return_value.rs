@@ -1,4 +1,6 @@
 use crate::arguments::Arguments;
+use crate::debug::MaybeDebug;
+use std::fmt::{self, Debug};
 
 pub trait DefaultReturnValue {
     fn default_return_value<'mock, A>() -> Option<Box<dyn ReturnValue<'mock, A, Self> + 'mock>>
@@ -27,7 +29,7 @@ impl DefaultReturnValue for () {
     }
 }
 
-pub trait ReturnValue<'mock, A, R>
+pub trait ReturnValue<'mock, A, R>: Debug
 where
     A: Arguments<'mock>,
 {
@@ -36,7 +38,16 @@ where
 
 pub struct Cloned<T>(pub(crate) T)
 where
-    T: Clone;
+    T: Clone + MaybeDebug;
+
+impl<'mock, R> Debug for Cloned<R>
+where
+    R: Clone,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        MaybeDebug::fmt(&self.0, f)
+    }
+}
 
 impl<'mock, A, R> ReturnValue<'mock, A, R> for Cloned<R>
 where
@@ -48,6 +59,7 @@ where
     }
 }
 
+#[derive(Debug)]
 pub struct Panic(Option<&'static str>);
 
 impl<'mock, A, R> ReturnValue<'mock, A, R> for Panic
