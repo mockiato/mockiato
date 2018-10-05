@@ -57,7 +57,6 @@ where
         }
     }
 
-    #[must_use]
     pub fn expect(&self, matcher: A::Matcher) -> CallBuilder<'mock, A, R> {
         let call = self.add_expected_call(Call::new(matcher));
 
