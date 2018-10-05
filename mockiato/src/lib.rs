@@ -2,6 +2,7 @@
 
 mod arguments;
 mod call;
+pub mod debug;
 mod expected_calls;
 mod matcher;
 pub mod return_value;

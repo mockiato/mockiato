@@ -32,18 +32,18 @@ where
     #[must_use]
     fn expect_say_hello<A0>(&self, name: A0) -> mockiato::CallBuilder<'mock, (D,), String>
     where
-        A0: mockiato::ArgumentMatcher<D> + 'mock,
+        A0: mockiato::IntoArgumentMatcher<'mock, D>,
     {
-        let matchers = (Box::new(name) as Box<dyn mockiato::ArgumentMatcher<D>>,);
+        let matchers = (name.into_argument_matcher(),);
 
         self.say_hello_calls.expect(matchers)
     }
 
     fn expect_print_hello<A0>(&self, name: A0) -> mockiato::CallBuilder<'mock, (D,), ()>
     where
-        A0: mockiato::ArgumentMatcher<D> + 'mock,
+        A0: mockiato::IntoArgumentMatcher<'mock, D>,
     {
-        let matchers = (Box::new(name) as Box<dyn mockiato::ArgumentMatcher<D>>,);
+        let matchers = (name.into_argument_matcher(),);
 
         self.print_hello_calls.expect(matchers)
     }
@@ -61,5 +61,4 @@ fn test_hand_generated_mock_works() {
         .times(4);
 
     mock.expect_print_hello("foo");
-
 }

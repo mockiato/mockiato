@@ -1,16 +1,24 @@
+use self::partial_eq::PartialEqMatcher;
 use crate::arguments::Arguments;
+use std::fmt::Debug;
 
-pub trait ArgumentMatcher<T> {
-    fn matches_argument(&self, input: &T) -> bool;
+mod partial_eq;
+
+pub trait IntoArgumentMatcher<'a, T> {
+    fn into_argument_matcher(self) -> Box<dyn ArgumentMatcher<T> + 'a>;
 }
 
-impl<T> ArgumentMatcher<T> for T
+impl<'a, T> IntoArgumentMatcher<'a, T> for T
 where
-    T: PartialEq,
+    T: PartialEq + 'a,
 {
-    fn matches_argument(&self, input: &T) -> bool {
-        self == input
+    default fn into_argument_matcher(self) -> Box<dyn ArgumentMatcher<T> + 'a> {
+        Box::new(PartialEqMatcher::from(self))
     }
+}
+
+pub trait ArgumentMatcher<T>: Debug {
+    fn matches_argument(&self, input: &T) -> bool;
 }
 
 pub trait ArgumentsMatcher<'mock, A>
