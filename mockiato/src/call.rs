@@ -59,14 +59,20 @@ where
 
     #[must_use]
     pub fn expect(&self, matcher: A::Matcher) -> CallBuilder<'mock, A, R> {
-        let call = Arc::new(RwLock::new(Call::new(matcher)));
+        let call = self.add_expected_call(Call::new(matcher));
+
+        CallBuilder { call }
+    }
+
+    fn add_expected_call(&self, call: Call<'mock, A, R>) -> Arc<RwLock<Call<'mock, A, R>>> {
+        let call = Arc::new(RwLock::new(call));
 
         self.calls
             .write()
             .expect("unable to write calls")
             .push(call.clone());
 
-        CallBuilder { call }
+        call
     }
 }
 
