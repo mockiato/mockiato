@@ -97,7 +97,7 @@ mod test {
     #[test]
     #[should_panic(expected = "No return value was specified")]
     fn call_panics_if_no_return_value_is_specified() {
-        let mut call: Call<((),), ()> = Call::new((().into_argument_matcher(),));
+        let mut call: Call<((),), String> = Call::new((().into_argument_matcher(),));
 
         call.call(((),));
     }
