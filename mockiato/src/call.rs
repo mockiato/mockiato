@@ -1,6 +1,7 @@
 use crate::arguments::Arguments;
 use crate::expected_calls::ExpectedCalls;
 use crate::return_value::{self, DefaultReturnValue, ReturnValue};
+use std::fmt::{self, Display};
 use std::ops::DerefMut;
 use std::sync::{Arc, RwLock};
 
@@ -56,12 +57,26 @@ impl<'mock, A, R> Call<'mock, A, R>
 where
     A: Arguments<'mock>,
 {
-    pub fn new(matcher: A::Matcher) -> Self {
+    pub(crate) fn new(matcher: A::Matcher) -> Self {
         Call {
             expected_calls: ExpectedCalls::default(),
             actual_number_of_calls: 0,
             matcher,
             return_value: R::default_return_value(),
         }
+    }
+
+}
+
+impl<'mock, A, R> Display for Call<'mock, A, R>
+where
+    A: Arguments<'mock>,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "({:?}) {:?} -> {:?}",
+            self.expected_calls, self.matcher, self.return_value
+        )
     }
 }

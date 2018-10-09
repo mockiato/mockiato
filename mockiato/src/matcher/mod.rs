@@ -21,7 +21,7 @@ pub trait ArgumentMatcher<T>: Debug {
     fn matches_argument(&self, input: &T) -> bool;
 }
 
-pub trait ArgumentsMatcher<'mock, A>
+pub trait ArgumentsMatcher<'mock, A>: Debug
 where
     A: Arguments<'mock> + ?Sized,
 {
