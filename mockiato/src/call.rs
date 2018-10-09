@@ -66,6 +66,14 @@ where
         }
     }
 
+    pub(crate) fn call(&mut self, arguments: A) -> R {
+        self.actual_number_of_calls += 1;
+
+        match self.return_value {
+            Some(ref return_value) => return_value.return_value(&arguments),
+            None => panic!("No return value was specified"),
+        }
+    }
 }
 
 impl<'mock, A, R> Display for Call<'mock, A, R>
@@ -78,5 +86,19 @@ where
             "({:?}) {:?} -> {:?}",
             self.expected_calls, self.matcher, self.return_value
         )
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::matcher::IntoArgumentMatcher;
+
+    #[test]
+    #[should_panic(expected = "No return value was specified")]
+    fn call_panics_if_no_return_value_is_specified() {
+        let mut call: Call<((),), ()> = Call::new((().into_argument_matcher(),));
+
+        call.call(((),));
     }
 }
