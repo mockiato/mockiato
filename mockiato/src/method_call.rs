@@ -2,17 +2,15 @@ use crate::arguments::Arguments;
 use crate::expected_calls::ExpectedCalls;
 use crate::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
 use std::fmt::{self, Display};
-use std::ops::DerefMut;
-use std::sync::{Arc, RwLock};
 
-pub struct CallBuilder<'a, 'mock, A, R>
+pub struct MethodCallBuilder<'a, 'mock, A, R>
 where
     A: Arguments<'mock>,
 {
-    call: &'a mut Call<'mock, A, R>,
+    call: &'a mut MethodCall<'mock, A, R>,
 }
 
-impl<'a, 'mock, A, R> CallBuilder<'a, 'mock, A, R>
+impl<'a, 'mock, A, R> MethodCallBuilder<'a, 'mock, A, R>
 where
     A: Arguments<'mock>,
 {
@@ -32,12 +30,12 @@ where
         self
     }
 
-    pub(crate) fn new(call: &'a mut Call<'mock, A, R>) -> Self {
-        CallBuilder { call }
+    pub(crate) fn new(call: &'a mut MethodCall<'mock, A, R>) -> Self {
+        Self { call }
     }
 }
 
-pub struct Call<'mock, A, R>
+pub struct MethodCall<'mock, A, R>
 where
     A: Arguments<'mock>,
 {
@@ -47,12 +45,12 @@ where
     return_value: Option<Box<dyn ReturnValueGenerator<'mock, A, R> + 'mock>>,
 }
 
-impl<'mock, A, R> Call<'mock, A, R>
+impl<'mock, A, R> MethodCall<'mock, A, R>
 where
     A: Arguments<'mock>,
 {
     pub(crate) fn new(matcher: A::Matcher) -> Self {
-        Call {
+        Self {
             expected_calls: ExpectedCalls::default(),
             actual_number_of_calls: 0,
             matcher,
@@ -75,7 +73,7 @@ where
     }
 }
 
-impl<'mock, A, R> Display for Call<'mock, A, R>
+impl<'mock, A, R> Display for MethodCall<'mock, A, R>
 where
     A: Arguments<'mock>,
 {
@@ -142,14 +140,14 @@ mod test {
     #[test]
     #[should_panic(expected = "No return value was specified")]
     fn call_panics_if_no_return_value_is_specified() {
-        let mut call: Call<((),), String> = Call::new((().into_argument_matcher(),));
+        let mut call: MethodCall<((),), String> = MethodCall::new((().into_argument_matcher(),));
 
         call.call(((),));
     }
 
     #[test]
     fn call_uses_return_value() {
-        let mut call: Call<((),), String> = Call::new((().into_argument_matcher(),));
+        let mut call: MethodCall<((),), String> = MethodCall::new((().into_argument_matcher(),));
 
         call.return_value = Some(Box::new(ReturnValueGeneratorMock::new(String::from("foo"))));
 
@@ -160,7 +158,7 @@ mod test {
 
     #[test]
     fn was_called_expected_number_of_times_returns_true() {
-        let mut call: Call<((),), ()> = Call::new((().into_argument_matcher(),));
+        let mut call: MethodCall<((),), ()> = MethodCall::new((().into_argument_matcher(),));
         call.return_value = Some(Box::new(ReturnValueGeneratorMock::new(())));
         call.expected_calls = 4.into();
 
@@ -174,7 +172,7 @@ mod test {
 
     #[test]
     fn was_called_expected_number_of_times_returns_false() {
-        let mut call: Call<((),), ()> = Call::new((().into_argument_matcher(),));
+        let mut call: MethodCall<((),), ()> = MethodCall::new((().into_argument_matcher(),));
         call.return_value = Some(Box::new(ReturnValueGeneratorMock::new(())));
         call.expected_calls = (2..).into();
 

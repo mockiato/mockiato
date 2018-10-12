@@ -13,8 +13,8 @@ struct GreeterMock<'mock, D>
 where
     D: Display,
 {
-    say_hello: mockiato::MockedFunction<'mock, (D,), String>,
-    print_hello: mockiato::MockedFunction<'mock, (D,), ()>,
+    say_hello: mockiato::Method<'mock, (D,), String>,
+    print_hello: mockiato::Method<'mock, (D,), ()>,
 }
 
 impl<'mock, D> GreeterMock<'mock, D>
@@ -23,14 +23,17 @@ where
 {
     fn new() -> Self {
         GreeterMock {
-            say_hello: mockiato::MockedFunction::new("say_hello"),
-            print_hello: mockiato::MockedFunction::new("print_hello"),
+            say_hello: mockiato::Method::new("say_hello"),
+            print_hello: mockiato::Method::new("print_hello"),
         }
     }
 
     // #[must_use] should only be here, if the function has a return
     #[must_use]
-    fn expect_say_hello<A0>(&mut self, name: A0) -> mockiato::CallBuilder<'_, 'mock, (D,), String>
+    fn expect_say_hello<A0>(
+        &mut self,
+        name: A0,
+    ) -> mockiato::MethodCallBuilder<'_, 'mock, (D,), String>
     where
         A0: mockiato::IntoArgumentMatcher<'mock, D>,
     {
@@ -39,7 +42,10 @@ where
         self.say_hello.add_expected_call(matchers)
     }
 
-    fn expect_print_hello<A0>(&mut self, name: A0) -> mockiato::CallBuilder<'_, 'mock, (D,), ()>
+    fn expect_print_hello<A0>(
+        &mut self,
+        name: A0,
+    ) -> mockiato::MethodCallBuilder<'_, 'mock, (D,), ()>
     where
         A0: mockiato::IntoArgumentMatcher<'mock, D>,
     {
