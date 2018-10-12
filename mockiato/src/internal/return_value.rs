@@ -36,7 +36,7 @@ pub trait ReturnValueGenerator<'mock, A, R>: Debug
 where
     A: Arguments<'mock>,
 {
-    fn generate_return_value(&self, input: &A) -> R;
+    fn generate_return_value(&self, input: A) -> R;
 }
 
 pub struct Cloned<T>(pub(crate) T)
@@ -57,7 +57,7 @@ where
     A: Arguments<'mock>,
     R: Clone,
 {
-    fn generate_return_value(&self, _: &A) -> R {
+    fn generate_return_value(&self, _: A) -> R {
         self.0.clone()
     }
 }
@@ -69,7 +69,7 @@ impl<'mock, A, R> ReturnValueGenerator<'mock, A, R> for Panic
 where
     A: Arguments<'mock>,
 {
-    fn generate_return_value(&self, _: &A) -> R {
+    fn generate_return_value(&self, _: A) -> R {
         match self.0 {
             Some(message) => panic!(message),
             None => panic!(),
@@ -86,13 +86,13 @@ mod test {
     fn test_panic_panicks() {
         let panic = Panic(Some("<panic message>"));
 
-        ReturnValueGenerator::<((),), ()>::generate_return_value(&panic, &((),));
+        ReturnValueGenerator::<((),), ()>::generate_return_value(&panic, ((),));
     }
 
     #[test]
     fn test_cloned_returns_expected_value() {
         let cloned = Cloned(String::from("foo"));
 
-        assert_eq!(String::from("foo"), cloned.generate_return_value(&((),)));
+        assert_eq!(String::from("foo"), cloned.generate_return_value(((),)));
     }
 }

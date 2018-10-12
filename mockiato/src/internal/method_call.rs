@@ -68,7 +68,7 @@ where
         self.actual_number_of_calls += 1;
 
         match self.return_value {
-            Some(ref return_value) => return_value.generate_return_value(&arguments),
+            Some(ref return_value) => return_value.generate_return_value(arguments),
             None => panic!("No return value was specified"),
         }
     }
@@ -125,7 +125,7 @@ mod test {
         A: Arguments<'mock>,
         R: Clone + Debug,
     {
-        fn generate_return_value(&self, _input: &A) -> R {
+        fn generate_return_value(&self, _input: A) -> R {
             *self.generate_return_value_was_called.borrow_mut() = true;
             self.return_value.clone()
         }
