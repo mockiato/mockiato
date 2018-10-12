@@ -1,6 +1,6 @@
 use crate::arguments::Arguments;
 use crate::expected_calls::ExpectedCalls;
-use crate::return_value::{self, DefaultReturnValue, ReturnValue};
+use crate::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
 use std::fmt::{self, Display};
 use std::ops::DerefMut;
 use std::sync::{Arc, RwLock};
@@ -50,7 +50,7 @@ where
     expected_calls: ExpectedCalls,
     actual_number_of_calls: u64,
     matcher: A::Matcher,
-    return_value: Option<Box<dyn ReturnValue<'mock, A, R> + 'mock>>,
+    return_value: Option<Box<dyn ReturnValueGenerator<'mock, A, R> + 'mock>>,
 }
 
 impl<'mock, A, R> Call<'mock, A, R>
