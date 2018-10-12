@@ -5,40 +5,34 @@ use std::fmt::{self, Display};
 use std::ops::DerefMut;
 use std::sync::{Arc, RwLock};
 
-pub struct CallBuilder<'mock, A, R>
+pub struct CallBuilder<'a, 'mock, A, R>
 where
     A: Arguments<'mock>,
 {
-    call: Arc<RwLock<Call<'mock, A, R>>>,
+    call: &'a mut Call<'mock, A, R>,
 }
 
-impl<'mock, A, R> CallBuilder<'mock, A, R>
+impl<'a, 'mock, A, R> CallBuilder<'a, 'mock, A, R>
 where
     A: Arguments<'mock>,
 {
-    pub fn will_return(&self, return_value: R) -> &Self
+    pub fn returns(&mut self, return_value: R) -> &mut Self
     where
         R: Clone + 'mock,
     {
-        let mut call = self.call.write().expect("unable to write call");
-
-        call.deref_mut().return_value = Some(Box::new(return_value::Cloned(return_value)));
-
+        self.call.return_value = Some(Box::new(return_value::Cloned(return_value)));
         self
     }
 
-    pub fn times<E>(&self, expected_calls: E) -> &Self
+    pub fn times<E>(&mut self, expected_calls: E) -> &mut Self
     where
         E: Into<ExpectedCalls>,
     {
-        let mut call = self.call.write().expect("unable to write call");
-
-        call.deref_mut().expected_calls = expected_calls.into();
-
+        self.call.expected_calls = expected_calls.into();
         self
     }
 
-    pub(crate) fn new(call: Arc<RwLock<Call<'mock, A, R>>>) -> Self {
+    pub(crate) fn new(call: &'a mut Call<'mock, A, R>) -> Self {
         CallBuilder { call }
     }
 }

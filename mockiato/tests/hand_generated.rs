@@ -30,35 +30,35 @@ where
 
     // #[must_use] should only be here, if the function has a return
     #[must_use]
-    fn expect_say_hello<A0>(&self, name: A0) -> mockiato::CallBuilder<'mock, (D,), String>
+    fn expect_say_hello<A0>(&mut self, name: A0) -> mockiato::CallBuilder<'_, 'mock, (D,), String>
     where
         A0: mockiato::IntoArgumentMatcher<'mock, D>,
     {
         let matchers = (name.into_argument_matcher(),);
 
-        self.say_hello.expect(matchers)
+        self.say_hello.add_expected_call(matchers)
     }
 
-    fn expect_print_hello<A0>(&self, name: A0) -> mockiato::CallBuilder<'mock, (D,), ()>
+    fn expect_print_hello<A0>(&mut self, name: A0) -> mockiato::CallBuilder<'_, 'mock, (D,), ()>
     where
         A0: mockiato::IntoArgumentMatcher<'mock, D>,
     {
         let matchers = (name.into_argument_matcher(),);
 
-        self.print_hello.expect(matchers)
+        self.print_hello.add_expected_call(matchers)
     }
 }
 
 #[test]
 fn test_hand_generated_mock_works() {
-    let mock = GreeterMock::new();
+    let mut mock = GreeterMock::new();
 
     mock.expect_say_hello("foo")
-        .will_return(String::from("Hello foo"));
+        .returns(String::from("Hello foo"));
 
     mock.expect_say_hello("bar")
-        .will_return(String::default())
+        .returns(String::default())
         .times(4);
 
-    mock.expect_print_hello("foo");
+    mock.expect_print_hello("foo").times(..=8);
 }
