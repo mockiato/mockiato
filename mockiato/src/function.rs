@@ -1,8 +1,5 @@
 use crate::arguments::Arguments;
 use crate::call::{Call, CallBuilder};
-use crate::expected_calls::ExpectedCalls;
-use crate::return_value::{self, DefaultReturnValue, ReturnValue};
-use std::ops::DerefMut;
 use std::sync::{Arc, RwLock};
 
 pub struct MockedFunction<'mock, A, R>
