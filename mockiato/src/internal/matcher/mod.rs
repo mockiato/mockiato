@@ -25,7 +25,7 @@ pub trait ArgumentsMatcher<'mock, A>: Debug
 where
     A: Arguments<'mock> + ?Sized,
 {
-    fn matches_call(&self, input: &A) -> bool;
+    fn matches_arguments(&self, input: &A) -> bool;
 }
 
 macro_rules! arguments_matcher_impl {
@@ -36,7 +36,7 @@ macro_rules! arguments_matcher_impl {
     )+) => {
         $(
             impl<'mock, $($T),+> ArgumentsMatcher<'mock, ($($T,)+)> for ($(Box<dyn ArgumentMatcher<$T> + 'mock>,)+) {
-                fn matches_call(&self, input: &($($T,)+)) -> bool {
+                fn matches_arguments(&self, input: &($($T,)+)) -> bool {
                     $(self.$idx.matches_argument(&input.$idx))&&+
                 }
             }
