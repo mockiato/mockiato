@@ -63,7 +63,7 @@ where
 }
 
 #[derive(Debug)]
-pub struct Panic(Option<&'static str>);
+pub struct Panic(pub(crate) Option<&'static str>);
 
 impl<'mock, A, R> ReturnValueGenerator<'mock, A, R> for Panic
 where
