@@ -1,5 +1,5 @@
 use super::ArgumentMatcher;
-use crate::debug::MaybeDebug;
+use crate::internal::debug::MaybeDebug;
 use std::fmt::{self, Debug};
 
 pub(crate) struct PartialEqMatcher<T>(T)

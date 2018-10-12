@@ -1,5 +1,5 @@
-use crate::arguments::Arguments;
-use crate::debug::MaybeDebug;
+use crate::internal::arguments::Arguments;
+use crate::internal::debug::MaybeDebug;
 use std::fmt::{self, Debug};
 
 pub trait DefaultReturnValue {

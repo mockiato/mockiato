@@ -1,50 +1,30 @@
-use self::partial_eq::PartialEqMatcher;
-use crate::arguments::Arguments;
-use std::fmt::Debug;
+use crate::internal::matcher::{ArgumentMatcher, ArgumentsMatcher};
 
-mod partial_eq;
-
-pub trait IntoArgumentMatcher<'a, T> {
-    fn into_argument_matcher(self) -> Box<dyn ArgumentMatcher<T> + 'a>;
+///
+/// A function's arguments.
+/// This trait is implemented for tuples with up to 12 members.
+///
+pub trait Arguments<'mock> {
+    type Matcher: ArgumentsMatcher<'mock, Self>;
 }
 
-impl<'a, T> IntoArgumentMatcher<'a, T> for T
-where
-    T: PartialEq + 'a,
-{
-    default fn into_argument_matcher(self) -> Box<dyn ArgumentMatcher<T> + 'a> {
-        Box::new(PartialEqMatcher::from(self))
-    }
-}
-
-pub trait ArgumentMatcher<T>: Debug {
-    fn matches_argument(&self, input: &T) -> bool;
-}
-
-pub trait ArgumentsMatcher<'mock, A>: Debug
-where
-    A: Arguments<'mock> + ?Sized,
-{
-    fn matches_call(&self, input: &A) -> bool;
-}
-
-macro_rules! arguments_matcher_impl {
+macro_rules! arguments_impl {
     ($(
         $Tuple:ident {
             $(($idx:tt) -> $T:ident)+
         }
     )+) => {
         $(
-            impl<'mock, $($T),+> ArgumentsMatcher<'mock, ($($T,)+)> for ($(Box<dyn ArgumentMatcher<$T> + 'mock>,)+) {
-                fn matches_call(&self, input: &($($T,)+)) -> bool {
-                    $(self.$idx.matches_argument(&input.$idx))&&+
-                }
+            impl<'mock, $($T),+> Arguments<'mock> for ($($T,)+) {
+                type Matcher = (
+                    $(Box<ArgumentMatcher<$T> + 'mock>,)+
+                );
             }
         )+
     }
 }
 
-arguments_matcher_impl! {
+arguments_impl! {
     Tuple1 {
         (0) -> A
     }

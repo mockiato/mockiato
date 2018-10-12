@@ -1,5 +1,5 @@
-use crate::arguments::Arguments;
-use crate::method_call::{MethodCall, MethodCallBuilder};
+use crate::internal::arguments::Arguments;
+use crate::internal::method_call::{MethodCall, MethodCallBuilder};
 
 pub struct Method<'mock, A, R>
 where

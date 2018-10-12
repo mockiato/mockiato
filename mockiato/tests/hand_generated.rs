@@ -13,8 +13,8 @@ struct GreeterMock<'mock, D>
 where
     D: Display,
 {
-    say_hello: mockiato::Method<'mock, (D,), String>,
-    print_hello: mockiato::Method<'mock, (D,), ()>,
+    say_hello: mockiato::internal::Method<'mock, (D,), String>,
+    print_hello: mockiato::internal::Method<'mock, (D,), ()>,
 }
 
 impl<'mock, D> GreeterMock<'mock, D>
@@ -23,8 +23,8 @@ where
 {
     fn new() -> Self {
         GreeterMock {
-            say_hello: mockiato::Method::new("say_hello"),
-            print_hello: mockiato::Method::new("print_hello"),
+            say_hello: mockiato::internal::Method::new("say_hello"),
+            print_hello: mockiato::internal::Method::new("print_hello"),
         }
     }
 
@@ -33,9 +33,9 @@ where
     fn expect_say_hello<A0>(
         &mut self,
         name: A0,
-    ) -> mockiato::MethodCallBuilder<'_, 'mock, (D,), String>
+    ) -> mockiato::internal::MethodCallBuilder<'_, 'mock, (D,), String>
     where
-        A0: mockiato::IntoArgumentMatcher<'mock, D>,
+        A0: mockiato::internal::IntoArgumentMatcher<'mock, D>,
     {
         let matchers = (name.into_argument_matcher(),);
 
@@ -45,9 +45,9 @@ where
     fn expect_print_hello<A0>(
         &mut self,
         name: A0,
-    ) -> mockiato::MethodCallBuilder<'_, 'mock, (D,), ()>
+    ) -> mockiato::internal::MethodCallBuilder<'_, 'mock, (D,), ()>
     where
-        A0: mockiato::IntoArgumentMatcher<'mock, D>,
+        A0: mockiato::internal::IntoArgumentMatcher<'mock, D>,
     {
         let matchers = (name.into_argument_matcher(),);
 

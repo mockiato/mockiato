@@ -1,6 +1,6 @@
-use crate::arguments::Arguments;
-use crate::expected_calls::ExpectedCalls;
-use crate::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
+use crate::internal::arguments::Arguments;
+use crate::internal::expected_calls::ExpectedCalls;
+use crate::internal::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
 use std::fmt::{self, Display};
 
 pub struct MethodCallBuilder<'a, 'mock, A, R>
@@ -89,7 +89,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::matcher::IntoArgumentMatcher;
+    use crate::internal::matcher::IntoArgumentMatcher;
     use std::cell::RefCell;
     use std::fmt::Debug;
 
