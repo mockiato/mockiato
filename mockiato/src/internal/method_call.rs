@@ -14,6 +14,9 @@ impl<'a, 'mock, A, R> MethodCallBuilder<'a, 'mock, A, R>
 where
     A: Arguments<'mock>,
 {
+    ///
+    /// Defines the return value for this method.
+    ///
     pub fn returns(&mut self, return_value: R) -> &mut Self
     where
         R: Clone + 'mock,
@@ -22,6 +25,9 @@ where
         self
     }
 
+    ///
+    /// Defines how often this method should be called.
+    ///
     pub fn times<E>(&mut self, expected_calls: E) -> &mut Self
     where
         E: Into<ExpectedCalls>,
