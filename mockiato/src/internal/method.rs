@@ -1,11 +1,12 @@
-use crate::internal::arguments::{Arguments, DebugArguments};
+// use crate::internal::arguments::DebugArguments;
+use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::method_call::{MethodCall, MethodCallBuilder};
 use std::fmt::{self, Display};
 
 #[derive(Debug)]
 pub struct Method<'mock, A, R>
 where
-    A: Arguments<'mock>,
+    A: ArgumentsMatcher<'mock> + 'mock,
 {
     name: &'static str,
     calls: Vec<MethodCall<'mock, A, R>>,
@@ -13,7 +14,7 @@ where
 
 impl<'mock, A, R> Method<'mock, A, R>
 where
-    A: Arguments<'mock>,
+    A: ArgumentsMatcher<'mock> + 'mock,
 {
     pub fn new(name: &'static str) -> Self {
         Self {
@@ -22,7 +23,7 @@ where
         }
     }
 
-    pub fn add_expected_call(&mut self, matcher: A::Matcher) -> MethodCallBuilder<'_, 'mock, A, R> {
+    pub fn add_expected_call(&mut self, matcher: A) -> MethodCallBuilder<'_, 'mock, A, R> {
         let call = MethodCall::new(matcher);
 
         self.calls.push(call);
@@ -30,14 +31,14 @@ where
         MethodCallBuilder::new(self.calls.last_mut().unwrap())
     }
 
-    pub fn call_unwrap(&self, arguments: A) -> R {
+    pub fn call_unwrap(&self, arguments: A::Arguments) -> R {
         match self.call(arguments) {
             Ok(return_value) => return_value,
             Err(err) => panic!("{}", err),
         }
     }
 
-    fn call(&self, arguments: A) -> Result<R, CallError<'_, 'mock, A, R>> {
+    fn call(&self, arguments: A::Arguments) -> Result<R, CallError<'_, 'mock, A, R>> {
         let matching_method_calls = self
             .calls
             .iter()
@@ -58,15 +59,15 @@ where
 #[derive(Debug)]
 enum CallError<'a, 'mock, A, R>
 where
-    A: Arguments<'mock>,
+    A: ArgumentsMatcher<'mock> + 'mock,
 {
-    NoMatching(A, &'a Method<'mock, A, R>),
-    MoreThanOneMatching(A, Vec<&'a MethodCall<'mock, A, R>>),
+    NoMatching(A::Arguments, &'a Method<'mock, A, R>),
+    MoreThanOneMatching(A::Arguments, Vec<&'a MethodCall<'mock, A, R>>),
 }
 
 impl<'a, 'mock, A, R> Display for CallError<'a, 'mock, A, R>
 where
-    A: Arguments<'mock>,
+    A: ArgumentsMatcher<'mock> + 'mock,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -77,7 +78,7 @@ The call {:?} was not expected.
 The following calls were expected:
 {}
 "#,
-                DebugArguments::new(arguments),
+                "<arguments>", // DebugArguments::<A>::new(arguments),
                 DisplayCalls(&method.calls.iter().collect::<Vec<_>>())
             ),
             CallError::MoreThanOneMatching(arguments, calls) => write!(
@@ -86,7 +87,7 @@ The following calls were expected:
 The call {:?} matches more than one expected call:
 {}
 "#,
-                DebugArguments::new(arguments),
+                "<arguments>", // DebugArguments::<A>::new(arguments),
                 DisplayCalls(&calls)
             ),
         }
@@ -95,11 +96,11 @@ The call {:?} matches more than one expected call:
 
 struct DisplayCalls<'a, 'mock, A, R>(&'a [&'a MethodCall<'mock, A, R>])
 where
-    A: Arguments<'mock>;
+    A: ArgumentsMatcher<'mock> + 'mock;
 
 impl<'a, 'mock, A, R> Display for DisplayCalls<'a, 'mock, A, R>
 where
-    A: Arguments<'mock>,
+    A: ArgumentsMatcher<'mock> + 'mock,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for call in self.0 {

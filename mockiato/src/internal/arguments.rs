@@ -1,5 +1,5 @@
 use crate::internal::debug::MaybeDebugWrapper;
-use crate::internal::matcher::{ArgumentMatcher, ArgumentsMatcher};
+use crate::internal::matcher::ArgumentsMatcher;
 use std::fmt::{self, Debug};
 use std::marker::PhantomData;
 
@@ -7,9 +7,7 @@ use std::marker::PhantomData;
 /// A function's arguments.
 /// This trait is implemented for tuples with up to 12 members.
 ///
-pub trait Arguments<'mock> {
-    type Matcher: ArgumentsMatcher<'mock, Self>;
-
+pub trait Arguments {
     fn debug_arguments(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result;
 }
 
@@ -20,11 +18,7 @@ macro_rules! arguments_impl {
         }
     )+) => {
         $(
-            impl<'mock, $($T),+> Arguments<'mock> for ($($T,)+) {
-                type Matcher = (
-                    $(Box<ArgumentMatcher<$T> + 'mock>,)+
-                );
-
+            impl<$($T),+> Arguments for ($($T,)+) {
                 fn debug_arguments(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                     let mut builder = f.debug_tuple("");
 
@@ -144,24 +138,25 @@ arguments_impl! {
     }
 }
 
-pub(crate) struct DebugArguments<'a, 'mock, A>(&'a A, PhantomData<&'mock ()>)
+/*pub(crate) struct DebugArguments<'a, 'mock, A>(&'a A::Arguments, PhantomData<&'mock ()>)
 where
-    A: Arguments<'mock>;
+    A: ArgumentsMatcher<'mock> + 'mock;
 
 impl<'a, 'mock, A> DebugArguments<'a, 'mock, A>
 where
-    A: Arguments<'mock>,
+    A: ArgumentsMatcher<'mock> + 'mock,
 {
-    pub(crate) fn new(arguments: &'a A) -> Self {
+    pub(crate) fn new(arguments: &'a A::Arguments) -> Self {
         DebugArguments(arguments, PhantomData)
     }
 }
 
 impl<'a, 'mock, A> Debug for DebugArguments<'a, 'mock, A>
 where
-    A: Arguments<'mock>,
+    A: ArgumentsMatcher<'mock> + 'mock,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.debug_arguments(f)
     }
 }
+*/

@@ -21,21 +21,30 @@ pub trait ArgumentMatcher<T>: Debug {
     fn matches_argument(&self, input: &T) -> bool;
 }
 
-pub trait ArgumentsMatcher<'mock, A>: Debug
-where
-    A: Arguments<'mock> + ?Sized,
-{
-    fn matches_arguments(&self, input: &A) -> bool;
+pub trait ArgumentsMatcher<'mock>: Debug {
+    type Arguments: Arguments;
+
+    fn matches_arguments(&self, input: &Self::Arguments) -> bool;
 }
 
-macro_rules! arguments_matcher_impl {
+impl<'mock, A> ArgumentsMatcher<'mock> for (Box<dyn ArgumentMatcher<A> + 'mock>,) {
+    type Arguments = (A,);
+
+    fn matches_arguments(&self, input: &Self::Arguments) -> bool {
+        self.0.matches_argument(&input.0)
+    }
+}
+
+/*macro_rules! arguments_matcher_impl {
     ($(
         $Tuple:ident {
             $(($idx:tt) -> $T:ident)+
         }
     )+) => {
         $(
-            impl<'mock, $($T),+> ArgumentsMatcher<'mock, ($($T,)+)> for ($(Box<dyn ArgumentMatcher<$T> + 'mock>,)+) {
+            impl<'mock, $($T),+> ArgumentsMatcher<'mock> for ($(Box<dyn ArgumentMatcher<$T> + 'mock>,)+) {
+                type Arguments = ($($T,)+);
+
                 fn matches_arguments(&self, input: &($($T,)+)) -> bool {
                     $(self.$idx.matches_argument(&input.$idx))&&+
                 }
@@ -147,4 +156,4 @@ arguments_matcher_impl! {
         (10) -> K
         (11) -> L
     }
-}
+}*/

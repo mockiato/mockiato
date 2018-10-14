@@ -8,8 +8,16 @@ trait Greeter /*: Debug*/ {
 
 // #[derive(Debug)]
 struct GreeterMock<'mock> {
-    say_hello: mockiato::internal::Method<'mock, ((&'mock str),), String>,
-    print_hello: mockiato::internal::Method<'mock, ((&'mock str),), ()>,
+    say_hello: mockiato::internal::Method<
+        'mock,
+        (Box<dyn for<'a> mockiato::internal::ArgumentMatcher<&'a str> + 'mock>,),
+        String,
+    >,
+    print_hello: mockiato::internal::Method<
+        'mock,
+        (Box<mockiato::internal::ArgumentMatcher<&'mock str> + 'mock>,),
+        (),
+    >,
 }
 
 impl<'mock> GreeterMock<'mock> {
@@ -25,9 +33,17 @@ impl<'mock> GreeterMock<'mock> {
     fn expect_say_hello<A0>(
         &mut self,
         name: A0,
-    ) -> mockiato::internal::MethodCallBuilder<'_, 'mock, (&'mock str,), String>
+    ) -> mockiato::internal::MethodCallBuilder<
+        '_,
+        'mock,
+        (Box<mockiato::internal::ArgumentMatcher<&'mock str> + 'mock>,),
+        String,
+    >
     where
-        A0: mockiato::internal::IntoArgumentMatcher<'mock, &'mock str>,
+        A0: mockiato::internal::IntoArgumentMatcher<
+            'mock,
+            Box<dyn for<'a> mockiato::internal::ArgumentMatcher<&'a str>>,
+        >,
     {
         let matchers = (name.into_argument_matcher(),);
 
@@ -37,7 +53,12 @@ impl<'mock> GreeterMock<'mock> {
     fn expect_print_hello<A0>(
         &mut self,
         name: A0,
-    ) -> mockiato::internal::MethodCallBuilder<'_, 'mock, (&'mock str,), ()>
+    ) -> mockiato::internal::MethodCallBuilder<
+        '_,
+        'mock,
+        (Box<mockiato::internal::ArgumentMatcher<&'mock str> + 'mock>,),
+        (),
+    >
     where
         A0: mockiato::internal::IntoArgumentMatcher<'mock, &'mock str>,
     {
