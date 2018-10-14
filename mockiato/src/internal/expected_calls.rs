@@ -1,3 +1,4 @@
+use std::fmt::{self, Display};
 use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive};
 
 #[derive(Eq, PartialEq, Debug)]
@@ -64,6 +65,23 @@ impl From<RangeInclusive<u64>> for ExpectedCalls {
 impl From<RangeToInclusive<u64>> for ExpectedCalls {
     fn from(range: RangeToInclusive<u64>) -> ExpectedCalls {
         ExpectedCalls(ExpectedCallsKind::AtMost(range.end))
+    }
+}
+
+impl Display for ExpectedCalls {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            ExpectedCallsKind::Any => write!(f, "any amount of times"),
+            ExpectedCallsKind::AtLeast(min) => write!(f, "at least {} times", min),
+            ExpectedCallsKind::AtMost(max) => write!(f, "at most {} times", max),
+            ExpectedCallsKind::Between { start, end } => {
+                write!(f, "between {} and {} times", start, end)
+            }
+            ExpectedCallsKind::BetweenInclusive { start, end } => {
+                write!(f, "between {} and {} times (inclusive)", start, end)
+            }
+            ExpectedCallsKind::Exact(value) => write!(f, "exactly {} times", value),
+        }
     }
 }
 

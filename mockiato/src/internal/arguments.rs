@@ -1,4 +1,7 @@
+use crate::internal::debug::MaybeDebugWrapper;
 use crate::internal::matcher::{ArgumentMatcher, ArgumentsMatcher};
+use std::fmt::{self, Debug};
+use std::marker::PhantomData;
 
 ///
 /// A function's arguments.
@@ -6,6 +9,8 @@ use crate::internal::matcher::{ArgumentMatcher, ArgumentsMatcher};
 ///
 pub trait Arguments<'mock> {
     type Matcher: ArgumentsMatcher<'mock, Self>;
+
+    fn debug_arguments(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result;
 }
 
 macro_rules! arguments_impl {
@@ -19,6 +24,16 @@ macro_rules! arguments_impl {
                 type Matcher = (
                     $(Box<ArgumentMatcher<$T> + 'mock>,)+
                 );
+
+                fn debug_arguments(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                    let mut builder = f.debug_tuple("");
+
+                    $(
+                        builder.field(&format!("{:?}", MaybeDebugWrapper(&self.$idx)));
+                    )*
+
+                    builder.finish()
+                }
             }
         )+
     }
@@ -126,5 +141,27 @@ arguments_impl! {
         (9) -> J
         (10) -> K
         (11) -> L
+    }
+}
+
+pub(crate) struct DebugArguments<'a, 'mock, A>(&'a A, PhantomData<&'mock ()>)
+where
+    A: Arguments<'mock>;
+
+impl<'a, 'mock, A> DebugArguments<'a, 'mock, A>
+where
+    A: Arguments<'mock>,
+{
+    pub(crate) fn new(arguments: &'a A) -> Self {
+        DebugArguments(arguments, PhantomData)
+    }
+}
+
+impl<'a, 'mock, A> Debug for DebugArguments<'a, 'mock, A>
+where
+    A: Arguments<'mock>,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.debug_arguments(f)
     }
 }

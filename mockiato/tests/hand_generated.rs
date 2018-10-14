@@ -1,30 +1,22 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
-trait Greeter<D>: Display
-where
-    D: Display,
-{
-    fn say_hello(&self, name: D) -> String;
+trait Greeter /*: Debug*/ {
+    fn say_hello(&self, name: &str) -> String;
 
-    fn print_hello(&self, name: D);
+    fn print_hello(&self, name: &str);
 }
 
-struct GreeterMock<'mock, D>
-where
-    D: Display,
-{
-    say_hello: mockiato::internal::Method<'mock, (D,), String>,
-    print_hello: mockiato::internal::Method<'mock, (D,), ()>,
+// #[derive(Debug)]
+struct GreeterMock<'mock> {
+    say_hello: mockiato::internal::Method<'mock, ((&'mock str),), String>,
+    print_hello: mockiato::internal::Method<'mock, ((&'mock str),), ()>,
 }
 
-impl<'mock, D> GreeterMock<'mock, D>
-where
-    D: Display,
-{
+impl<'mock> GreeterMock<'mock> {
     fn new() -> Self {
         GreeterMock {
-            say_hello: mockiato::internal::Method::new("say_hello"),
-            print_hello: mockiato::internal::Method::new("print_hello"),
+            say_hello: mockiato::internal::Method::new("GreeterMock::say_hello"),
+            print_hello: mockiato::internal::Method::new("GreeterMock::print_hello"),
         }
     }
 
@@ -33,9 +25,9 @@ where
     fn expect_say_hello<A0>(
         &mut self,
         name: A0,
-    ) -> mockiato::internal::MethodCallBuilder<'_, 'mock, (D,), String>
+    ) -> mockiato::internal::MethodCallBuilder<'_, 'mock, (&'mock str,), String>
     where
-        A0: mockiato::internal::IntoArgumentMatcher<'mock, D>,
+        A0: mockiato::internal::IntoArgumentMatcher<'mock, &'mock str>,
     {
         let matchers = (name.into_argument_matcher(),);
 
@@ -45,9 +37,9 @@ where
     fn expect_print_hello<A0>(
         &mut self,
         name: A0,
-    ) -> mockiato::internal::MethodCallBuilder<'_, 'mock, (D,), ()>
+    ) -> mockiato::internal::MethodCallBuilder<'_, 'mock, (&'mock str,), ()>
     where
-        A0: mockiato::internal::IntoArgumentMatcher<'mock, D>,
+        A0: mockiato::internal::IntoArgumentMatcher<'mock, &'mock str>,
     {
         let matchers = (name.into_argument_matcher(),);
 
@@ -55,8 +47,18 @@ where
     }
 }
 
+impl<'mock> Greeter for GreeterMock<'mock> {
+    fn say_hello(&self, name: &str) -> String {
+        self.say_hello.call_unwrap((name,))
+    }
+
+    fn print_hello(&self, name: &str) {
+        self.print_hello.call_unwrap((name,))
+    }
+}
+
 #[test]
-fn test_hand_generated_mock_works() {
+fn hand_generated_mock_works() {
     let mut mock = GreeterMock::new();
 
     mock.expect_say_hello("foo")
@@ -65,6 +67,8 @@ fn test_hand_generated_mock_works() {
     mock.expect_say_hello("bar")
         .returns(String::default())
         .times(4);
+
+    mock.expect_say_hello("baz").panics_with_message("foo");
 
     mock.expect_print_hello("foo").times(..=8);
 }

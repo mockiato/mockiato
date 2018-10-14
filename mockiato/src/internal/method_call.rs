@@ -2,6 +2,7 @@ use crate::internal::arguments::Arguments;
 use crate::internal::expected_calls::ExpectedCalls;
 use crate::internal::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
 use crate::internal::ArgumentsMatcher;
+use crate::internal::DisplayOption;
 use std::cell::RefCell;
 use std::fmt::{self, Display};
 
@@ -38,7 +39,7 @@ where
     ///
     /// Defines that this method panics with a message.
     ///
-    pub fn panics_with_message<S>(&mut self, message: &'static str) -> &mut Self {
+    pub fn panics_with_message(&mut self, message: &'static str) -> &mut Self {
         self.call.return_value = Some(Box::new(return_value::Panic(Some(message))));
         self
     }
@@ -59,6 +60,7 @@ where
     }
 }
 
+#[derive(Debug)]
 pub struct MethodCall<'mock, A, R>
 where
     A: Arguments<'mock>,
@@ -108,8 +110,11 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "({:?}) {:?} -> {:?}",
-            self.expected_calls, self.matcher, self.return_value
+            "{:?} -> {} {}, was called {} times",
+            self.matcher,
+            DisplayOption(self.return_value.as_ref()),
+            self.expected_calls,
+            *self.actual_number_of_calls.borrow()
         )
     }
 }
@@ -140,6 +145,15 @@ mod test {
                 return_value,
                 generate_return_value_was_called: Default::default(),
             }
+        }
+    }
+
+    impl<R> Display for ReturnValueGeneratorMock<R>
+    where
+        R: Clone + Debug,
+    {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            unimplemented!();
         }
     }
 
