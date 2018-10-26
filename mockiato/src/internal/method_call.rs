@@ -16,9 +16,7 @@ impl<'a, A, R> MethodCallBuilder<'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
-    ///
     /// Defines the return value for this method.
-    ///
     pub fn returns(&mut self, return_value: R) -> &mut Self
     where
         R: Clone + 'static,
@@ -27,25 +25,19 @@ where
         self
     }
 
-    ///
     /// Defines that this method panics.
-    ///
     pub fn panics(&mut self) -> &mut Self {
         self.call.return_value = Some(Box::new(return_value::Panic(None)));
         self
     }
 
-    ///
     /// Defines that this method panics with a message.
-    ///
     pub fn panics_with_message(&mut self, message: &'static str) -> &mut Self {
         self.call.return_value = Some(Box::new(return_value::Panic(Some(message))));
         self
     }
 
-    ///
     /// Defines how often this method should be called.
-    ///
     pub fn times<E>(&mut self, expected_calls: E) -> &mut Self
     where
         E: Into<ExpectedCalls>,
