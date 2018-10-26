@@ -81,8 +81,8 @@ mod greeter_mock {
 
     impl Debug for SayHelloArgumentsMatcher {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            f.debug_struct("SayHelloArgumentsMatcher")
-                .field("name", &mockiato::internal::MaybeDebugWrapper(&self.name))
+            f.debug_tuple("say_hello")
+                .field(&mockiato::internal::MaybeDebugWrapper(&self.name))
                 .finish()
         }
     }
@@ -95,9 +95,16 @@ mod greeter_mock {
         }
     }
 
-    #[derive(Debug)]
     pub(super) struct PrintHelloArguments<'args> {
         pub(super) name: &'args str,
+    }
+
+    impl<'args> Debug for PrintHelloArguments<'args> {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_tuple("")
+                .field(&mockiato::internal::MaybeDebugWrapper(&self.name))
+                .finish()
+        }
     }
 
     impl<'args> mockiato::internal::Arguments for PrintHelloArguments<'args> {}
@@ -108,8 +115,8 @@ mod greeter_mock {
 
     impl Debug for PrintHelloArgumentsMatcher {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            f.debug_struct("PrintHelloArgumentsMatcher")
-                .field("name", &mockiato::internal::MaybeDebugWrapper(&self.name))
+            f.debug_tuple("")
+                .field(&mockiato::internal::MaybeDebugExtWrapper(&self.name))
                 .finish()
         }
     }
@@ -138,4 +145,6 @@ fn hand_generated_mock_works() {
     mock.expect_say_hello("baz").panics_with_message("foo");
 
     mock.expect_print_hello("foo").times(..=8);
+
+    mock.print_hello("asdf");
 }
