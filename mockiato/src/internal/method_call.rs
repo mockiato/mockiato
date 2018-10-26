@@ -121,6 +121,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::internal::arguments::Arguments;
     use std::cell::RefCell;
     use std::fmt::Debug;
     use std::thread::panicking;
@@ -184,64 +185,102 @@ mod test {
         }
     }
 
-    /*#[test]
+    #[derive(Debug)]
+    struct DummyArguments;
+
+    impl Arguments for DummyArguments {}
+
+    #[derive(Debug, Default)]
+    struct DummyArgumentsMatcher {
+        matches_arguments_return: Option<bool>,
+    }
+
+    impl<'args> ArgumentsMatcher<'args> for DummyArgumentsMatcher {
+        type Arguments = DummyArguments;
+
+        fn matches_arguments(&self, input: &Self::Arguments) -> bool {
+            self.matches_arguments_return.unwrap()
+        }
+    }
+
+    #[test]
     #[should_panic(expected = "No return value was specified")]
     fn call_panics_if_no_return_value_is_specified() {
-        let call: MethodCall<_, String> = MethodCall::new((().into_argument_matcher(),));
-    
-        call.call(((),));
+        let call: MethodCall<_, String> = MethodCall::new(DummyArgumentsMatcher::default());
+
+        call.call(DummyArguments);
     }
-    
+
     #[test]
     fn call_uses_return_value() {
-        let mut call: MethodCall<_, String> = MethodCall::new((().into_argument_matcher(),));
-    
+        let mut call: MethodCall<_, String> = MethodCall::new(DummyArgumentsMatcher {
+            matches_arguments_return: Some(true),
+        });
+
         call.return_value = Some(Box::new(ReturnValueGeneratorMock::new(Some(String::from(
             "foo",
         )))));
-    
-        let return_value = call.call(((),));
-    
+
+        let return_value = call.call(DummyArguments);
+
         assert_eq!(String::from("foo"), return_value);
     }
-    
+
     #[test]
     fn was_called_expected_number_of_times_returns_true() {
-        let mut call: MethodCall<_, ()> = MethodCall::new((().into_argument_matcher(),));
+        let mut call: MethodCall<_, ()> = MethodCall::new(DummyArgumentsMatcher {
+            matches_arguments_return: Some(true),
+        });
         call.return_value = Some(Box::new(ReturnValueGeneratorMock::new(Some(()))));
         call.expected_calls = 4.into();
-    
-        call.call(((),));
-        call.call(((),));
-        call.call(((),));
-        call.call(((),));
-    
+
+        call.call(DummyArguments);
+        call.call(DummyArguments);
+        call.call(DummyArguments);
+        call.call(DummyArguments);
+
         assert!(call.was_called_expected_number_of_times());
     }
-    
+
     #[test]
     fn was_called_expected_number_of_times_returns_false() {
         let call: MethodCall<_, ()> = {
-            let mut call = MethodCall::new((().into_argument_matcher(),));
+            let mut call = MethodCall::new(DummyArgumentsMatcher {
+                matches_arguments_return: Some(true),
+            });
             call.return_value = Some(Box::new(ReturnValueGeneratorMock::new(Some(()))));
             call.expected_calls = (2..).into();
             call
         };
-    
-        call.call(((),));
-    
+
+        call.call(DummyArguments);
+
         assert!(!call.was_called_expected_number_of_times());
     }
-    
+
     #[test]
-    fn matches_expected_arguments_works() {
+    fn matches_expected_arguments_returns_true() {
         let call: MethodCall<_, ()> = {
-            let mut call = MethodCall::new(("foo".into_argument_matcher(),));
+            let mut call = MethodCall::new(DummyArgumentsMatcher {
+                matches_arguments_return: Some(true),
+            });
             call.return_value = Some(Box::new(ReturnValueGeneratorMock::new(None)));
             call
         };
-    
-        assert!(call.matches_expected_arguments(&("foo",)));
-        assert!(!call.matches_expected_arguments(&("bar",)));
-    }*/
+
+        assert!(call.matches_expected_arguments(&DummyArguments));
+    }
+
+    #[test]
+    fn matches_expected_arguments_returns_false() {
+        let call: MethodCall<_, ()> = {
+            let mut call = MethodCall::new(DummyArgumentsMatcher {
+                matches_arguments_return: Some(false),
+            });
+            call.return_value = Some(Box::new(ReturnValueGeneratorMock::new(None)));
+            call
+        };
+
+        assert!(!call.matches_expected_arguments(&DummyArguments));
+    }
 }
