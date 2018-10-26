@@ -3,8 +3,6 @@
 //! It may change at any time. Do not use this module directly.
 //!
 
-#![deny(clippy::unimplemented)]
-
 pub use self::arguments::*;
 pub use self::debug::*;
 pub use self::expected_calls::*;
