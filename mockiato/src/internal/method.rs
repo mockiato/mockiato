@@ -65,7 +65,15 @@ where
     }
 
     fn verify(&self) -> Result<(), VerificationError<'_, A, R>> {
-        unimplemented!();
+        if self
+            .calls
+            .iter()
+            .any(|method_call| !method_call.was_called_expected_number_of_times())
+        {
+            return Err(VerificationError { method: &self });
+        }
+
+        Ok(())
     }
 }
 
@@ -125,7 +133,7 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
             f,
-            "The expected calls for {} were not met.",
+            "The expected calls for {} were not satisified.",
             self.method.name
         )?;
 
@@ -218,7 +226,7 @@ mod test {
         let mut method = Method::<_, String>::new("test");
 
         method
-            .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
+            .add_expected_call(ArgumentsMatcherMock::new(None))
             .returns(Default::default())
             .times(2);
 
