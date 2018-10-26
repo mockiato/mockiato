@@ -1,4 +1,4 @@
-use crate::internal::debug::MaybeDebug;
+use crate::internal::fmt::MaybeDebug;
 use crate::internal::matcher::ArgumentsMatcher;
 use std::fmt::{self, Debug, Display};
 

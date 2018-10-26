@@ -1,5 +1,5 @@
 use crate::internal::arguments::Arguments;
-use crate::internal::debug::MaybeDebug;
+use crate::internal::fmt::MaybeDebug;
 use std::fmt::Debug;
 
 pub trait ArgumentMatcher<T>: MaybeDebug {
