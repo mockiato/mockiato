@@ -5,6 +5,8 @@ use crate::internal::DisplayOption;
 use std::cell::RefCell;
 use std::fmt::{self, Display};
 
+/// Configures an expected method call.
+/// This builder is returned from the `expect_*` methods on a generated mock.
 pub struct MethodCallBuilder<'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
@@ -17,6 +19,7 @@ where
     A: for<'args> ArgumentsMatcher<'args>,
 {
     /// Defines the return value for this method.
+    /// The value must be [`Clone`]able.g
     pub fn returns(&mut self, return_value: R) -> &mut Self
     where
         R: Clone + 'static,

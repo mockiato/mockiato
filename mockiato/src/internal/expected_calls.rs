@@ -1,6 +1,8 @@
 use std::fmt::{self, Display};
 use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive};
 
+/// Defines how often a method call is expected
+/// to be called.
 #[derive(Eq, PartialEq, Debug)]
 pub struct ExpectedCalls(ExpectedCallsKind);
 
