@@ -124,7 +124,7 @@ fn run_mode(mode: &'static str) {
             link_flag("-L", "dependency", &["deps"]),
             extern_dep("mockiato_codegen", Kind::Dynamic).expect("find codegen dep"),
         ]
-            .join(" "),
+        .join(" "),
     );
 
     compiletest::run_tests(&config);
