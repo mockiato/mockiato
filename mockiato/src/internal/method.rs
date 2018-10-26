@@ -1,4 +1,3 @@
-// use crate::internal::arguments::DebugArguments;
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::method_call::{MethodCall, MethodCallBuilder};
 use std::fmt::{self, Display};
@@ -81,7 +80,7 @@ The call {:?} was not expected.
 The following calls were expected:
 {}
 "#,
-                "<arguments>", // DebugArguments::<A>::new(arguments),
+                arguments,
                 DisplayCalls(&method.calls.iter().collect::<Vec<_>>())
             ),
             CallError::MoreThanOneMatching(arguments, calls) => write!(
@@ -90,7 +89,7 @@ The following calls were expected:
 The call {:?} matches more than one expected call:
 {}
 "#,
-                "<arguments>", // DebugArguments::<A>::new(arguments),
+                arguments,
                 DisplayCalls(&calls)
             ),
         }
@@ -105,7 +104,7 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for call in self.0 {
-            write!(f, "{}\n", call)?;
+            writeln!(f, "{}", call)?;
         }
 
         Ok(())

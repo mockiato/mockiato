@@ -1,4 +1,3 @@
-use crate::internal::arguments::Arguments;
 use crate::internal::expected_calls::ExpectedCalls;
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
