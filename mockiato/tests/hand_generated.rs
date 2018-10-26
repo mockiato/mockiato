@@ -161,4 +161,13 @@ fn hand_generated_mock_works() {
     mock.expect_say_hello("baz").panics_with_message("foo");
 
     mock.expect_print_hello("foo").times(..=8);
+
+    mock.say_hello("foo");
+
+    mock.say_hello("bar");
+    mock.say_hello("bar");
+    mock.say_hello("bar");
+    mock.say_hello("bar");
+
+    mock.print_hello("foo");
 }

@@ -152,7 +152,7 @@ mod test {
     where
         R: Clone + Debug,
     {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
             unimplemented!();
         }
     }

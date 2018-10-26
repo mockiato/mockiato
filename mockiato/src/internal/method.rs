@@ -174,7 +174,7 @@ mod test {
         method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
 
         match method.call(ArgumentsMock) {
-            Err(CallError::MoreThanOneMatching(args, method_calls)) => {
+            Err(CallError::MoreThanOneMatching(_, method_calls)) => {
                 assert_eq!(2, method_calls.len());
             }
             _ => panic!("unexpected result from method call"),
