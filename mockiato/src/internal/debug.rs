@@ -16,10 +16,14 @@ impl<'a> Debug for MaybeDebugExtWrapper<'a> {
     }
 }
 
+/// This trait makes every type [`Debug`] by falling
+/// back to "?" when [`Debug`] is not implemented.
 pub trait MaybeDebug {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result;
 }
 
+/// A wrapper around [`MaybeDebug`] for container types such as [`Box`],
+/// because specialization does not allow impls for `Box<T>`.
 pub trait MaybeDebugExt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result;
 }
