@@ -24,7 +24,10 @@ pub trait MaybeDebugExt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result;
 }
 
-impl<T> MaybeDebug for T {
+impl<T> MaybeDebug for T
+where
+    T: ?Sized,
+{
     default fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "?")
     }
@@ -32,7 +35,7 @@ impl<T> MaybeDebug for T {
 
 impl<T> MaybeDebug for T
 where
-    T: fmt::Debug,
+    T: fmt::Debug + ?Sized,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
