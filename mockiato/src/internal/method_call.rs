@@ -153,7 +153,7 @@ mod test {
         R: Clone + Debug,
     {
         fn fmt(&self, _: &mut fmt::Formatter<'_>) -> fmt::Result {
-            unimplemented!();
+            panic!();
         }
     }
 
