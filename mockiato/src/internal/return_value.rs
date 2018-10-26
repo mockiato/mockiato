@@ -98,29 +98,45 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::internal::matcher::ArgumentMatcher;
+    use crate::internal::arguments::Arguments;
 
-    /*#[test]
+    #[derive(Debug)]
+    struct DummyArguments;
+
+    impl Arguments for DummyArguments {}
+
+    #[derive(Debug, Default)]
+    struct DummyArgumentsMatcher;
+
+    impl<'args> ArgumentsMatcher<'args> for DummyArgumentsMatcher {
+        type Arguments = DummyArguments;
+
+        fn matches_arguments(&self, _input: &Self::Arguments) -> bool {
+            unimplemented!();
+        }
+    }
+
+    #[test]
     #[should_panic(expected = "<panic message>")]
     fn test_panic_panicks() {
         let panic = Panic(Some("<panic message>"));
-    
-        ReturnValueGenerator::<(Box<dyn ArgumentMatcher<()>>,), ()>::generate_return_value(
+
+        ReturnValueGenerator::<DummyArgumentsMatcher, ()>::generate_return_value(
             &panic,
-            ((),),
+            DummyArguments,
         );
     }
-    
+
     #[test]
     fn test_cloned_returns_expected_value() {
         let cloned = Cloned(String::from("foo"));
-    
+
         assert_eq!(
             String::from("foo"),
-            ReturnValueGenerator::<(Box<dyn ArgumentMatcher<()>>,), ()>::generate_return_value(
+            ReturnValueGenerator::<DummyArgumentsMatcher, String>::generate_return_value(
                 &cloned,
-                ((),)
+                DummyArguments
             )
         );
-    }*/
+    }
 }
