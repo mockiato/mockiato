@@ -1,7 +1,6 @@
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::method_call::{MethodCall, MethodCallBuilder};
 use std::fmt::{self, Display};
-use std::thread::panicking;
 
 #[derive(Debug)]
 pub struct Method<A, R>
