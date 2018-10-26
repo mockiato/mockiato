@@ -1,9 +1,13 @@
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::method_call::{MethodCall, MethodCallBuilder};
 use std::fmt::{self, Display};
+use std::thread::panicking;
 
 #[derive(Debug)]
-pub struct Method<A, R> {
+pub struct Method<A, R>
+where
+    A: for<'args> ArgumentsMatcher<'args>,
+{
     name: &'static str,
     calls: Vec<MethodCall<A, R>>,
 }
@@ -34,6 +38,12 @@ where
         }
     }
 
+    pub fn verify_unwrap(&self) {
+        if let Err(err) = self.verify() {
+            panic!("{}", err);
+        }
+    }
+
     fn call<'a>(
         &'a self,
         arguments: <A as ArgumentsMatcher<'a>>::Arguments,
@@ -52,6 +62,10 @@ where
                 matching_method_calls,
             )),
         }
+    }
+
+    fn verify(&self) -> Result<(), VerificationError<'_, A, R>> {
+        unimplemented!();
     }
 }
 
@@ -93,6 +107,33 @@ The call {:?} matches more than one expected call:
                 DisplayCalls(&calls)
             ),
         }
+    }
+}
+
+#[derive(Debug)]
+struct VerificationError<'a, A, R>
+where
+    A: for<'args> ArgumentsMatcher<'args>,
+{
+    method: &'a Method<A, R>,
+}
+
+impl<'a, A, R> Display for VerificationError<'a, A, R>
+where
+    A: for<'args> ArgumentsMatcher<'args>,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "The expected calls for {} were not met.",
+            self.method.name
+        )?;
+
+        for call in &self.method.calls {
+            writeln!(f, "{}", call)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -156,5 +197,38 @@ mod test {
             .returns(String::from("bar"));
 
         assert_eq!(String::from("bar"), method.call(ArgumentsMock).unwrap());
+    }
+
+    #[test]
+    fn verify_is_ok_if_expectations_are_met() {
+        let mut method = Method::<_, String>::new("test");
+
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
+            .returns(Default::default())
+            .times(1);
+
+        method.call(ArgumentsMock).unwrap();
+
+        assert!(method.verify().is_ok());
+    }
+
+    #[test]
+    fn verify_errors_if_expectations_not_met() {
+        let mut method = Method::<_, String>::new("test");
+
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
+            .returns(Default::default())
+            .times(2);
+
+        assert!(method.verify().is_err());
+    }
+
+    #[test]
+    fn verify_is_ok_if_expectations_are_empty() {
+        let method = Method::<ArgumentsMatcherMock, String>::new("test");
+
+        assert!(method.verify().is_ok());
     }
 }
