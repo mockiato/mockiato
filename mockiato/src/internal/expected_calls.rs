@@ -1,3 +1,4 @@
+use crate::internal::fmt::DisplayTimes;
 use std::fmt::{self, Display};
 use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive};
 
@@ -83,17 +84,6 @@ impl Display for ExpectedCalls {
                 write!(f, "between {} and {} times (inclusive)", start, end)
             }
             ExpectedCallsKind::Exact(value) => write!(f, "exactly {}", DisplayTimes(value)),
-        }
-    }
-}
-
-struct DisplayTimes(u64);
-
-impl Display for DisplayTimes {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "1 time"),
-            _ => write!(f, "{} times", self.0),
         }
     }
 }

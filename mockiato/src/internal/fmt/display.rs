@@ -15,3 +15,14 @@ where
         }
     }
 }
+
+pub(crate) struct DisplayTimes(pub(crate) u64);
+
+impl Display for DisplayTimes {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "1 time"),
+            _ => write!(f, "{} times", self.0),
+        }
+    }
+}
