@@ -3,47 +3,44 @@ use crate::internal::matcher::ArgumentsMatcher;
 use std::fmt::{self, Debug, Display};
 
 pub trait DefaultReturnValue {
-    fn default_return_value<'mock, A>(
-    ) -> Option<Box<dyn ReturnValueGenerator<'mock, A, Self> + 'mock>>
+    fn default_return_value<A>() -> Option<Box<dyn ReturnValueGenerator<A, Self>>>
     where
         Self: Sized,
-        A: ArgumentsMatcher<'mock> + 'mock;
+        A: for<'args> ArgumentsMatcher<'args>;
 }
 
 impl<T> DefaultReturnValue for T {
-    default fn default_return_value<'mock, A>(
-    ) -> Option<Box<dyn ReturnValueGenerator<'mock, A, T> + 'mock>>
+    default fn default_return_value<A>() -> Option<Box<dyn ReturnValueGenerator<A, T>>>
     where
         Self: Sized,
-        A: ArgumentsMatcher<'mock> + 'mock,
+        A: for<'args> ArgumentsMatcher<'args>,
     {
         None
     }
 }
 
 impl DefaultReturnValue for () {
-    fn default_return_value<'mock, A>(
-    ) -> Option<Box<dyn ReturnValueGenerator<'mock, A, ()> + 'mock>>
+    fn default_return_value<A>() -> Option<Box<dyn ReturnValueGenerator<A, ()>>>
     where
         Self: Sized,
-        A: ArgumentsMatcher<'mock> + 'mock,
+        A: for<'args> ArgumentsMatcher<'args>,
     {
         Some(Box::new(Cloned(())))
     }
 }
 
-pub trait ReturnValueGenerator<'mock, A, R>: Display + Debug
+pub trait ReturnValueGenerator<A, R>: Display + Debug
 where
-    A: ArgumentsMatcher<'mock> + 'mock,
+    A: for<'args> ArgumentsMatcher<'args>,
 {
-    fn generate_return_value(&self, input: A::Arguments) -> R;
+    fn generate_return_value(&self, input: <A as ArgumentsMatcher>::Arguments) -> R;
 }
 
 pub struct Cloned<T>(pub(crate) T)
 where
     T: Clone + MaybeDebug;
 
-impl<'mock, R> Display for Cloned<R>
+impl<R> Display for Cloned<R>
 where
     R: Clone,
 {
@@ -52,7 +49,7 @@ where
     }
 }
 
-impl<'mock, R> Debug for Cloned<R>
+impl<R> Debug for Cloned<R>
 where
     R: Clone,
 {
@@ -61,12 +58,12 @@ where
     }
 }
 
-impl<'mock, A, R> ReturnValueGenerator<'mock, A, R> for Cloned<R>
+impl<A, R> ReturnValueGenerator<A, R> for Cloned<R>
 where
-    A: ArgumentsMatcher<'mock> + 'mock,
+    A: for<'args> ArgumentsMatcher<'args>,
     R: Clone,
 {
-    fn generate_return_value(&self, _: A::Arguments) -> R {
+    fn generate_return_value(&self, _: <A as ArgumentsMatcher>::Arguments) -> R {
         self.0.clone()
     }
 }
@@ -86,11 +83,11 @@ impl Display for Panic {
     }
 }
 
-impl<'mock, A, R> ReturnValueGenerator<'mock, A, R> for Panic
+impl<A, R> ReturnValueGenerator<A, R> for Panic
 where
-    A: ArgumentsMatcher<'mock> + 'mock,
+    A: for<'args> ArgumentsMatcher<'args>,
 {
-    fn generate_return_value(&self, _: A::Arguments) -> R {
+    fn generate_return_value(&self, _: <A as ArgumentsMatcher>::Arguments) -> R {
         match self.0 {
             Some(message) => panic!(message),
             None => panic!(),

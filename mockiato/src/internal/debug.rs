@@ -1,6 +1,6 @@
 use std::fmt::{self, Debug, Display};
 
-pub(crate) struct MaybeDebugWrapper<'a>(pub(crate) &'a dyn MaybeDebug);
+pub struct MaybeDebugWrapper<'a>(pub &'a dyn MaybeDebug);
 
 impl<'a> Debug for MaybeDebugWrapper<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

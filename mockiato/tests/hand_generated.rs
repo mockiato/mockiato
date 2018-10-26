@@ -1,26 +1,18 @@
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 
-trait Greeter /*: Debug*/ {
+trait Greeter: Debug {
     fn say_hello(&self, name: &str) -> String;
 
     fn print_hello(&self, name: &str);
 }
 
-// #[derive(Debug)]
-struct GreeterMock<'mock> {
-    say_hello: mockiato::internal::Method<
-        'mock,
-        (Box<dyn for<'a> mockiato::internal::ArgumentMatcher<&'a str> + 'mock>,),
-        String,
-    >,
-    print_hello: mockiato::internal::Method<
-        'mock,
-        (Box<mockiato::internal::ArgumentMatcher<&'mock str> + 'mock>,),
-        (),
-    >,
+#[derive(Debug)]
+struct GreeterMock {
+    say_hello: mockiato::internal::Method<self::greeter_mock::SayHelloArgumentsMatcher, String>,
+    print_hello: mockiato::internal::Method<self::greeter_mock::PrintHelloArgumentsMatcher, ()>,
 }
 
-impl<'mock> GreeterMock<'mock> {
+impl GreeterMock {
     fn new() -> Self {
         GreeterMock {
             say_hello: mockiato::internal::Method::new("GreeterMock::say_hello"),
@@ -35,46 +27,99 @@ impl<'mock> GreeterMock<'mock> {
         name: A0,
     ) -> mockiato::internal::MethodCallBuilder<
         '_,
-        'mock,
-        (Box<mockiato::internal::ArgumentMatcher<&'mock str> + 'mock>,),
+        self::greeter_mock::SayHelloArgumentsMatcher,
         String,
     >
     where
-        A0: mockiato::internal::IntoArgumentMatcher<
-            'mock,
-            Box<dyn for<'a> mockiato::internal::ArgumentMatcher<&'a str>>,
-        >,
+        A0: for<'a> mockiato::internal::ArgumentMatcher<&'a str> + 'static,
     {
-        let matchers = (name.into_argument_matcher(),);
-
-        self.say_hello.add_expected_call(matchers)
+        self.say_hello
+            .add_expected_call(self::greeter_mock::SayHelloArgumentsMatcher {
+                name: Box::new(name),
+            })
     }
 
     fn expect_print_hello<A0>(
         &mut self,
         name: A0,
-    ) -> mockiato::internal::MethodCallBuilder<
-        '_,
-        'mock,
-        (Box<mockiato::internal::ArgumentMatcher<&'mock str> + 'mock>,),
-        (),
-    >
+    ) -> mockiato::internal::MethodCallBuilder<'_, self::greeter_mock::PrintHelloArgumentsMatcher, ()>
     where
-        A0: mockiato::internal::IntoArgumentMatcher<'mock, &'mock str>,
+        A0: for<'a> mockiato::internal::ArgumentMatcher<&'a str> + 'static,
     {
-        let matchers = (name.into_argument_matcher(),);
-
-        self.print_hello.add_expected_call(matchers)
+        self.print_hello
+            .add_expected_call(self::greeter_mock::PrintHelloArgumentsMatcher {
+                name: Box::new(name),
+            })
     }
 }
 
-impl<'mock> Greeter for GreeterMock<'mock> {
+impl Greeter for GreeterMock {
     fn say_hello(&self, name: &str) -> String {
-        self.say_hello.call_unwrap((name,))
+        self.say_hello
+            .call_unwrap(self::greeter_mock::SayHelloArguments { name })
     }
 
     fn print_hello(&self, name: &str) {
-        self.print_hello.call_unwrap((name,))
+        self.print_hello
+            .call_unwrap(self::greeter_mock::PrintHelloArguments { name })
+    }
+}
+
+mod greeter_mock {
+    use std::fmt::{self, Debug};
+    // TODO: this needs to work with MaybeDebug traits
+    #[derive(Debug)]
+    pub(super) struct SayHelloArguments<'args> {
+        pub(super) name: &'args str,
+    }
+
+    impl<'args> mockiato::internal::Arguments for SayHelloArguments<'args> {}
+
+    pub(super) struct SayHelloArgumentsMatcher {
+        pub(super) name: Box<dyn for<'a> mockiato::internal::ArgumentMatcher<&'a str>>,
+    }
+
+    impl Debug for SayHelloArgumentsMatcher {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("SayHelloArgumentsMatcher")
+                .field("name", &mockiato::internal::MaybeDebugWrapper(&self.name))
+                .finish()
+        }
+    }
+
+    impl<'args> mockiato::internal::ArgumentsMatcher<'args> for SayHelloArgumentsMatcher {
+        type Arguments = SayHelloArguments<'args>;
+
+        fn matches_arguments(&self, args: &Self::Arguments) -> bool {
+            self.name.matches_argument(&args.name)
+        }
+    }
+
+    #[derive(Debug)]
+    pub(super) struct PrintHelloArguments<'args> {
+        pub(super) name: &'args str,
+    }
+
+    impl<'args> mockiato::internal::Arguments for PrintHelloArguments<'args> {}
+
+    pub(super) struct PrintHelloArgumentsMatcher {
+        pub(super) name: Box<dyn for<'a> mockiato::internal::ArgumentMatcher<&'a str>>,
+    }
+
+    impl Debug for PrintHelloArgumentsMatcher {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("PrintHelloArgumentsMatcher")
+                .field("name", &mockiato::internal::MaybeDebugWrapper(&self.name))
+                .finish()
+        }
+    }
+
+    impl<'args> mockiato::internal::ArgumentsMatcher<'args> for PrintHelloArgumentsMatcher {
+        type Arguments = PrintHelloArguments<'args>;
+
+        fn matches_arguments(&self, args: &Self::Arguments) -> bool {
+            self.name.matches_argument(&args.name)
+        }
     }
 }
 
@@ -83,7 +128,8 @@ fn hand_generated_mock_works() {
     let mut mock = GreeterMock::new();
 
     mock.expect_say_hello("foo")
-        .returns(String::from("Hello foo"));
+        .returns(String::from("Hello foo"))
+        .times(1);
 
     mock.expect_say_hello("bar")
         .returns(String::default())
