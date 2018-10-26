@@ -72,15 +72,26 @@ impl Display for ExpectedCalls {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             ExpectedCallsKind::Any => write!(f, "any amount of times"),
-            ExpectedCallsKind::AtLeast(min) => write!(f, "at least {} times", min),
-            ExpectedCallsKind::AtMost(max) => write!(f, "at most {} times", max),
+            ExpectedCallsKind::AtLeast(min) => write!(f, "at least {}", DisplayTimes(min)),
+            ExpectedCallsKind::AtMost(max) => write!(f, "at most {}", DisplayTimes(max)),
             ExpectedCallsKind::Between { start, end } => {
                 write!(f, "between {} and {} times", start, end)
             }
             ExpectedCallsKind::BetweenInclusive { start, end } => {
                 write!(f, "between {} and {} times (inclusive)", start, end)
             }
-            ExpectedCallsKind::Exact(value) => write!(f, "exactly {} times", value),
+            ExpectedCallsKind::Exact(value) => write!(f, "exactly {}", DisplayTimes(value)),
+        }
+    }
+}
+
+struct DisplayTimes(u64);
+
+impl Display for DisplayTimes {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "1 time"),
+            _ => write!(f, "{} times", self.0),
         }
     }
 }
