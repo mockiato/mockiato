@@ -53,6 +53,15 @@ impl GreeterMock {
     }
 }
 
+impl Drop for GreeterMock {
+    fn drop(&mut self) {
+        if !std::thread::panicking() {
+            self.say_hello.verify_unwrap();
+            self.print_hello.verify_unwrap();
+        }
+    }
+}
+
 impl Greeter for GreeterMock {
     fn say_hello(&self, name: &str) -> String {
         self.say_hello
