@@ -114,52 +114,85 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::internal::arguments::Arguments;
+    use std::cell::RefCell;
+    use std::thread::panicking;
 
-    /*#[test]
+    #[derive(Debug)]
+    struct ArgumentsMock;
+
+    impl Arguments for ArgumentsMock {}
+
+    #[derive(Debug, Default)]
+    struct ArgumentsMatcherMock {
+        matches_arguments_return: Option<bool>,
+        matches_arguments_was_called: RefCell<bool>,
+    }
+
+    impl ArgumentsMatcherMock {
+        fn new(matches_arguments_return: Option<bool>) -> Self {
+            Self {
+                matches_arguments_return,
+                matches_arguments_was_called: RefCell::new(false),
+            }
+        }
+    }
+
+    impl<'args> ArgumentsMatcher<'args> for ArgumentsMatcherMock {
+        type Arguments = ArgumentsMock;
+
+        fn matches_arguments(&self, _input: &Self::Arguments) -> bool {
+            *self.matches_arguments_was_called.borrow_mut() = true;
+            self.matches_arguments_return.unwrap()
+        }
+    }
+
+    impl Drop for ArgumentsMatcherMock {
+        fn drop(&mut self) {
+            if !panicking() {
+                assert!(*self.matches_arguments_was_called.borrow())
+            }
+        }
+    }
+
+    #[test]
     fn call_errors_if_more_than_one_call_matches() {
-        let mut method = Method::new("test");
-    
-        method
-            .add_expected_call(("foo".into_argument_matcher(),))
-            .returns(String::from("bar"));
-    
-        method
-            .add_expected_call(("foo".into_argument_matcher(),))
-            .returns(String::from("baz"));
-    
-        match method.call(("foo",)) {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+
+        match method.call(ArgumentsMock) {
             Err(CallError::MoreThanOneMatching(args, method_calls)) => {
-                assert_eq!(args, ("foo",));
                 assert_eq!(2, method_calls.len());
             }
             _ => panic!("unexpected result from method call"),
         }
     }
-    
+
     #[test]
     fn call_errors_if_no_calls_match() {
-        let mut method = Method::new("test");
-    
+        let mut method = Method::<_, ()>::new("test");
+
         method
-            .add_expected_call(("foo".into_argument_matcher(),))
-            .returns(String::from("bar"));
-    
-        match method.call(("bar",)) {
-            Err(CallError::NoMatching(args, _)) => {
-                assert_eq!(args, ("bar",));
-            }
+            .add_expected_call(ArgumentsMatcherMock::new(Some(false)))
+            .returns(());
+
+        match method.call(ArgumentsMock) {
+            Err(CallError::NoMatching(..)) => {}
             _ => panic!("unexpected result from method call"),
         }
     }
-    
+
     #[test]
     fn call_calls_matching_method_call() {
-        let mut method = Method::new("test");
-    
+        let mut method = Method::<_, String>::new("test");
+
         method
-            .add_expected_call(("foo".into_argument_matcher(),))
+            .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
             .returns(String::from("bar"));
-    
-        assert_eq!(String::from("bar"), method.call(("foo",)).unwrap());
-    }*/
+
+        assert_eq!(String::from("bar"), method.call(ArgumentsMock).unwrap());
+    }
 }
