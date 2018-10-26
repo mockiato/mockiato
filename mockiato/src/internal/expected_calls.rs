@@ -295,4 +295,22 @@ mod test {
             !ExpectedCalls(ExpectedCallsKind::Between { start: 100, end: 0 }).matches_value(50),
         );
     }
+
+    #[test]
+    fn between_inclusive_matches_when_start_equals_end() {
+        assert!(ExpectedCalls(ExpectedCallsKind::BetweenInclusive {
+            start: 100,
+            end: 100
+        })
+        .matches_value(100));
+    }
+
+    #[test]
+    fn between_does_not_match_when_start_equals_end() {
+        assert!(!ExpectedCalls(ExpectedCallsKind::Between {
+            start: 100,
+            end: 100
+        })
+        .matches_value(100));
+    }
 }
