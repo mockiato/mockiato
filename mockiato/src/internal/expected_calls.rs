@@ -279,4 +279,20 @@ mod test {
             ExpectedCalls::from(21..=56)
         )
     }
+
+    #[test]
+    fn ranges_with_bigger_start_than_end_do_not_match() {
+        // The built-in RangeBounds::contains() method (https://doc.rust-lang.org/std/ops/trait.RangeBounds.html#method.contains)
+        // does the same thing with these ranges.
+        // See: https://play.rust-lang.org/?version=nightly&mode=debug&edition=2015&gist=c87572feae3b49e7ad150ad1494f6042
+
+        assert!(
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 100, end: 0 })
+                .matches_value(50),
+        );
+
+        assert!(
+            !ExpectedCalls(ExpectedCallsKind::Between { start: 100, end: 0 }).matches_value(50),
+        );
+    }
 }
