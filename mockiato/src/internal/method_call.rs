@@ -1,4 +1,5 @@
 use crate::internal::expected_calls::ExpectedCalls;
+use crate::internal::fmt::DisplayTimes;
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
 use crate::internal::DisplayOption;
@@ -104,11 +105,11 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:?} -> {} {}, was called {} times",
+            "{:?} -> {} {}, was called {}",
             self.matcher,
             DisplayOption(self.return_value.as_ref()),
             self.expected_calls,
-            *self.actual_number_of_calls.borrow()
+            DisplayTimes(*self.actual_number_of_calls.borrow())
         )
     }
 }
