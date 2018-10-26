@@ -114,46 +114,8 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::internal::arguments::Arguments;
-    use std::cell::RefCell;
-    use std::thread::panicking;
-
-    #[derive(Debug)]
-    struct ArgumentsMock;
-
-    impl Arguments for ArgumentsMock {}
-
-    #[derive(Debug, Default)]
-    struct ArgumentsMatcherMock {
-        matches_arguments_return: Option<bool>,
-        matches_arguments_was_called: RefCell<bool>,
-    }
-
-    impl ArgumentsMatcherMock {
-        fn new(matches_arguments_return: Option<bool>) -> Self {
-            Self {
-                matches_arguments_return,
-                matches_arguments_was_called: RefCell::new(false),
-            }
-        }
-    }
-
-    impl<'args> ArgumentsMatcher<'args> for ArgumentsMatcherMock {
-        type Arguments = ArgumentsMock;
-
-        fn matches_arguments(&self, _input: &Self::Arguments) -> bool {
-            *self.matches_arguments_was_called.borrow_mut() = true;
-            self.matches_arguments_return.unwrap()
-        }
-    }
-
-    impl Drop for ArgumentsMatcherMock {
-        fn drop(&mut self) {
-            if !panicking() {
-                assert!(*self.matches_arguments_was_called.borrow())
-            }
-        }
-    }
+    use crate::internal::arguments::ArgumentsMock;
+    use crate::internal::matcher::ArgumentsMatcherMock;
 
     #[test]
     fn call_errors_if_more_than_one_call_matches() {
