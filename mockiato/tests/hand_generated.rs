@@ -229,14 +229,14 @@ fn hand_generated_mock_works() {
 
     mock.expect_print_hello("foo").times(..=8);
 
-    mock.say_hello("foo");
+    assert_eq!(String::from("Hello foo"), mock.say_hello("foo"));
 
-    mock.say_hello("bar");
-    mock.say_hello("bar");
-    mock.say_hello("bar");
-    mock.say_hello("bar");
+    assert_eq!(String::from(""), mock.say_hello("bar"));
+    assert_eq!(String::from(""), mock.say_hello("bar"));
+    assert_eq!(String::from(""), mock.say_hello("bar"));
+    assert_eq!(String::from(""), mock.say_hello("bar"));
 
     mock.print_hello("foo");
 
-    mock.borrow_hello("Peter");
+    assert_eq!("Hello Peter", mock.borrow_hello("Peter"));
 }

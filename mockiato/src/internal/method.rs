@@ -31,16 +31,11 @@ where
     }
 
     pub fn call_unwrap<'a>(&'a self, arguments: <A as ArgumentsMatcher<'a>>::Arguments) -> R {
-        match self.call(arguments) {
-            Ok(return_value) => return_value,
-            Err(err) => panic!("{}", err),
-        }
+        self.call(arguments).unwrap_or_else(|err| panic!("{}", err))
     }
 
     pub fn verify_unwrap(&self) {
-        if let Err(err) = self.verify() {
-            panic!("{}", err);
-        }
+        self.verify().unwrap_or_else(|err| panic!("{}", err))
     }
 
     fn call<'a>(
@@ -69,10 +64,10 @@ where
             .iter()
             .any(|method_call| !method_call.was_called_expected_number_of_times())
         {
-            return Err(VerificationError { method: &self });
+            Err(VerificationError { method: &self })
+        } else {
+            Ok(())
         }
-
-        Ok(())
     }
 }
 
