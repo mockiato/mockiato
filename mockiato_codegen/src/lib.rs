@@ -20,13 +20,8 @@ use crate::syntax::ext::base::SyntaxExtension;
 use crate::syntax::symbol::Symbol;
 
 mod constant;
-mod context;
-mod definition_id;
-mod derive_resolver;
-mod generate;
 mod mockable;
 mod parse;
-mod trait_bound_resolver;
 
 use self::constant::ATTR_NAME;
 use self::mockable::Mockable;
