@@ -29,8 +29,6 @@ pub fn mockable(args: TokenStream, input: TokenStream) -> TokenStream {
     let attr = parse_macro_input!(args as AttributeArgs);
     let item = parse_macro_input!(input as Item);
 
-    //    println!("{:#?}", attr);
-
     let mockable = Mockable::new();
 
     mockable.expand(attr, item)
