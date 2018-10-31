@@ -3,7 +3,7 @@ use crate::constant::ATTR_NAME;
 use crate::Result;
 use proc_macro::{Diagnostic, Level};
 use syn::spanned::Spanned;
-use syn::{AttributeArgs, Meta, MetaList, NestedMeta};
+use syn::{AttributeArgs, NestedMeta};
 
 #[derive(Debug)]
 pub(crate) struct MockableAttr {
