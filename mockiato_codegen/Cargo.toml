@@ -13,7 +13,7 @@ quote = "0.6"
 
 [dependencies.syn]
 version = "0.15"
-features = ["full"]
+features = ["full", "extra-traits"]
 
 [dependencies.proc-macro2]
 version = "0.4"
@@ -21,7 +21,3 @@ features = ["nightly"]
 
 [dev-dependencies]
 compiletest_rs = "0.3.14"
-
-[dev-dependencies.syn]
-version = "0.15"
-features = ["extra-traits"]
