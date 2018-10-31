@@ -1,4 +1,3 @@
-extern crate mockiato_codegen;
 use mockiato_codegen::mockable;
 
 #[mockable(name = 1)]
