@@ -1,5 +1,4 @@
-#![feature(plugin)]
-#![plugin(mockiato_codegen)]
+use mockiato_codegen::mockable;
 
 #[mockable]
 trait Foo {}
