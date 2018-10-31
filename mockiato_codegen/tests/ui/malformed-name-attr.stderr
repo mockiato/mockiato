@@ -2,7 +2,7 @@ error: #[mockable(name = "...") expects a string literal
  --> $DIR/malformed-name-attr.rs:4:12
   |
 4 | #[mockable(name = 1)]
-  |            ^^^^^^^^
+  |            ^^^^
   |
   = help: Example usage: #[mockable(name = "FooMock")]
 
@@ -10,7 +10,7 @@ error: #[mockable(name = "...") expects a string literal
  --> $DIR/malformed-name-attr.rs:7:12
   |
 7 | #[mockable(name(FooMock))]
-  |            ^^^^^^^^^^^^^
+  |            ^^^^
   |
   = help: Example usage: #[mockable(name = "FooMock")]
 
