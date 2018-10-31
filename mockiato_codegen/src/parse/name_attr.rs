@@ -1,44 +1,40 @@
 use crate::constant::ATTR_NAME;
-use crate::context::Context;
-use crate::syntax::ast::{Ident, LitKind, MetaItem, MetaItemKind};
-use crate::syntax::source_map::Spanned;
-use crate::syntax::symbol::Symbol;
-use crate::syntax_pos::Span;
+use crate::Result;
+use proc_macro::Span;
+use proc_macro::{Diagnostic, Level};
+use syn::spanned::Spanned;
+use syn::{Ident, Lit, Meta, MetaNameValue};
 
 #[derive(Debug)]
 pub(crate) struct NameAttr {
-    symbol_span: Span,
-    symbol: Symbol,
+    pub(crate) span: Span,
+    pub(crate) ident: Ident,
 }
 
 impl NameAttr {
-    pub(crate) fn parse(cx: &Context, meta_item: MetaItem) -> Option<Self> {
-        if let MetaItemKind::NameValue(Spanned { node, span }) = meta_item.node {
-            if let LitKind::Str(symbol, _) = node {
-                return Some(Self {
-                    symbol,
-                    symbol_span: span,
+    pub(crate) fn parse(meta_item: Meta) -> Result<Self> {
+        let meta_item_span = meta_item.span().unstable();
+
+        if let Meta::NameValue(MetaNameValue { lit, .. }) = meta_item {
+            if let Lit::Str(str_lit) = lit {
+                return Ok(Self {
+                    ident: Ident::new(&str_lit.value(), str_lit.span()),
+                    span: str_lit.span().unstable(),
                 });
             }
         }
 
-        cx.into_inner()
-            .parse_sess
-            .span_diagnostic
-            .mut_span_err(
-                meta_item.span,
-                &format!("#[{}(name = \"...\") expects a string literal", ATTR_NAME),
-            )
-            .help(&format!(
-                "Example usage: #[{}(name = \"FooMock\")]",
-                ATTR_NAME,
-            ))
-            .emit();
+        Diagnostic::spanned(
+            meta_item_span,
+            Level::Error,
+            format!("#[{}(name = \"...\") expects a string literal", ATTR_NAME),
+        )
+        .help(format!(
+            "Example usage: #[{}(name = \"FooMock\")]",
+            ATTR_NAME,
+        ))
+        .emit();
 
-        None
-    }
-
-    pub(crate) fn expand(self) -> Ident {
-        Ident::new(self.symbol, self.symbol_span)
+        Err(())
     }
 }
