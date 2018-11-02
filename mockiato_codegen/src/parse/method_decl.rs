@@ -1,13 +1,12 @@
 use crate::Result;
 use proc_macro::{Diagnostic, Level, Span};
 use syn::spanned::Spanned;
-use syn::token::{Async, Const, Unsafe};
 use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, TraitItem, TraitItemMethod};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MethodDecl {
     attrs: Vec<Attribute>,
-    unsafety: Option<Unsafe>,
+    unsafety: Option<Token![unsafe]>,
     ident: Ident,
     generics: Generics,
     span: Span,
@@ -60,7 +59,7 @@ impl MethodDecl {
     }
 }
 
-fn check_constness(constness: Option<Const>, span: Span) -> Result<()> {
+fn check_constness(constness: Option<Token![const]>, span: Span) -> Result<()> {
     if constness.is_none() {
         Ok(())
     } else {
@@ -69,7 +68,7 @@ fn check_constness(constness: Option<Const>, span: Span) -> Result<()> {
     }
 }
 
-fn check_asyncness(asyncness: Option<Async>, span: Span) -> Result<()> {
+fn check_asyncness(asyncness: Option<Token![async]>, span: Span) -> Result<()> {
     if asyncness.is_none() {
         Ok(())
     } else {

@@ -5,7 +5,6 @@ use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::token::{Add, Unsafe};
 use syn::{Generics, Ident, Item, ItemTrait, TypeParamBound};
 
 #[derive(Debug, Clone)]
@@ -13,8 +12,8 @@ pub(crate) struct TraitDecl {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
     pub(crate) generics: Generics,
-    pub(crate) unsafety: Option<Unsafe>,
-    pub(crate) supertraits: Punctuated<TypeParamBound, Add>,
+    pub(crate) unsafety: Option<Token![unsafe]>,
+    pub(crate) supertraits: Punctuated<TypeParamBound, Token![+]>,
     pub(crate) methods: Vec<MethodDecl>,
 }
 
