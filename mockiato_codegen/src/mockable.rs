@@ -1,3 +1,4 @@
+use crate::constant::ATTR_NAME;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
@@ -24,7 +25,10 @@ impl Mockable {
             err.emit(|d| {
                 d.span_note(
                     item_span,
-                    "Required because of #[mockable] on the trait declaration",
+                    format!(
+                        "Required because of #[{}] on the trait declaration",
+                        ATTR_NAME
+                    ),
                 )
             })
         }) {
