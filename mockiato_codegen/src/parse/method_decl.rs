@@ -1,12 +1,16 @@
 use crate::Result;
 use proc_macro::{Diagnostic, Level, Span};
 use syn::spanned::Spanned;
-use syn::token::Const;
-use syn::{Attribute, MethodSig, TraitItem, TraitItemMethod};
+use syn::token::{Async, Const, Unsafe};
+use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, TraitItem, TraitItemMethod};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MethodDecl {
     attrs: Vec<Attribute>,
+    unsafety: Option<Unsafe>,
+    ident: Ident,
+    generics: Generics,
+    span: Span,
 }
 
 impl MethodDecl {
@@ -17,7 +21,7 @@ impl MethodDecl {
                 Diagnostic::spanned(
                     trait_item.span().unstable(),
                     Level::Error,
-                    format!("Traits are currently only allowed to contain traits"),
+                    "Traits are currently only allowed to contain traits",
                 )
                 .emit();
                 Err(())
@@ -32,14 +36,27 @@ impl MethodDecl {
             constness,
             unsafety,
             asyncness,
-            abi,
             ident,
             decl,
+            ..
         } = sig;
+        let FnDecl {
+            generics,
+            inputs,
+            output,
+            ..
+        } = decl;
 
         check_constness(constness, span)?;
+        check_asyncness(asyncness, span)?;
 
-        Ok(Self { attrs })
+        Ok(Self {
+            attrs,
+            unsafety,
+            ident,
+            generics,
+            span,
+        })
     }
 }
 
@@ -47,12 +64,16 @@ fn check_constness(constness: Option<Const>, span: Span) -> Result<()> {
     if constness.is_none() {
         Ok(())
     } else {
-        Diagnostic::spanned(
-            span,
-            Level::Error,
-            format!("`const` methods are not supported"),
-        )
-        .emit();
+        Diagnostic::spanned(span, Level::Error, "`const` methods are not supported").emit();
+        Err(())
+    }
+}
+
+fn check_asyncness(asyncness: Option<Async>, span: Span) -> Result<()> {
+    if asyncness.is_none() {
+        Ok(())
+    } else {
+        Diagnostic::spanned(span, Level::Error, "`async` methods are not yet supported").emit();
         Err(())
     }
 }
