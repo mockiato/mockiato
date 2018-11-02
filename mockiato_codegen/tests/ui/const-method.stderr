@@ -3,6 +3,12 @@ error: `const` methods are not supported
   |
 5 |     const fn bar(&self, baz: u64);
   |     ^^^^^
+  |
+note: Required because of #[mockable] on the trait declaration
+ --> $DIR/const-method.rs:4:1
+  |
+4 | trait Foo {
+  | ^^^^^
 
 error: aborting due to previous error
 

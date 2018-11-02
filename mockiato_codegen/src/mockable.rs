@@ -2,6 +2,7 @@ use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro::TokenStream;
+use syn::spanned::Spanned;
 use syn::{AttributeArgs, Ident, Item};
 
 #[derive(Default)]
@@ -13,13 +14,21 @@ impl Mockable {
     }
 
     pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> TokenStream {
-        let trait_decl = match TraitDecl::parse(item).map_err(|err| err.emit(|d| d)) {
-            Ok(trait_decl) => trait_decl,
+        let mockable_attr = match MockableAttr::parse(attr).map_err(|err| err.emit(|d| d)) {
+            Ok(mockable_attr) => mockable_attr,
             Err(_) => return TokenStream::new(),
         };
 
-        let mockable_attr = match MockableAttr::parse(attr).map_err(|err| err.emit(|d| d)) {
-            Ok(mockable_attr) => mockable_attr,
+        let item_span = item.span().unstable();
+        let trait_decl = match TraitDecl::parse(item).map_err(|err| {
+            err.emit(|d| {
+                d.span_note(
+                    item_span,
+                    "Required because of #[mockable] on the trait declaration",
+                )
+            })
+        }) {
+            Ok(trait_decl) => trait_decl,
             Err(_) => return TokenStream::new(),
         };
 

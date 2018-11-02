@@ -23,7 +23,7 @@ impl MethodInputs {
                 Error::Diagnostic(Diagnostic::spanned(
                     span,
                     Level::Error,
-                    "The first parameter of a method must be self",
+                    "The first parameter of a method must be self, so that the trait is object-safe",
                 ))
             })?;
 
