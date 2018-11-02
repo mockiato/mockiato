@@ -5,7 +5,7 @@ use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::token::Add;
+use syn::token::{Add, Unsafe};
 use syn::{Generics, Ident, Item, ItemTrait, TypeParamBound};
 
 #[derive(Debug, Clone)]
@@ -13,6 +13,7 @@ pub(crate) struct TraitDecl {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
     pub(crate) generics: Generics,
+    pub(crate) unsafety: Option<Unsafe>,
     pub(crate) supertraits: Punctuated<TypeParamBound, Add>,
     pub(crate) methods: Vec<MethodDecl>,
 }
@@ -30,16 +31,6 @@ impl TraitDecl {
                 ident,
                 ..
             } = item_trait;
-
-            if unsafety.is_some() {
-                Diagnostic::spanned(
-                    span,
-                    Level::Error,
-                    format!("#[{}] does not work with unsafe traits", ATTR_NAME),
-                )
-                .emit();
-                return Err(());
-            }
 
             if auto_token.is_some() {
                 Diagnostic::spanned(
@@ -60,6 +51,7 @@ impl TraitDecl {
             return Ok(TraitDecl {
                 ident,
                 span,
+                unsafety,
                 generics: generics.clone(),
                 supertraits: supertraits.clone(),
                 methods: methods.into_iter().map(Result::unwrap).collect(),
