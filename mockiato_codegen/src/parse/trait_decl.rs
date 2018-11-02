@@ -1,6 +1,6 @@
 use crate::constant::ATTR_NAME;
 use crate::parse::method_decl::MethodDecl;
-use crate::Result;
+use crate::{Error, Result};
 use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
@@ -32,19 +32,17 @@ impl TraitDecl {
             } = item_trait;
 
             if auto_token.is_some() {
-                Diagnostic::spanned(
+                return Err(Error::Diagnostic(Diagnostic::spanned(
                     span,
                     Level::Error,
                     format!("#[{}] does not work with auto traits", ATTR_NAME),
-                )
-                .emit();
-                return Err(());
+                )));
             }
 
             let methods: Vec<_> = items.into_iter().map(MethodDecl::parse).collect();
 
             if methods.iter().any(Result::is_err) {
-                return Err(());
+                return Err(Error::merge(methods.into_iter().filter_map(Result::err)));
             }
 
             return Ok(TraitDecl {
@@ -57,13 +55,10 @@ impl TraitDecl {
             });
         }
 
-        Diagnostic::spanned(
+        Err(Error::Diagnostic(Diagnostic::spanned(
             item.span().unstable(),
             Level::Error,
             format!("#[{}] can only be used with traits", ATTR_NAME),
-        )
-        .emit();
-
-        Err(())
+        )))
     }
 }

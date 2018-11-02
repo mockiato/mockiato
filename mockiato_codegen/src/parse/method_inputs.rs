@@ -1,4 +1,4 @@
-use crate::Result;
+use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
@@ -17,17 +17,14 @@ impl MethodInputs {
 
         let self_arg = inputs_iter
             .next()
-            .ok_or(())
+            .ok_or(Error::Empty)
             .and_then(|input| MethodSelfArg::parse(input))
-            .map_err(|err| {
-                Diagnostic::spanned(
+            .map_err(|_| {
+                Error::Diagnostic(Diagnostic::spanned(
                     span,
                     Level::Error,
                     "The first parameter of a method must be self",
-                )
-                .emit();
-
-                err
+                ))
             })?;
 
         Ok(Self {
@@ -72,7 +69,7 @@ impl MethodSelfArg {
                 colon_token,
                 ty,
             })),
-            _ => Err(()),
+            _ => Err(Error::Empty),
         }
     }
 }

@@ -13,12 +13,12 @@ impl Mockable {
     }
 
     pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> TokenStream {
-        let trait_decl = match TraitDecl::parse(item) {
+        let trait_decl = match TraitDecl::parse(item).map_err(|err| err.emit(|d| d)) {
             Ok(trait_decl) => trait_decl,
             Err(_) => return TokenStream::new(),
         };
 
-        let mockable_attr = match MockableAttr::parse(attr) {
+        let mockable_attr = match MockableAttr::parse(attr).map_err(|err| err.emit(|d| d)) {
             Ok(mockable_attr) => mockable_attr,
             Err(_) => return TokenStream::new(),
         };

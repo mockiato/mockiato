@@ -1,5 +1,5 @@
 use crate::parse::method_inputs::MethodInputs;
-use crate::Result;
+use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
 use syn::spanned::Spanned;
 use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, TraitItem, TraitItemMethod};
@@ -18,15 +18,11 @@ impl MethodDecl {
     pub(crate) fn parse(trait_item: TraitItem) -> Result<Self> {
         match trait_item {
             TraitItem::Method(method) => Self::parse_method(method),
-            _ => {
-                Diagnostic::spanned(
-                    trait_item.span().unstable(),
-                    Level::Error,
-                    "Traits are currently only allowed to contain traits",
-                )
-                .emit();
-                Err(())
-            }
+            _ => Err(Error::Diagnostic(Diagnostic::spanned(
+                trait_item.span().unstable(),
+                Level::Error,
+                "Traits are currently only allowed to contain traits",
+            ))),
         }
     }
 
@@ -66,8 +62,11 @@ fn check_constness(constness: Option<Token![const]>, span: Span) -> Result<()> {
     if constness.is_none() {
         Ok(())
     } else {
-        Diagnostic::spanned(span, Level::Error, "`const` methods are not supported").emit();
-        Err(())
+        Err(Error::Diagnostic(Diagnostic::spanned(
+            span,
+            Level::Error,
+            "`const` methods are not supported",
+        )))
     }
 }
 
@@ -75,7 +74,10 @@ fn check_asyncness(asyncness: Option<Token![async]>, span: Span) -> Result<()> {
     if asyncness.is_none() {
         Ok(())
     } else {
-        Diagnostic::spanned(span, Level::Error, "`async` methods are not yet supported").emit();
-        Err(())
+        Err(Error::Diagnostic(Diagnostic::spanned(
+            span,
+            Level::Error,
+            "`async` methods are not yet supported",
+        )))
     }
 }

@@ -1,6 +1,6 @@
 use super::name_attr::NameAttr;
 use crate::constant::ATTR_NAME;
-use crate::Result;
+use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level};
 use syn::spanned::Spanned;
 use syn::{AttributeArgs, NestedMeta};
@@ -18,7 +18,7 @@ impl MockableAttr {
             .into_iter()
             .map(|nested| match nested {
                 NestedMeta::Meta(meta) => Ok(meta),
-                NestedMeta::Literal(lit) => {
+                NestedMeta::Literal(lit) => Err(Error::Diagnostic(
                     Diagnostic::spanned(
                         lit.span().unstable(),
                         Level::Error,
@@ -27,11 +27,8 @@ impl MockableAttr {
                     .help(format!(
                         "Example usage: #[{}(name = \"FooMock\")]",
                         ATTR_NAME
-                    ))
-                    .emit();
-
-                    Err(())
-                }
+                    )),
+                )),
             })
             .collect();
 
@@ -44,16 +41,14 @@ impl MockableAttr {
                 }
                 name_attr = Some(NameAttr::parse(item)?);
             } else {
-                Diagnostic::spanned(
+                return Err(Error::Diagnostic(Diagnostic::spanned(
                     item.span().unstable(),
                     Level::Error,
                     format!(
                         "This attribute property is not supported by #[{}]",
                         ATTR_NAME
                     ),
-                );
-
-                return Err(());
+                )));
             }
         }
 

@@ -1,5 +1,5 @@
 use crate::constant::ATTR_NAME;
-use crate::Result;
+use crate::{Error, Result};
 use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::spanned::Spanned;
@@ -24,17 +24,16 @@ impl NameAttr {
             }
         }
 
-        Diagnostic::spanned(
-            meta_item_span,
-            Level::Error,
-            format!("#[{}(name = \"...\") expects a string literal", ATTR_NAME),
-        )
-        .help(format!(
-            "Example usage: #[{}(name = \"FooMock\")]",
-            ATTR_NAME,
+        Err(Error::Diagnostic(
+            Diagnostic::spanned(
+                meta_item_span,
+                Level::Error,
+                format!("#[{}(name = \"...\") expects a string literal", ATTR_NAME),
+            )
+            .help(format!(
+                "Example usage: #[{}(name = \"FooMock\")]",
+                ATTR_NAME,
+            )),
         ))
-        .emit();
-
-        Err(())
     }
 }
