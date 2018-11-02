@@ -3,7 +3,8 @@
     extern_crate_item_prelude,
     proc_macro_diagnostic,
     proc_macro_span,
-    proc_macro_hygiene
+    proc_macro_hygiene,
+    bind_by_move_pattern_guards
 )]
 
 extern crate proc_macro;

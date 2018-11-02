@@ -1,0 +1,8 @@
+error: The first parameter of a method must be self
+ --> $DIR/method-without-self.rs:5:12
+  |
+5 |     fn bar(baz: u64);
+  |            ^^^
+
+error: aborting due to previous error
+

@@ -1,3 +1,4 @@
+use crate::parse::method_inputs::MethodInputs;
 use crate::Result;
 use proc_macro::{Diagnostic, Level, Span};
 use syn::spanned::Spanned;
@@ -10,6 +11,7 @@ pub(crate) struct MethodDecl {
     ident: Ident,
     generics: Generics,
     span: Span,
+    inputs: MethodInputs,
 }
 
 impl MethodDecl {
@@ -55,6 +57,7 @@ impl MethodDecl {
             ident,
             generics,
             span,
+            inputs: MethodInputs::parse(inputs)?,
         })
     }
 }
