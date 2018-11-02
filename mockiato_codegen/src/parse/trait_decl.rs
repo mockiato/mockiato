@@ -1,11 +1,12 @@
 use crate::constant::ATTR_NAME;
+use crate::parse::method_decl::MethodDecl;
 use crate::Result;
 use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::token::Add;
-use syn::{Generics, Ident, Item, ItemTrait, TraitItem, TypeParamBound};
+use syn::{Generics, Ident, Item, ItemTrait, TypeParamBound};
 
 #[derive(Debug, Clone)]
 pub(crate) struct TraitDecl {
@@ -13,7 +14,7 @@ pub(crate) struct TraitDecl {
     pub(crate) ident: Ident,
     pub(crate) generics: Generics,
     pub(crate) supertraits: Punctuated<TypeParamBound, Add>,
-    pub(crate) items: Vec<TraitItem>,
+    pub(crate) methods: Vec<MethodDecl>,
 }
 
 impl TraitDecl {
@@ -50,12 +51,18 @@ impl TraitDecl {
                 return Err(());
             }
 
+            let methods: Vec<_> = items.into_iter().map(MethodDecl::parse).collect();
+
+            if methods.iter().any(Result::is_err) {
+                return Err(());
+            }
+
             return Ok(TraitDecl {
                 ident,
                 span,
                 generics: generics.clone(),
                 supertraits: supertraits.clone(),
-                items: items.clone(),
+                methods: methods.into_iter().map(Result::unwrap).collect(),
             });
         }
 
