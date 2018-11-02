@@ -1,7 +1,8 @@
 use crate::Result;
-use proc_macro::{Diagnostic, Level};
+use proc_macro::{Diagnostic, Level, Span};
 use syn::spanned::Spanned;
-use syn::{Attribute, TraitItem, TraitItemMethod};
+use syn::token::Const;
+use syn::{Attribute, MethodSig, TraitItem, TraitItemMethod};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MethodDecl {
@@ -25,8 +26,33 @@ impl MethodDecl {
     }
 
     fn parse_method(method: TraitItemMethod) -> Result<Self> {
+        let span = method.span().unstable();
         let TraitItemMethod { attrs, sig, .. } = method;
+        let MethodSig {
+            constness,
+            unsafety,
+            asyncness,
+            abi,
+            ident,
+            decl,
+        } = sig;
+
+        check_constness(constness, span)?;
 
         Ok(Self { attrs })
+    }
+}
+
+fn check_constness(constness: Option<Const>, span: Span) -> Result<()> {
+    if constness.is_none() {
+        Ok(())
+    } else {
+        Diagnostic::spanned(
+            span,
+            Level::Error,
+            format!("`const` methods are not supported"),
+        )
+        .emit();
+        Err(())
     }
 }
