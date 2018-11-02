@@ -1,6 +1,6 @@
 #![feature(custom_attribute, plugin)]
-#![plugin(mockiato_codegen)]
 
+use mockiato_codegen::mockable;
 use std::fmt::{self, Display};
 
 trait Debug {}

@@ -1,5 +1,4 @@
-#![feature(plugin)]
-#![plugin(mockiato_codegen)]
+use mockiato_codegen::mockable;
 
 #[mockable(name = 1)]
 trait Foo {}
@@ -9,3 +8,5 @@ trait Bar {}
 
 #[mockable(name)]
 trait Baz {}
+
+fn main() {}

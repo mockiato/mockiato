@@ -1,40 +1,35 @@
-#![crate_type = "dylib"]
 #![feature(
     quote,
-    concat_idents,
-    plugin_registrar,
-    rustc_private,
-    decl_macro,
-    custom_attribute,
-    underscore_imports
+    extern_crate_item_prelude,
+    proc_macro_diagnostic,
+    proc_macro_span,
+    proc_macro_hygiene
 )]
 
-extern crate rustc;
-extern crate rustc_plugin;
-extern crate rustc_resolve;
-extern crate syntax;
-extern crate syntax_pos;
+extern crate proc_macro;
 
-use crate::rustc_plugin::Registry;
-use crate::syntax::ext::base::SyntaxExtension;
-use crate::syntax::symbol::Symbol;
+#[macro_use]
+extern crate quote;
+
+#[macro_use]
+extern crate syn;
 
 mod constant;
-mod context;
-mod definition_id;
-mod derive_resolver;
-mod generate;
 mod mockable;
 mod parse;
-mod trait_bound_resolver;
 
-use self::constant::ATTR_NAME;
 use self::mockable::Mockable;
+use proc_macro::TokenStream;
+use syn::{AttributeArgs, Item};
 
-#[plugin_registrar]
-pub fn plugin_registrar(reg: &mut Registry) {
-    reg.register_syntax_extension(
-        Symbol::intern(ATTR_NAME),
-        SyntaxExtension::MultiDecorator(Box::new(Mockable::new())),
-    );
+pub(crate) type Result<T> = std::result::Result<T, ()>;
+
+#[proc_macro_attribute]
+pub fn mockable(args: TokenStream, input: TokenStream) -> TokenStream {
+    let attr = parse_macro_input!(args as AttributeArgs);
+    let item = parse_macro_input!(input as Item);
+
+    let mockable = Mockable::new();
+
+    mockable.expand(attr, item)
 }

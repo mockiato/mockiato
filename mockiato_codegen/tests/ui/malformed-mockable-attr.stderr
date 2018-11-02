@@ -1,7 +1,7 @@
 error: Unsupported syntax for #[mockable]
- --> $DIR/malformed-mockable-attr.rs:4:12
+ --> $DIR/malformed-mockable-attr.rs:3:12
   |
-4 | #[mockable("Bar")]
+3 | #[mockable("Bar")]
   |            ^^^^^
   |
   = help: Example usage: #[mockable(name = "FooMock")]

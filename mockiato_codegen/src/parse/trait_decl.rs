@@ -1,60 +1,71 @@
 use crate::constant::ATTR_NAME;
-use crate::context::Context;
-use crate::syntax::ast::{GenericBounds, Generics, Ident, IsAuto, ItemKind, TraitItem, Unsafety};
-use crate::syntax::ext::base::Annotatable;
-use crate::syntax_pos::Span;
+use crate::Result;
+use proc_macro::Span;
+use proc_macro::{Diagnostic, Level};
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
+use syn::token::Add;
+use syn::{Generics, Ident, Item, ItemTrait, TraitItem, TypeParamBound};
 
 #[derive(Debug, Clone)]
 pub(crate) struct TraitDecl {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
     pub(crate) generics: Generics,
-    pub(crate) generic_bounds: GenericBounds,
+    pub(crate) supertraits: Punctuated<TypeParamBound, Add>,
     pub(crate) items: Vec<TraitItem>,
 }
 
 impl TraitDecl {
-    pub(crate) fn parse(cx: &Context, annotated: &Annotatable) -> Result<Self, ()> {
-        if let Annotatable::Item(ref item) = annotated {
-            let span = item.span;
-            let ident = item.ident;
+    pub(crate) fn parse(item: Item) -> Result<Self> {
+        if let Item::Trait(item_trait) = item {
+            let span = item_trait.span().unstable();
+            let ItemTrait {
+                auto_token,
+                unsafety,
+                generics,
+                supertraits,
+                items,
+                ident,
+                ..
+            } = item_trait;
 
-            if let ItemKind::Trait(
-                ref is_auto,
-                ref unsafety,
-                ref generics,
-                ref generic_bounds,
-                ref items,
-            ) = item.node
-            {
-                if unsafety == &Unsafety::Unsafe {
-                    cx.into_inner().span_err(
-                        span,
-                        &format!("#[{}] does not work with unsafe traits", ATTR_NAME),
-                    );
-                    return Err(());
-                }
-
-                if is_auto == &IsAuto::Yes {
-                    cx.into_inner().span_err(
-                        span,
-                        &format!("#[{}] does not work with auto traits", ATTR_NAME),
-                    );
-                    return Err(());
-                }
-
-                return Ok(TraitDecl {
-                    ident,
+            if unsafety.is_some() {
+                Diagnostic::spanned(
                     span,
-                    generics: generics.clone(),
-                    generic_bounds: generic_bounds.clone(),
-                    items: items.clone(),
-                });
+                    Level::Error,
+                    format!("#[{}] does not work with unsafe traits", ATTR_NAME),
+                )
+                .emit();
+                return Err(());
             }
+
+            if auto_token.is_some() {
+                Diagnostic::spanned(
+                    span,
+                    Level::Error,
+                    format!("#[{}] does not work with auto traits", ATTR_NAME),
+                )
+                .emit();
+                return Err(());
+            }
+
+            return Ok(TraitDecl {
+                ident,
+                span,
+                generics: generics.clone(),
+                supertraits: supertraits.clone(),
+                items: items.clone(),
+            });
         }
 
-        cx.into_inner()
-            .span_err(annotated.span(), "#[mockable] can only be used with traits");
+        Diagnostic::spanned(
+            item.span().unstable(),
+            Level::Error,
+            format!("#[{}] can only be used with traits", ATTR_NAME),
+        )
+        .emit();
+
         Err(())
     }
 }

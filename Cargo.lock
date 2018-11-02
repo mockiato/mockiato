@@ -109,6 +109,9 @@ name = "mockiato_codegen"
 version = "0.1.0"
 dependencies = [
  "compiletest_rs 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "proc-macro2 0.4.20 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 0.6.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 0.15.15 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

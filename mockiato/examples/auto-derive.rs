@@ -1,6 +1,4 @@
-#![feature(plugin)]
-#![plugin(mockiato_codegen)]
-
+use mockiato_codegen::mockable;
 use std::fmt::{Debug, Display};
 
 #[mockable]

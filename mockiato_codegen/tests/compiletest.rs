@@ -120,6 +120,7 @@ fn run_mode(mode: &'static str) {
 
     config.target_rustcflags = Some(
         [
+            String::from("--edition=2018"),
             link_flag("-L", "crate", &[]),
             link_flag("-L", "dependency", &["deps"]),
             extern_dep("mockiato_codegen", Kind::Dynamic).expect("find codegen dep"),

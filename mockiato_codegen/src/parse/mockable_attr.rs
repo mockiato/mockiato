@@ -1,8 +1,9 @@
-use crate::constant::ATTR_NAME;
-use crate::context::Context;
-use crate::syntax::ast::{self, MetaItemKind, NestedMetaItemKind};
-
 use super::name_attr::NameAttr;
+use crate::constant::ATTR_NAME;
+use crate::Result;
+use proc_macro::{Diagnostic, Level};
+use syn::spanned::Spanned;
+use syn::{AttributeArgs, NestedMeta};
 
 #[derive(Debug)]
 pub(crate) struct MockableAttr {
@@ -10,60 +11,52 @@ pub(crate) struct MockableAttr {
 }
 
 impl MockableAttr {
-    pub(crate) fn parse(cx: &Context, meta_item: &ast::MetaItem) -> Option<Self> {
+    pub(crate) fn parse(args: AttributeArgs) -> Result<Self> {
         let mut name_attr = None;
 
-        match meta_item.node {
-            MetaItemKind::Word => {}
-            MetaItemKind::NameValue(..) => unreachable!(),
-            MetaItemKind::List(ref list) => {
-                let meta_items: Vec<_> = list
-                    .iter()
-                    .map(|nested| match nested.node {
-                        NestedMetaItemKind::MetaItem(ref meta_item) => Some(meta_item),
-                        NestedMetaItemKind::Literal(_) => {
-                            cx.into_inner()
-                                .parse_sess
-                                .span_diagnostic
-                                .mut_span_err(
-                                    nested.span(),
-                                    &format!("Unsupported syntax for #[{}]", ATTR_NAME),
-                                )
-                                .help(&format!(
-                                    "Example usage: #[{}(name = \"FooMock\")]",
-                                    ATTR_NAME
-                                ))
-                                .emit();
-                            None
-                        }
-                    })
-                    .collect();
+        let meta_items: Vec<_> = args
+            .into_iter()
+            .map(|nested| match nested {
+                NestedMeta::Meta(meta) => Ok(meta),
+                NestedMeta::Literal(lit) => {
+                    Diagnostic::spanned(
+                        lit.span().unstable(),
+                        Level::Error,
+                        format!("Unsupported syntax for #[{}]", ATTR_NAME),
+                    )
+                    .help(format!(
+                        "Example usage: #[{}(name = \"FooMock\")]",
+                        ATTR_NAME
+                    ))
+                    .emit();
 
-                for item in meta_items {
-                    match item {
-                        Some(item) => {
-                            if item.ident == "name" {
-                                if name_attr.is_some() {
-                                    cx.into_inner().span_warn(item.span(), "`name` is specified more than once. The latter definition will take precedence.");
-                                }
-                                name_attr = NameAttr::parse(&cx, item.clone());
-                            } else {
-                                cx.into_inner().span_err(
-                                    item.span(),
-                                    &format!(
-                                        "This attribute property is not supported by #[{}]",
-                                        ATTR_NAME
-                                    ),
-                                );
-                                return None;
-                            }
-                        }
-                        None => return None,
-                    }
+                    Err(())
                 }
+            })
+            .collect();
+
+        for item in meta_items {
+            let item = item?;
+
+            if item.name() == "name" {
+                if name_attr.is_some() {
+                    Diagnostic::spanned(item.span().unstable(), Level::Warning, "`name` is specified more than once. The latter definition will take precedence.").emit();
+                }
+                name_attr = Some(NameAttr::parse(item)?);
+            } else {
+                Diagnostic::spanned(
+                    item.span().unstable(),
+                    Level::Error,
+                    format!(
+                        "This attribute property is not supported by #[{}]",
+                        ATTR_NAME
+                    ),
+                );
+
+                return Err(());
             }
         }
 
-        Some(Self { name_attr })
+        Ok(Self { name_attr })
     }
 }
