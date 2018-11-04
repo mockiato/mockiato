@@ -40,13 +40,13 @@ impl TraitDecl {
 
         let methods = items.into_iter().map(MethodDecl::parse);
 
-        return Ok(TraitDecl {
+        Ok(TraitDecl {
             ident,
             span,
             unsafety,
             generics: generics.clone(),
             supertraits: supertraits.clone(),
             methods: merge_results!(methods),
-        });
+        })
     }
 }

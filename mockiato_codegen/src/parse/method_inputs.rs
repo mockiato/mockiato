@@ -18,7 +18,7 @@ impl MethodInputs {
         let self_arg = inputs_iter
             .next()
             .ok_or(Error::Empty)
-            .and_then(|input| MethodSelfArg::parse(input))
+            .and_then(MethodSelfArg::parse)
             .map_err(|_| {
                 Error::Diagnostic(Diagnostic::spanned(
                     span,
@@ -38,16 +38,16 @@ impl MethodInputs {
 
 #[derive(Debug, Clone)]
 pub(crate) enum MethodSelfArg {
-    SelfRef(ArgSelfRef),
-    SelfValue(ArgSelf),
-    SelfCaptured(ArgCaptured),
+    Ref(ArgSelfRef),
+    Value(ArgSelf),
+    Captured(Box<ArgCaptured>),
 }
 
 impl MethodSelfArg {
     fn parse(arg: FnArg) -> Result<Self> {
         match arg {
-            FnArg::SelfRef(self_ref) => Ok(MethodSelfArg::SelfRef(self_ref)),
-            FnArg::SelfValue(self_value) => Ok(MethodSelfArg::SelfValue(self_value)),
+            FnArg::SelfRef(self_ref) => Ok(MethodSelfArg::Ref(self_ref)),
+            FnArg::SelfValue(self_value) => Ok(MethodSelfArg::Value(self_value)),
             FnArg::Captured(ArgCaptured {
                 pat:
                     Pat::Ident(PatIdent {
@@ -58,7 +58,7 @@ impl MethodSelfArg {
                     }),
                 colon_token,
                 ty,
-            }) if ident == "self" => Ok(MethodSelfArg::SelfCaptured(ArgCaptured {
+            }) if ident == "self" => Ok(MethodSelfArg::Captured(box ArgCaptured {
                 pat: Pat::Ident(PatIdent {
                     by_ref,
                     mutability,
