@@ -1,9 +1,7 @@
-use crate::constant::ATTR_NAME;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
-use proc_macro::TokenStream;
-use syn::spanned::Spanned;
+use proc_macro::{Span, TokenStream};
 use syn::{AttributeArgs, Ident, Item};
 
 #[derive(Default)]
@@ -20,17 +18,8 @@ impl Mockable {
             Err(_) => return TokenStream::new(),
         };
 
-        let item_span = item.span().unstable();
         let trait_decl = match TraitDecl::parse(item.clone()).map_err(|err| {
-            err.emit(|d| {
-                d.span_note(
-                    item_span,
-                    format!(
-                        "Required because of #[{}] on the trait declaration",
-                        ATTR_NAME
-                    ),
-                )
-            })
+            err.emit(|d| d.span_note(Span::call_site(), "Required for mockable traits"))
         }) {
             Ok(trait_decl) => trait_decl,
             Err(_) => return TokenStream::new(),

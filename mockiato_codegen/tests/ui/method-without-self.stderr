@@ -4,11 +4,11 @@ error: The first parameter of a method must be self, so that the trait is object
 5 |     fn bar(baz: u64);
   |            ^^^
   |
-note: Required because of #[mockable] on the trait declaration
- --> $DIR/method-without-self.rs:4:1
+note: Required for mockable traits
+ --> $DIR/method-without-self.rs:3:1
   |
-4 | trait Foo {
-  | ^^^^^
+3 | #[mockable]
+  | ^^^^^^^^^^^
 
 error: aborting due to previous error
 
