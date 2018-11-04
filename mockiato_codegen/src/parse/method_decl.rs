@@ -2,7 +2,7 @@ use crate::parse::method_inputs::MethodInputs;
 use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
 use syn::spanned::Spanned;
-use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, TraitItem, TraitItemMethod};
+use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, ReturnType, TraitItem, TraitItemMethod};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MethodDecl {
@@ -12,6 +12,7 @@ pub(crate) struct MethodDecl {
     generics: Generics,
     span: Span,
     inputs: MethodInputs,
+    output: ReturnType,
 }
 
 impl MethodDecl {
@@ -54,6 +55,7 @@ impl MethodDecl {
             generics,
             span,
             inputs: MethodInputs::parse(inputs)?,
+            output,
         })
     }
 }
