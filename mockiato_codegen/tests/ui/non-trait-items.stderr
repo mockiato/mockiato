@@ -1,0 +1,50 @@
+error: Only traits can be made mockable
+ --> $DIR/non-trait-items.rs:4:1
+  |
+4 | struct Foo {}
+  | ^^^^^^
+  |
+note: Required because of this attribute
+ --> $DIR/non-trait-items.rs:3:1
+  |
+3 | #[mockable]
+  | ^^^^^^^^^^^
+
+error: Only traits can be made mockable
+ --> $DIR/non-trait-items.rs:7:1
+  |
+7 | enum Foo {}
+  | ^^^^
+  |
+note: Required because of this attribute
+ --> $DIR/non-trait-items.rs:6:1
+  |
+6 | #[mockable]
+  | ^^^^^^^^^^^
+
+error: Only traits can be made mockable
+  --> $DIR/non-trait-items.rs:10:1
+   |
+10 | fn foo() {}
+   | ^^
+   |
+note: Required because of this attribute
+  --> $DIR/non-trait-items.rs:9:1
+   |
+9  | #[mockable]
+   | ^^^^^^^^^^^
+
+error: Only traits can be made mockable
+  --> $DIR/non-trait-items.rs:13:1
+   |
+13 | type Foo = usize;
+   | ^^^^
+   |
+note: Required because of this attribute
+  --> $DIR/non-trait-items.rs:12:1
+   |
+12 | #[mockable]
+   | ^^^^^^^^^^^
+
+error: aborting due to 4 previous errors
+
