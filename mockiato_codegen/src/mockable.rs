@@ -21,7 +21,7 @@ impl Mockable {
         };
 
         let item_span = item.span().unstable();
-        let trait_decl = match TraitDecl::parse(item).map_err(|err| {
+        let trait_decl = match TraitDecl::parse(item.clone()).map_err(|err| {
             err.emit(|d| {
                 d.span_note(
                     item_span,
@@ -39,6 +39,8 @@ impl Mockable {
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
 
         TokenStream::from(quote! {
+            #item
+
             #[derive(Debug)]
             struct #mock_struct_ident;
         })
