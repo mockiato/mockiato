@@ -40,3 +40,15 @@ impl Error {
         Error::MultipleDiagnostics(collected)
     }
 }
+
+pub(crate) macro merge_results($iter: expr) {{
+    let results: Vec<_> = $iter.collect();
+
+    if results.iter().any(Result::is_err) {
+        return Err(crate::Error::merge(
+            results.into_iter().filter_map(Result::err),
+        ));
+    }
+
+    results.into_iter().map(Result::unwrap).collect()
+}}
