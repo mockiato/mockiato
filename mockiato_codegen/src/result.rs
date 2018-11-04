@@ -10,7 +10,11 @@ pub(crate) enum Error {
 }
 
 impl Error {
-    pub(crate) fn emit<F>(self, map_fn: F) -> Self
+    pub(crate) fn emit(self) -> Self {
+        self.emit_with(|d| d)
+    }
+
+    pub(crate) fn emit_with<F>(self, map_fn: F) -> Self
     where
         F: Fn(Diagnostic) -> Diagnostic,
     {

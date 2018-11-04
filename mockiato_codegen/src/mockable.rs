@@ -19,18 +19,18 @@ impl Mockable {
             return TokenStream::new();
         }
 
-        let mockable_attr = match MockableAttr::parse(attr).map_err(|err| err.emit(|d| d)) {
+        let mockable_attr = match MockableAttr::parse(attr).map_err(|err| err.emit()) {
             Ok(mockable_attr) => mockable_attr,
             Err(_) => return TokenStream::new(),
         };
 
-        let item_trait = match expect_item_trait(item).map_err(|err| err.emit(|d| d)) {
+        let item_trait = match expect_item_trait(item).map_err(|err| err.emit()) {
             Ok(trait_decl) => trait_decl,
             Err(_) => early_return!(),
         };
 
         let trait_decl = match TraitDecl::parse(item_trait.clone()).map_err(|err| {
-            err.emit(|d| d.span_note(Span::call_site(), "Required for mockable traits"))
+            err.emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))
         }) {
             Ok(trait_decl) => trait_decl,
             Err(_) => early_return!(),
