@@ -1,8 +1,8 @@
-use crate::{Error, Result};
+use crate::{merge_results, Error, Result};
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Pat, PatIdent};
+use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Pat, PatIdent, Type};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MethodInputs {
@@ -27,15 +27,14 @@ impl MethodInputs {
                 ))
             })?;
 
+        let args = inputs_iter.map(MethodArg::parse);
+
         Ok(Self {
             self_arg,
-            args: Vec::new(),
+            args: merge_results!(args),
         })
     }
 }
-
-#[derive(Debug, Clone)]
-pub(crate) struct MethodArg {}
 
 #[derive(Debug, Clone)]
 pub(crate) enum MethodSelfArg {
@@ -70,6 +69,27 @@ impl MethodSelfArg {
                 ty,
             })),
             _ => Err(Error::Empty),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) enum MethodArg {
+    Captured(ArgCaptured),
+    Ignored(Type),
+}
+
+impl MethodArg {
+    pub(crate) fn parse(arg: FnArg) -> Result<Self> {
+        let span = arg.span().unstable();
+        match arg {
+            FnArg::Captured(captured) => Ok(MethodArg::Captured(captured)),
+            FnArg::Ignored(ty) => Ok(MethodArg::Ignored(ty)),
+            _ => Err(Error::Diagnostic(Diagnostic::spanned(
+                span,
+                Level::Error,
+                "Only captured and ignored method arguments are supported",
+            ).note("This error should never appear, because rustc already enforces these requirements"))),
         }
     }
 }
