@@ -21,7 +21,7 @@ impl Mockable {
 
         let mockable_attr = match MockableAttr::parse(attr).map_err(|err| err.emit()) {
             Ok(mockable_attr) => mockable_attr,
-            Err(_) => return TokenStream::new(),
+            Err(_) => early_return!(),
         };
 
         let item_trait = match expect_item_trait(item).map_err(|err| err.emit()) {
