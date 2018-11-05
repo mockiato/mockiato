@@ -17,7 +17,7 @@ impl MethodInputs {
 
         let self_arg = inputs_iter
             .next()
-            .ok_or(Error::Empty)
+            .ok_or(())
             .and_then(MethodSelfArg::parse)
             .map_err(|_| {
                 Error::Diagnostic(Diagnostic::spanned(
@@ -44,7 +44,7 @@ pub(crate) enum MethodSelfArg {
 }
 
 impl MethodSelfArg {
-    fn parse(arg: FnArg) -> Result<Self> {
+    fn parse(arg: FnArg) -> std::result::Result<Self, ()> {
         match arg {
             FnArg::SelfRef(self_ref) => Ok(MethodSelfArg::Ref(self_ref)),
             FnArg::SelfValue(self_value) => Ok(MethodSelfArg::Value(self_value)),
@@ -68,7 +68,7 @@ impl MethodSelfArg {
                 colon_token,
                 ty,
             })),
-            _ => Err(Error::Empty),
+            _ => Err(()),
         }
     }
 }
