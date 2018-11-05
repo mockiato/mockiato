@@ -29,7 +29,11 @@ impl MethodDecl {
 
     fn parse_method(method: TraitItemMethod) -> Result<Self> {
         let span = method.span().unstable();
-        let TraitItemMethod { attrs, sig, .. } = method;
+        let TraitItemMethod {
+            attrs,
+            sig: signature,
+            ..
+        } = method;
         let MethodSig {
             constness,
             unsafety,
@@ -37,7 +41,7 @@ impl MethodDecl {
             ident,
             decl,
             ..
-        } = sig;
+        } = signature;
         let FnDecl {
             generics,
             inputs,
