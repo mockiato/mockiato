@@ -48,26 +48,18 @@ impl MethodSelfArg {
         match arg {
             FnArg::SelfRef(self_ref) => Ok(MethodSelfArg::Ref(self_ref)),
             FnArg::SelfValue(self_value) => Ok(MethodSelfArg::Value(self_value)),
-            FnArg::Captured(ArgCaptured {
-                pat:
-                    Pat::Ident(PatIdent {
-                        by_ref,
-                        mutability,
-                        ident,
-                        subpat,
-                    }),
-                colon_token,
-                ty,
-            }) if ident == "self" => Ok(MethodSelfArg::Captured(box ArgCaptured {
-                pat: Pat::Ident(PatIdent {
-                    by_ref,
-                    mutability,
-                    ident,
-                    subpat,
-                }),
-                colon_token,
-                ty,
-            })),
+            FnArg::Captured(captured_arg) => Self::parse_captured_arg(captured_arg),
+            _ => Err(()),
+        }
+    }
+
+    fn parse_captured_arg(arg: ArgCaptured) -> std::result::Result<Self, ()> {
+        const SELF_ARG_NAME: &str = "self";
+
+        match arg.pat {
+            Pat::Ident(PatIdent { ref ident, .. }) if ident == SELF_ARG_NAME => {
+                Ok(MethodSelfArg::Captured(box arg))
+            }
             _ => Err(()),
         }
     }
