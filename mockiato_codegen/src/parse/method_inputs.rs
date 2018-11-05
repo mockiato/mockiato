@@ -31,7 +31,7 @@ impl MethodInputs {
 
         Ok(Self {
             self_arg,
-            args: merge_results!(args),
+            args: merge_results(args)?.collect(),
         })
     }
 }

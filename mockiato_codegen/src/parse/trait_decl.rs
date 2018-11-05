@@ -46,7 +46,7 @@ impl TraitDecl {
             unsafety,
             generics: generics.clone(),
             supertraits: supertraits.clone(),
-            methods: merge_results!(methods),
+            methods: merge_results(methods)?.collect(),
         })
     }
 }

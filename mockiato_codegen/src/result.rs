@@ -46,14 +46,14 @@ impl Error {
     }
 }
 
-pub(crate) macro merge_results($iter: expr) {{
-    let results: Vec<_> = $iter.collect();
-
-    if results.iter().any(Result::is_err) {
-        return Err(crate::Error::merge(
-            results.into_iter().filter_map(Result::err),
-        ));
+pub(crate) fn merge_results<T, I>(results: I) -> Result<impl Iterator<Item = T>>
+where
+    I: Iterator<Item = Result<T>>,
+{
+    let results: Vec<_> = results.collect();
+    if results.iter().any(|r| r.is_err()) {
+        Err(Error::merge(results.into_iter().filter_map(Result::err)))
+    } else {
+        Ok(results.into_iter().map(Result::unwrap))
     }
-
-    results.into_iter().map(Result::unwrap).collect()
-}}
+}
