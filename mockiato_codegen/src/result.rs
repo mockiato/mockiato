@@ -10,10 +10,14 @@ pub(crate) enum Error {
 }
 
 impl Error {
+    /// Emits all [`Diagnostic`] messages stored in this error.
     pub(crate) fn emit(self) -> Self {
         self.emit_with(|d| d)
     }
 
+    /// Emits all [`Diagnostic`] messages stored in this error.
+    /// The passed [`Fn`] acts as a transformation function and is called for every
+    /// [`Diagnostic`] in this error.
     pub(crate) fn emit_with<F>(self, map_fn: F) -> Self
     where
         F: Fn(Diagnostic) -> Diagnostic,
@@ -29,6 +33,8 @@ impl Error {
         Error::Empty
     }
 
+    /// Creates a new [`Error`] by merging an Iterator and collecting
+    /// all [`Diagnostic`] messages.
     pub(crate) fn merge<I>(errors: I) -> Self
     where
         I: Iterator<Item = Error>,

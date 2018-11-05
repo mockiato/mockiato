@@ -4,6 +4,8 @@ use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
 use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, ReturnType, TraitItem, TraitItemMethod};
 
+/// Holds everything required to generate a mock struct
+/// from a trait declaration.
 #[derive(Debug, Clone)]
 pub(crate) struct MethodDecl {
     attrs: Vec<Attribute>,

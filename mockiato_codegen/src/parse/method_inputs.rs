@@ -38,8 +38,11 @@ impl MethodInputs {
 
 #[derive(Debug, Clone)]
 pub(crate) enum MethodSelfArg {
+    /// `self` is taken by reference: `&self` or `&mut self`
     Ref(ArgSelfRef),
+    /// `self` is consumed: `self`
     Value(ArgSelf),
+    /// `self` has a type. Example: `self: Box<Self>`
     Captured(Box<ArgCaptured>),
 }
 
@@ -67,7 +70,9 @@ impl MethodSelfArg {
 
 #[derive(Debug, Clone)]
 pub(crate) enum MethodArg {
+    /// A "normal" argument. Example: `first_name: &str`
     Captured(ArgCaptured),
+    /// An ignored argument. Example: `_: String`
     Ignored(Type),
 }
 

@@ -5,8 +5,11 @@ use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level};
 use syn::{AttributeArgs, NestedMeta};
 
+/// The `#[mockable]` attribute, which is placed on a trait.
 #[derive(Debug)]
 pub(crate) struct MockableAttr {
+    /// The name sub-attribute. Example: `#[name = "FooMock"]`
+    /// This customizes the name of the generated mock struct.
     pub(crate) name_attr: Option<NameAttr>,
 }
 
