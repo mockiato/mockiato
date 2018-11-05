@@ -45,8 +45,8 @@ impl MethodDecl {
             ..
         } = decl;
 
-        check_constness(constness, span)?;
-        check_asyncness(asyncness, span)?;
+        check_option_is_none(constness, span, "`const` methods are not supported")?;
+        check_option_is_none(asyncness, span, "`async` methods are not supported")?;
 
         Ok(Self {
             attrs,
@@ -60,26 +60,13 @@ impl MethodDecl {
     }
 }
 
-fn check_constness(constness: Option<Token![const]>, span: Span) -> Result<()> {
-    if constness.is_none() {
-        Ok(())
-    } else {
-        Err(Error::Diagnostic(Diagnostic::spanned(
+fn check_option_is_none<T>(value: Option<T>, span: Span, error_message: &str) -> Result<()> {
+    match value {
+        None => Ok(()),
+        Some(_) => Err(Error::Diagnostic(Diagnostic::spanned(
             span,
             Level::Error,
-            "`const` methods are not supported",
-        )))
-    }
-}
-
-fn check_asyncness(asyncness: Option<Token![async]>, span: Span) -> Result<()> {
-    if asyncness.is_none() {
-        Ok(())
-    } else {
-        Err(Error::Diagnostic(Diagnostic::spanned(
-            span,
-            Level::Error,
-            "`async` methods are not yet supported",
-        )))
+            error_message,
+        ))),
     }
 }
