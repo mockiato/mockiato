@@ -15,26 +15,20 @@ impl Mockable {
     }
 
     pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> TokenStream {
-        macro early_return() {
-            return TokenStream::new();
+        macro try_or_return($expr: expr) {
+            match $expr {
+                Ok(value) => value,
+                Err(_) => return TokenStream::new(),
+            }
         }
 
-        let mockable_attr = match MockableAttr::parse(attr).map_err(|err| err.emit()) {
-            Ok(mockable_attr) => mockable_attr,
-            Err(_) => early_return!(),
-        };
+        let mockable_attr = try_or_return!(MockableAttr::parse(attr).map_err(|err| err.emit()));
 
-        let item_trait = match expect_item_trait(item).map_err(|err| err.emit()) {
-            Ok(trait_decl) => trait_decl,
-            Err(_) => early_return!(),
-        };
+        let item_trait = try_or_return!(expect_item_trait(item).map_err(|err| err.emit()));
 
-        let trait_decl = match TraitDecl::parse(item_trait.clone()).map_err(|err| {
-            err.emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))
-        }) {
-            Ok(trait_decl) => trait_decl,
-            Err(_) => early_return!(),
-        };
+        let trait_decl = try_or_return!(TraitDecl::parse(item_trait.clone())
+            .map_err(|err| err
+                .emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))));
 
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
 
