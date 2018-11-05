@@ -1,7 +1,7 @@
+use crate::spanned::SpannedUnstable;
 use crate::{merge_results, Error, Result};
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
 use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Pat, PatIdent, Type};
 
 #[derive(Debug, Clone)]
@@ -12,7 +12,7 @@ pub(crate) struct MethodInputs {
 
 impl MethodInputs {
     pub(crate) fn parse(inputs: Punctuated<FnArg, Token![,]>) -> Result<Self> {
-        let span = inputs.span().unstable();
+        let span = inputs.span_unstable();
         let mut inputs_iter = inputs.into_iter();
 
         let self_arg = inputs_iter
@@ -81,7 +81,7 @@ pub(crate) enum MethodArg {
 
 impl MethodArg {
     pub(crate) fn parse(arg: FnArg) -> Result<Self> {
-        let span = arg.span().unstable();
+        let span = arg.span_unstable();
         match arg {
             FnArg::Captured(captured) => Ok(MethodArg::Captured(captured)),
             FnArg::Ignored(ty) => Ok(MethodArg::Ignored(ty)),

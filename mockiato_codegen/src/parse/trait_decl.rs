@@ -1,10 +1,10 @@
 use crate::constant::ATTR_NAME;
 use crate::parse::method_decl::MethodDecl;
+use crate::spanned::SpannedUnstable;
 use crate::{merge_results, Error, Result};
 use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
 use syn::{Generics, Ident, ItemTrait, TypeParamBound};
 
 #[derive(Debug, Clone)]
@@ -19,7 +19,7 @@ pub(crate) struct TraitDecl {
 
 impl TraitDecl {
     pub(crate) fn parse(item: ItemTrait) -> Result<Self> {
-        let span = item.span().unstable();
+        let span = item.span_unstable();
         let ItemTrait {
             auto_token,
             unsafety,

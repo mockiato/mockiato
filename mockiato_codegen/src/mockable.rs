@@ -1,9 +1,9 @@
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
+use crate::spanned::SpannedUnstable;
 use crate::Error;
 use proc_macro::{Diagnostic, Level, Span, TokenStream};
-use syn::spanned::Spanned;
 use syn::{AttributeArgs, Ident, Item, ItemTrait};
 
 #[derive(Default)]
@@ -50,7 +50,7 @@ fn extract_item_trait(item: Item) -> Result<ItemTrait, Error> {
         Item::Trait(item_trait) => Ok(item_trait),
         _ => Err(Error::Diagnostic(
             Diagnostic::spanned(
-                item.span().unstable(),
+                item.span_unstable(),
                 Level::Error,
                 "Only traits can be made mockable",
             )

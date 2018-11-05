@@ -1,7 +1,7 @@
 use crate::parse::method_inputs::MethodInputs;
+use crate::spanned::SpannedUnstable;
 use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
-use syn::spanned::Spanned;
 use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, ReturnType, TraitItem, TraitItemMethod};
 
 #[derive(Debug, Clone)]
@@ -20,7 +20,7 @@ impl MethodDecl {
         match trait_item {
             TraitItem::Method(method) => Self::parse_method(method),
             _ => Err(Error::Diagnostic(Diagnostic::spanned(
-                trait_item.span().unstable(),
+                trait_item.span_unstable(),
                 Level::Error,
                 "Traits are currently only allowed to contain traits",
             ))),
@@ -28,7 +28,7 @@ impl MethodDecl {
     }
 
     fn parse_method(method: TraitItemMethod) -> Result<Self> {
-        let span = method.span().unstable();
+        let span = method.span_unstable();
         let TraitItemMethod {
             attrs,
             sig: signature,

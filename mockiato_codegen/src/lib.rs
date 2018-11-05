@@ -21,6 +21,7 @@ mod constant;
 mod mockable;
 mod parse;
 mod result;
+mod spanned;
 
 use self::mockable::Mockable;
 pub(crate) use self::result::*;
