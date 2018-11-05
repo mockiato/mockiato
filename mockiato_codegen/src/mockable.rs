@@ -23,9 +23,7 @@ impl Mockable {
         }
 
         let mockable_attr = try_or_return!(MockableAttr::parse(attr).map_err(|err| err.emit()));
-
-        let item_trait = try_or_return!(expect_item_trait(item).map_err(|err| err.emit()));
-
+        let item_trait = try_or_return!(extract_item_trait(item).map_err(|err| err.emit()));
         let trait_decl = try_or_return!(TraitDecl::parse(item_trait.clone())
             .map_err(|err| err
                 .emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))));
@@ -47,7 +45,7 @@ fn mock_struct_ident(trait_decl: &TraitDecl, name_attr: Option<NameAttr>) -> Ide
         .unwrap_or_else(|| Ident::new(&format!("{}Mock", trait_decl.ident), trait_decl.span.into()))
 }
 
-fn expect_item_trait(item: Item) -> Result<ItemTrait, Error> {
+fn extract_item_trait(item: Item) -> Result<ItemTrait, Error> {
     match item {
         Item::Trait(item_trait) => Ok(item_trait),
         _ => Err(Error::Diagnostic(
