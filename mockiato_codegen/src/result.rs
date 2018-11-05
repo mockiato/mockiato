@@ -37,6 +37,10 @@ impl Error {
     {
         let mut collected = Vec::new();
 
+        if let (_, Some(max)) = errors.size_hint() {
+            collected.reserve(max);
+        }
+
         errors.for_each(|err| match err {
             Error::Diagnostic(diagnostic) => collected.push(diagnostic),
             Error::MultipleDiagnostics(mut diagnostics) => collected.append(&mut diagnostics),
