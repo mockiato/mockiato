@@ -1,0 +1,38 @@
+error: Traits are currently only allowed to contain traits
+ --> $DIR/non-method-items.rs:9:5
+  |
+9 |     const BAR: usize;
+  |     ^^^^^
+  |
+note: Required for mockable traits
+ --> $DIR/non-method-items.rs:7:1
+  |
+7 | #[mockable]
+  | ^^^^^^^^^^^
+
+error: Traits are currently only allowed to contain traits
+  --> $DIR/non-method-items.rs:11:5
+   |
+11 |     type Baz;
+   |     ^^^^
+   |
+note: Required for mockable traits
+  --> $DIR/non-method-items.rs:7:1
+   |
+7  | #[mockable]
+   | ^^^^^^^^^^^
+
+error: Traits are currently only allowed to contain traits
+  --> $DIR/non-method-items.rs:13:5
+   |
+13 |     macro_in_trait!();
+   |     ^^^^^^^^^^^^^^
+   |
+note: Required for mockable traits
+  --> $DIR/non-method-items.rs:7:1
+   |
+7  | #[mockable]
+   | ^^^^^^^^^^^
+
+error: aborting due to 3 previous errors
+

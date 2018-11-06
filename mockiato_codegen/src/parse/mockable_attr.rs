@@ -1,12 +1,15 @@
 use super::name_attr::NameAttr;
 use crate::constant::ATTR_NAME;
-use crate::Result;
+use crate::spanned::SpannedUnstable;
+use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level};
-use syn::spanned::Spanned;
 use syn::{AttributeArgs, NestedMeta};
 
+/// The `#[mockable]` attribute, which is placed on a trait.
 #[derive(Debug)]
 pub(crate) struct MockableAttr {
+    /// The name sub-attribute. Example: `#[name = "FooMock"]`
+    /// This customizes the name of the generated mock struct.
     pub(crate) name_attr: Option<NameAttr>,
 }
 
@@ -18,20 +21,17 @@ impl MockableAttr {
             .into_iter()
             .map(|nested| match nested {
                 NestedMeta::Meta(meta) => Ok(meta),
-                NestedMeta::Literal(lit) => {
+                NestedMeta::Literal(lit) => Err(Error::Diagnostic(
                     Diagnostic::spanned(
-                        lit.span().unstable(),
+                        lit.span_unstable(),
                         Level::Error,
                         format!("Unsupported syntax for #[{}]", ATTR_NAME),
                     )
                     .help(format!(
                         "Example usage: #[{}(name = \"FooMock\")]",
                         ATTR_NAME
-                    ))
-                    .emit();
-
-                    Err(())
-                }
+                    )),
+                )),
             })
             .collect();
 
@@ -40,20 +40,18 @@ impl MockableAttr {
 
             if item.name() == "name" {
                 if name_attr.is_some() {
-                    Diagnostic::spanned(item.span().unstable(), Level::Warning, "`name` is specified more than once. The latter definition will take precedence.").emit();
+                    Diagnostic::spanned(item.span_unstable(), Level::Warning, "`name` is specified more than once. The latter definition will take precedence.").emit();
                 }
                 name_attr = Some(NameAttr::parse(item)?);
             } else {
-                Diagnostic::spanned(
-                    item.span().unstable(),
+                return Err(Error::Diagnostic(Diagnostic::spanned(
+                    item.span_unstable(),
                     Level::Error,
                     format!(
                         "This attribute property is not supported by #[{}]",
                         ATTR_NAME
                     ),
-                );
-
-                return Err(());
+                )));
             }
         }
 

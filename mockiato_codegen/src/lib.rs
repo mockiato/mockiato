@@ -3,7 +3,10 @@
     extern_crate_item_prelude,
     proc_macro_diagnostic,
     proc_macro_span,
-    proc_macro_hygiene
+    proc_macro_hygiene,
+    bind_by_move_pattern_guards,
+    decl_macro,
+    box_syntax
 )]
 
 extern crate proc_macro;
@@ -17,12 +20,13 @@ extern crate syn;
 mod constant;
 mod mockable;
 mod parse;
+mod result;
+mod spanned;
 
 use self::mockable::Mockable;
+pub(crate) use self::result::*;
 use proc_macro::TokenStream;
 use syn::{AttributeArgs, Item};
-
-pub(crate) type Result<T> = std::result::Result<T, ()>;
 
 #[proc_macro_attribute]
 pub fn mockable(args: TokenStream, input: TokenStream) -> TokenStream {

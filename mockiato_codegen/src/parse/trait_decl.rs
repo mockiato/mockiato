@@ -1,71 +1,52 @@
 use crate::constant::ATTR_NAME;
-use crate::Result;
+use crate::parse::method_decl::MethodDecl;
+use crate::spanned::SpannedUnstable;
+use crate::{merge_results, Error, Result};
 use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
-use syn::token::Add;
-use syn::{Generics, Ident, Item, ItemTrait, TraitItem, TypeParamBound};
+use syn::{Generics, Ident, ItemTrait, TypeParamBound};
 
 #[derive(Debug, Clone)]
 pub(crate) struct TraitDecl {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
     pub(crate) generics: Generics,
-    pub(crate) supertraits: Punctuated<TypeParamBound, Add>,
-    pub(crate) items: Vec<TraitItem>,
+    pub(crate) unsafety: Option<Token![unsafe]>,
+    pub(crate) supertraits: Punctuated<TypeParamBound, Token![+]>,
+    pub(crate) methods: Vec<MethodDecl>,
 }
 
 impl TraitDecl {
-    pub(crate) fn parse(item: Item) -> Result<Self> {
-        if let Item::Trait(item_trait) = item {
-            let span = item_trait.span().unstable();
-            let ItemTrait {
-                auto_token,
-                unsafety,
-                generics,
-                supertraits,
-                items,
-                ident,
-                ..
-            } = item_trait;
+    pub(crate) fn parse(item: ItemTrait) -> Result<Self> {
+        let span = item.span_unstable();
+        let ItemTrait {
+            auto_token,
+            unsafety,
+            generics,
+            supertraits,
+            items,
+            ident,
+            ..
+        } = item;
 
-            if unsafety.is_some() {
-                Diagnostic::spanned(
-                    span,
-                    Level::Error,
-                    format!("#[{}] does not work with unsafe traits", ATTR_NAME),
-                )
-                .emit();
-                return Err(());
-            }
-
-            if auto_token.is_some() {
-                Diagnostic::spanned(
-                    span,
-                    Level::Error,
-                    format!("#[{}] does not work with auto traits", ATTR_NAME),
-                )
-                .emit();
-                return Err(());
-            }
-
-            return Ok(TraitDecl {
-                ident,
+        if auto_token.is_some() {
+            return Err(Error::Diagnostic(Diagnostic::spanned(
                 span,
-                generics: generics.clone(),
-                supertraits: supertraits.clone(),
-                items: items.clone(),
-            });
+                Level::Error,
+                format!("#[{}] does not work with auto traits", ATTR_NAME),
+            )));
         }
 
-        Diagnostic::spanned(
-            item.span().unstable(),
-            Level::Error,
-            format!("#[{}] can only be used with traits", ATTR_NAME),
-        )
-        .emit();
+        let methods = items.into_iter().map(MethodDecl::parse);
 
-        Err(())
+        Ok(TraitDecl {
+            ident,
+            span,
+            unsafety,
+            generics: generics.clone(),
+            supertraits: supertraits.clone(),
+            methods: merge_results(methods)?.collect(),
+        })
     }
 }
