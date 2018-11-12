@@ -70,9 +70,9 @@ impl MethodSelfArg {
 
 #[derive(Debug, Clone)]
 pub(crate) struct MethodArg {
-    ident: Ident,
-    ty: Type,
-    span: Span,
+    pub(crate) ident: Ident,
+    pub(crate) ty: Type,
+    pub(crate) span: Span,
 }
 
 impl MethodArg {

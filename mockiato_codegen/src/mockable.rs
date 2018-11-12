@@ -1,8 +1,10 @@
+use crate::generate::argument_matcher::generate_argument_matcher;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
 use crate::spanned::SpannedUnstable;
 use crate::Error;
+use heck::SnakeCase;
 use proc_macro::{Diagnostic, Level, Span, TokenStream};
 use syn::{AttributeArgs, Ident, Item, ItemTrait};
 
@@ -29,12 +31,24 @@ impl Mockable {
                 .emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))));
 
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
+        let mod_ident = mod_ident(&mock_struct_ident);
+
+        let argument_matchers: proc_macro2::TokenStream = trait_decl
+            .methods
+            .iter()
+            .map(generate_argument_matcher)
+            .collect();
 
         TokenStream::from(quote! {
             #item_trait
 
-            #[derive(Debug)]
             struct #mock_struct_ident;
+
+            mod #mod_ident {
+                use super::*;
+
+                #argument_matchers
+            }
         })
     }
 }
@@ -43,6 +57,10 @@ fn mock_struct_ident(trait_decl: &TraitDecl, name_attr: Option<NameAttr>) -> Ide
     name_attr
         .map(|attr| attr.ident)
         .unwrap_or_else(|| Ident::new(&format!("{}Mock", trait_decl.ident), trait_decl.span.into()))
+}
+
+fn mod_ident(ident: &Ident) -> Ident {
+    Ident::new(&ident.to_string().to_snake_case(), ident.span())
 }
 
 fn extract_item_trait(item: Item) -> Result<ItemTrait, Error> {

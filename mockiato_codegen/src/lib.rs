@@ -18,6 +18,7 @@ extern crate quote;
 extern crate syn;
 
 mod constant;
+mod generate;
 mod mockable;
 mod parse;
 mod result;

@@ -10,6 +10,7 @@ proc-macro = true
 
 [dependencies]
 quote = "0.6"
+heck = "0.3"
 
 [dependencies.syn]
 version = "0.15"

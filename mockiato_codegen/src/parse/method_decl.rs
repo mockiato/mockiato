@@ -8,13 +8,13 @@ use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, ReturnType, TraitItem, 
 /// from a trait declaration.
 #[derive(Debug, Clone)]
 pub(crate) struct MethodDecl {
-    attrs: Vec<Attribute>,
-    unsafety: Option<Token![unsafe]>,
-    ident: Ident,
-    generics: Generics,
-    span: Span,
-    inputs: MethodInputs,
-    output: ReturnType,
+    pub(crate) attrs: Vec<Attribute>,
+    pub(crate) unsafety: Option<Token![unsafe]>,
+    pub(crate) ident: Ident,
+    pub(crate) generics: Generics,
+    pub(crate) span: Span,
+    pub(crate) inputs: MethodInputs,
+    pub(crate) output: ReturnType,
 }
 
 impl MethodDecl {
