@@ -48,9 +48,9 @@ fn argument_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
 
             let bound_lifetimes = bound_lifetimes(lifetime_rewriter.lifetimes);
 
-            TokenStream::from(quote!{
+            quote! {
                 pub(super) #ident: std::boxed::Box<dyn #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty>>,
-            })
+            }
         })
         .collect()
 }
@@ -61,10 +61,7 @@ fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
     }
 
     Some(BoundLifetimes {
-        lifetimes: lifetimes
-            .into_iter()
-            .map(|lifetime| LifetimeDef::new(lifetime))
-            .collect(),
+        lifetimes: lifetimes.into_iter().map(LifetimeDef::new).collect(),
         ..Default::default()
     })
 }
