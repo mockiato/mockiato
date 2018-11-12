@@ -12,7 +12,12 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
     let mut lifetime_rewriter = LifetimeRewriter::new(UniformLifetimeGenerator::default());
     let arguments_fields = generate_arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
 
-    let generics = generics(lifetime_rewriter.generator.has_lifetimes);
+    let generics = if lifetime_rewriter.generator.has_lifetimes {
+        generics()
+    } else {
+        TokenStream::new()
+    };
+
     let debug_impl = generate_debug_impl(method_decl, &generics);
 
     quote! {
@@ -27,15 +32,11 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
 }
 
 /// Generates the generics clause (including angled brackets) for the arguments struct.
-fn generics(has_lifetimes: bool) -> TokenStream {
-    if has_lifetimes {
-        let lifetime = args_lifetime();
+fn generics() -> TokenStream {
+    let lifetime = args_lifetime();
 
-        quote! {
-            <#lifetime>
-        }
-    } else {
-        TokenStream::new()
+    quote! {
+        <#lifetime>
     }
 }
 
