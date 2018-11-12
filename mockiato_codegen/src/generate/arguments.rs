@@ -1,17 +1,18 @@
+use super::lifetime_rewriter::{LifetimeGenerator, LifetimeRewriter};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use heck::CamelCase;
 use proc_macro2::{Span, TokenStream};
-use syn::visit_mut::{visit_type_mut, visit_type_reference_mut, VisitMut};
-use syn::{Ident, Lifetime, TypeReference};
+use syn::visit_mut::visit_type_mut;
+use syn::{Ident, Lifetime};
 
 pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
     let arguments_ident = arguments_ident(&method_decl.ident);
 
-    let mut lifetime_rewriter = LifetimeRewriter::default();
+    let mut lifetime_rewriter = LifetimeRewriter::new(LifetimeGeneratorImpl::default());
     let arguments_fields = arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
 
-    let generics = generics(lifetime_rewriter.has_lifetimes);
+    let generics = generics(lifetime_rewriter.generator.has_lifetimes);
     let debug_impl = generate_debug_impl(method_decl, &generics);
 
     quote! {
@@ -71,7 +72,7 @@ fn arguments_ident(method_ident: &Ident) -> Ident {
 }
 
 fn arguments_fields(
-    lifetime_rewriter: &mut LifetimeRewriter,
+    lifetime_rewriter: &mut LifetimeRewriter<LifetimeGeneratorImpl>,
     method_inputs: &MethodInputs,
 ) -> TokenStream {
     method_inputs
@@ -95,26 +96,16 @@ fn args_lifetime() -> Lifetime {
     Lifetime::new("'__mockiato_args", Span::call_site())
 }
 
-/// Replaces all lifetimes in the given AST with the same lifetime
-/// It also gives explicit lifetimes to references without lifetimes
+/// Replaces all lifetimes with the same lifetime
 #[derive(Default)]
-struct LifetimeRewriter {
+struct LifetimeGeneratorImpl {
     // Indicates that the rewriter found at least one lifetime
     has_lifetimes: bool,
 }
 
-impl VisitMut for LifetimeRewriter {
-    fn visit_lifetime_mut(&mut self, lifetime: &mut Lifetime) {
-        *lifetime = args_lifetime();
+impl LifetimeGenerator for LifetimeGeneratorImpl {
+    fn generate_lifetime(&mut self) -> Lifetime {
         self.has_lifetimes = true;
-    }
-
-    fn visit_type_reference_mut(&mut self, type_reference: &mut TypeReference) {
-        visit_type_reference_mut(self, type_reference);
-
-        if type_reference.lifetime.is_none() {
-            type_reference.lifetime = Some(args_lifetime());
-            self.has_lifetimes = true;
-        }
+        args_lifetime()
     }
 }
