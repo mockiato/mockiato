@@ -6,11 +6,8 @@ use std::fmt::{self, Display};
 trait Debug {}
 
 #[mockable]
-trait Greeter<D>: fmt::Debug
-where
-    D: Display,
-{
-    fn say_hello(&self, name: D) -> String;
+trait Greeter: fmt::Debug {
+    fn say_hello(&self, name: &dyn Display) -> String;
 }
 
 #[test]
