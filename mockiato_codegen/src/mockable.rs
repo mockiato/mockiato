@@ -1,4 +1,5 @@
 use crate::generate::argument_matcher::generate_argument_matcher;
+use crate::generate::arguments::generate_arguments;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
@@ -34,6 +35,9 @@ impl Mockable {
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
         let mod_ident = mod_ident(&mock_struct_ident);
 
+        let arguments: proc_macro2::TokenStream =
+            trait_decl.methods.iter().map(generate_arguments).collect();
+
         let argument_matchers: proc_macro2::TokenStream = trait_decl
             .methods
             .iter()
@@ -50,6 +54,8 @@ impl Mockable {
 
             mod #mod_ident {
                 use super::*;
+
+                #arguments
 
                 #argument_matchers
             }

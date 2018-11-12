@@ -1,9 +1,10 @@
+use super::lifetime_rewriter::{LifetimeGenerator, LifetimeRewriter};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use heck::CamelCase;
 use proc_macro2::{Span, TokenStream};
-use syn::visit_mut::{visit_type_mut, visit_type_reference_mut, VisitMut};
-use syn::{BoundLifetimes, Ident, Lifetime, LifetimeDef, LitStr, TypeReference};
+use syn::visit_mut::visit_type_mut;
+use syn::{BoundLifetimes, Ident, Lifetime, LifetimeDef, LitStr};
 
 pub(crate) fn generate_argument_matcher(method_decl: &MethodDecl) -> TokenStream {
     let argument_matcher_ident = argument_matcher_ident(&method_decl.ident);
@@ -65,10 +66,10 @@ fn argument_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
             let ident = &input.ident;
             let mut ty = input.ty.clone();
 
-            let mut lifetime_rewriter = LifetimeRewriter::default();
+            let mut lifetime_rewriter = LifetimeRewriter::new(IncrementalLifetimeGenerator::default());
             visit_type_mut(&mut lifetime_rewriter, &mut ty);
 
-            let bound_lifetimes = bound_lifetimes(lifetime_rewriter.lifetimes);
+            let bound_lifetimes = bound_lifetimes(lifetime_rewriter.generator.lifetimes);
 
             quote! {
                 pub(super) #ident: std::boxed::Box<dyn #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty>>,
@@ -93,12 +94,12 @@ fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
 /// can be used in a for<...> clause.
 /// It also gives explicit lifetimes to references without lifetimes
 #[derive(Default)]
-struct LifetimeRewriter {
+struct IncrementalLifetimeGenerator {
     lifetimes: Vec<Lifetime>,
 }
 
-impl LifetimeRewriter {
-    fn create_new_lifetime(&mut self) -> Lifetime {
+impl LifetimeGenerator for IncrementalLifetimeGenerator {
+    fn generate_lifetime(&mut self) -> Lifetime {
         // The only requirement for this lifetime is that it's unique.
         // The fixed prefix is arbitrary.
         let lifetime = Lifetime::new(
@@ -107,19 +108,5 @@ impl LifetimeRewriter {
         );
         self.lifetimes.push(lifetime.clone());
         lifetime
-    }
-}
-
-impl VisitMut for LifetimeRewriter {
-    fn visit_lifetime_mut(&mut self, lifetime: &mut Lifetime) {
-        *lifetime = self.create_new_lifetime();
-    }
-
-    fn visit_type_reference_mut(&mut self, type_reference: &mut TypeReference) {
-        visit_type_reference_mut(self, type_reference);
-
-        if type_reference.lifetime.is_none() {
-            type_reference.lifetime = Some(self.create_new_lifetime());
-        }
     }
 }
