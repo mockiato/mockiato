@@ -33,6 +33,9 @@ use syn::{AttributeArgs, Item};
 /// # Examples
 ///
 /// ```
+/// # use mockiato_codegen::mockable;
+/// use std::fmt::Display;
+///
 /// #[mockable]
 /// trait Greeter {
 ///     fn greet(&self, name: &Display) -> String;
