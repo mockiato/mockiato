@@ -80,6 +80,9 @@ impl MethodArg {
         let span = arg.span_unstable();
 
         match arg {
+            // A "captured" argument is the "normal" way of specifying an argument
+            // with an explicit name and type.
+            // E.g. `name: &str`
             FnArg::Captured(captured) => {
                 let span = captured.span_unstable();
 
