@@ -12,7 +12,7 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
     let arguments_fields = arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
 
     let generics = generics(lifetime_rewriter.has_lifetimes);
-    let debug_impl = generate_debug_impl(method_decl, generics.clone());
+    let debug_impl = generate_debug_impl(method_decl, &generics);
 
     quote! {
         pub(super) struct #arguments_ident #generics {
@@ -39,7 +39,7 @@ fn generics(has_lifetimes: bool) -> TokenStream {
 }
 
 /// Generates a `Debug` implementation for an arguments struct.
-fn generate_debug_impl(method_decl: &MethodDecl, generics: TokenStream) -> TokenStream {
+fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> TokenStream {
     let arguments_ident = arguments_ident(&method_decl.ident);
 
     let debug_fields: TokenStream = method_decl
