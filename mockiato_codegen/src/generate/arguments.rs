@@ -10,7 +10,7 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
     let arguments_ident = arguments_ident(&method_decl.ident);
 
     let mut lifetime_rewriter = LifetimeRewriter::new(LifetimeGeneratorImpl::default());
-    let arguments_fields = arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
+    let arguments_fields = generate_arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
 
     let generics = generics(lifetime_rewriter.generator.has_lifetimes);
     let debug_impl = generate_debug_impl(method_decl, &generics);
@@ -71,7 +71,7 @@ fn arguments_ident(method_ident: &Ident) -> Ident {
     )
 }
 
-fn arguments_fields(
+fn generate_arguments_fields(
     lifetime_rewriter: &mut LifetimeRewriter<LifetimeGeneratorImpl>,
     method_inputs: &MethodInputs,
 ) -> TokenStream {
