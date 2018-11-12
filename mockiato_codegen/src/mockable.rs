@@ -42,6 +42,7 @@ impl Mockable {
         TokenStream::from(quote! {
             #item_trait
 
+            #[derive(Debug)]
             struct #mock_struct_ident;
 
             mod #mod_ident {
