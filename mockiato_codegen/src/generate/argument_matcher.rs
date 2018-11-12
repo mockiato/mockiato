@@ -77,6 +77,7 @@ fn argument_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
         .collect()
 }
 
+/// Generates a for<...> clause from a list of given lifetimes
 fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
     if lifetimes.is_empty() {
         None
@@ -88,6 +89,9 @@ fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
     }
 }
 
+/// Replaces all lifetimes in the given AST with auto-generated lifetimes that
+/// can be used in a for<...> clause.
+/// It also gives explicit lifetimes to references without lifetimes
 #[derive(Default)]
 struct LifetimeRewriter {
     lifetimes: Vec<Lifetime>,
@@ -95,7 +99,12 @@ struct LifetimeRewriter {
 
 impl LifetimeRewriter {
     fn create_new_lifetime(&mut self) -> Lifetime {
-        let lifetime = Lifetime::new(&format!("'arg{}", self.lifetimes.len()), Span::call_site());
+        // The only requirement for this lifetime is that it's unique.
+        // The fixed prefix is arbitrary.
+        let lifetime = Lifetime::new(
+            &format!("'__mockiato_arg{}", self.lifetimes.len()),
+            Span::call_site(),
+        );
         self.lifetimes.push(lifetime.clone());
         lifetime
     }
