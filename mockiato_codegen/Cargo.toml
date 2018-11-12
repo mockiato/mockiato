@@ -19,6 +19,3 @@ features = ["full", "extra-traits"]
 [dependencies.proc-macro2]
 version = "0.4"
 features = ["nightly"]
-
-[dev-dependencies]
-compiletest_rs = "0.3.14"
