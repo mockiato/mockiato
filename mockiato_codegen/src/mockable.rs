@@ -15,6 +15,7 @@ impl Mockable {
     }
 
     pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> TokenStream {
+        #[doc(hidden)]
         macro try_or_return($expr: expr) {
             match $expr {
                 Ok(value) => value,
