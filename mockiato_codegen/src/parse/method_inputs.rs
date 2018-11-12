@@ -88,7 +88,6 @@ impl MethodArg {
 
                 match captured.pat {
                     Pat::Ident(pat_ident) => {
-
                         if pat_ident.subpat.is_some() {
                             panic!("Sub-pattern should not appear within method declaration");
                         }
