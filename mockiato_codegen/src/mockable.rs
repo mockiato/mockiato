@@ -61,8 +61,16 @@ fn mock_struct_ident(trait_decl: &TraitDecl, name_attr: Option<NameAttr>) -> Ide
         .unwrap_or_else(|| Ident::new(&format!("{}Mock", trait_decl.ident), trait_decl.span.into()))
 }
 
-fn mod_ident(ident: &Ident) -> Ident {
-    Ident::new(&ident.to_string().to_snake_case(), ident.span())
+/// Generates an [`struct@Ident`] for the internal sub-mod for `Arguments` and `ArgumentsMatcher` impls
+/// for a mock struct.
+///
+/// The sub-mod is used to hide implementation details from the user
+/// and to prevent cluttering of the namespace of the trait's mod.
+fn mod_ident(mock_ident: &Ident) -> Ident {
+    Ident::new(
+        &format!("__mockiato_{}", mock_ident.to_string().to_snake_case()),
+        mock_ident.span(),
+    )
 }
 
 fn extract_item_trait(item: Item) -> Result<ItemTrait, Error> {
