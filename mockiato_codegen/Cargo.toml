@@ -1,7 +1,10 @@
 [package]
 name = "mockiato_codegen"
 version = "0.1.0"
-authors = ["Ruben Schmidmeister <ruben.schmidmeister@icloud.com>"]
+authors = [
+    "Ruben Schmidmeister <ruben@myelin.ch>",
+    "Jeremy Stucki <jeremy@myelin.ch>",
+]
 edition = "2018"
 license = "MIT"
 
