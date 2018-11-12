@@ -8,12 +8,19 @@ use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, ReturnType, TraitItem, 
 /// from a trait declaration.
 #[derive(Debug, Clone)]
 pub(crate) struct MethodDecl {
+    /// A list of attributes decorating this method. (E.g. `#[inline(always)]`)
     pub(crate) attrs: Vec<Attribute>,
+    /// Whether this method is unsafe or not
     pub(crate) unsafety: Option<Token![unsafe]>,
+    /// The name of this method. (E.g. `greet`)
     pub(crate) ident: Ident,
+    /// The generic type params (including lifetimes)
     pub(crate) generics: Generics,
+    /// The [`Span`] of the entire method
     pub(crate) span: Span,
+    /// The inputs (arguments) of this method
     pub(crate) inputs: MethodInputs,
+    /// Return type of this method.
     pub(crate) output: ReturnType,
 }
 
