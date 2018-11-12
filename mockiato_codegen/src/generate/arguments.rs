@@ -25,6 +25,7 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
     }
 }
 
+/// Generates the generics clause (including angled brackets) for the arguments struct.
 fn generics(has_lifetimes: bool) -> TokenStream {
     if has_lifetimes {
         let lifetime = args_lifetime();
