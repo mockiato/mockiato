@@ -1,8 +1,8 @@
 use crate::spanned::SpannedUnstable;
 use crate::{merge_results, Error, Result};
-use proc_macro::{Diagnostic, Level};
+use proc_macro::{Diagnostic, Level, Span};
 use syn::punctuated::Punctuated;
-use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Pat, PatIdent, Type};
+use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Type};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MethodInputs {
@@ -69,23 +69,45 @@ impl MethodSelfArg {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum MethodArg {
-    /// A "normal" argument. Example: `first_name: &str`
-    Captured(ArgCaptured),
-    /// An ignored argument. Example: `_: String`
-    Ignored(Type),
+pub(crate) struct MethodArg {
+    ident: Ident,
+    ty: Type,
+    span: Span,
 }
 
 impl MethodArg {
     pub(crate) fn parse(arg: FnArg) -> Result<Self> {
         let span = arg.span_unstable();
+
         match arg {
-            FnArg::Captured(captured) => Ok(MethodArg::Captured(captured)),
-            FnArg::Ignored(ty) => Ok(MethodArg::Ignored(ty)),
+            FnArg::Captured(captured) => {
+                let span = captured.span_unstable();
+
+                match captured.pat {
+                    Pat::Ident(pat_ident) => {
+
+                        if pat_ident.subpat.is_some() {
+                            panic!("Sub-pattern should not appear within method declaration");
+                        }
+
+                        Ok(MethodArg {
+                            ident: pat_ident.ident,
+                            ty: captured.ty,
+                            span
+                        })
+                    },
+                    _ => {
+                        Err(Error::Diagnostic(Diagnostic::spanned(
+                        span,
+                        Level::Error,
+                        "Ignored arguments are not supported")))
+                    },
+                }
+            }
             _ => Err(Error::Diagnostic(Diagnostic::spanned(
                 span,
                 Level::Error,
-                "Only captured and ignored method arguments are supported",
+                "Only captured arguments are supported",
             ).note("This error should never appear, because rustc already enforces these requirements"))),
         }
     }

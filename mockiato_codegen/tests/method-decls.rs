@@ -6,7 +6,9 @@ trait Foo {
     fn mut_self_ref(&mut self);
     fn captured_self(self: Box<Self>);
     fn self_ownership(self);
-    fn discarded_arg(&self, _: String);
+    fn arg_ref(&self, slice: &[u8]);
+    fn arg_mut_ref(&self, buf: &mut [u8]);
+    fn arg_ownership(&self, list: Vec<u32>);
 }
 
 fn main() {}
