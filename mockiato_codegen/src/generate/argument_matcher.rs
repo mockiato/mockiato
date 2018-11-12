@@ -82,7 +82,7 @@ fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
         None
     } else {
         Some(BoundLifetimes {
-            lifgetimes: lifetimes.into_iter().map(LifetimeDef::new).collect(),
+            lifetimes: lifetimes.into_iter().map(LifetimeDef::new).collect(),
             ..Default::default()
         })
     }
