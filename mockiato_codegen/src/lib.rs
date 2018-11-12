@@ -33,8 +33,8 @@ use syn::{AttributeArgs, Item};
 ///
 /// # Examples
 ///
-/// ```
-/// # use mockiato_codegen::mockable;
+/// ```ignore
+/// use mockiato::mockable;
 /// use std::fmt::Display;
 ///
 /// #[mockable]
