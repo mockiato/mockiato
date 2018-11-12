@@ -3,25 +3,47 @@ use crate::parse::method_inputs::MethodInputs;
 use heck::CamelCase;
 use proc_macro2::{Span, TokenStream};
 use syn::visit_mut::{visit_type_mut, visit_type_reference_mut, VisitMut};
-use syn::{BoundLifetimes, Ident, Lifetime, LifetimeDef, TypeReference};
+use syn::{BoundLifetimes, Ident, Lifetime, LifetimeDef, LitStr, TypeReference};
 
 pub(crate) fn generate_argument_matcher(method_decl: &MethodDecl) -> TokenStream {
     let argument_matcher_ident = argument_matcher_ident(&method_decl.ident);
     let argument_matcher_fields = argument_matcher_fields(&method_decl.inputs);
+    let debug_impl = generate_debug_impl(method_decl);
 
     quote! {
         pub(super) struct #argument_matcher_ident {
             #argument_matcher_fields
         }
 
-        impl std::fmt::Debug for #argument_matcher_ident {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                // TODO
-                unimplemented!()
-            }
-        }
+        #debug_impl
 
         impl mockiato::internal::Arguments for #argument_matcher_ident {}
+    }
+}
+
+/// Generates a `Debug` implementation for an argument matcher.
+fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
+    let method_name_str = LitStr::new(&method_decl.ident.to_string(), method_decl.ident.span());
+    let argument_matcher_ident = argument_matcher_ident(&method_decl.ident);
+
+    let debug_fields: TokenStream = method_decl
+        .inputs
+        .args
+        .iter()
+        .map(|input| {
+            let ident = &input.ident;
+            quote!{ .field(&mockiato::internal::MaybeDebugExtWrapper(&self.#ident)) }
+        })
+        .collect();
+
+    quote! {
+        impl std::fmt::Debug for #argument_matcher_ident {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.debug_tuple(#method_name_str)
+                  #debug_fields
+                 .finish()
+            }
+        }
     }
 }
 
