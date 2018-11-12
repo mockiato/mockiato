@@ -18,6 +18,7 @@ extern crate quote;
 extern crate syn;
 
 mod constant;
+mod generate;
 mod mockable;
 mod parse;
 mod result;
@@ -32,8 +33,8 @@ use syn::{AttributeArgs, Item};
 ///
 /// # Examples
 ///
-/// ```
-/// # use mockiato_codegen::mockable;
+/// ```ignore
+/// use mockiato::mockable;
 /// use std::fmt::Display;
 ///
 /// #[mockable]

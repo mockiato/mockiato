@@ -1,11 +1,11 @@
 error: The first parameter of a method must be self, so that the trait is object-safe
- --> $DIR/method-without-self.rs:5:12
+ --> $DIR/method_without_self.rs:5:12
   |
 5 |     fn bar(baz: u64);
   |            ^^^
   |
 note: Required for mockable traits
- --> $DIR/method-without-self.rs:3:1
+ --> $DIR/method_without_self.rs:3:1
   |
 3 | #[mockable]
   | ^^^^^^^^^^^

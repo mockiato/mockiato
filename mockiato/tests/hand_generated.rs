@@ -1,9 +1,9 @@
 use std::fmt::Debug;
 
-trait Greeter: Debug {
+trait Greeter<'a>: Debug {
     fn say_hello(&self, name: &str) -> String;
 
-    fn print_hello(&self, name: &str);
+    fn print_hello(&self, name: &'a str);
 
     fn borrow_hello(&self, name: &str) -> &str;
 }
@@ -86,13 +86,13 @@ impl Drop for GreeterMock {
     }
 }
 
-impl Greeter for GreeterMock {
+impl<'a> Greeter<'a> for GreeterMock {
     fn say_hello(&self, name: &str) -> String {
         self.say_hello
             .call_unwrap(self::greeter_mock::SayHelloArguments { name })
     }
 
-    fn print_hello(&self, name: &str) {
+    fn print_hello(&self, name: &'a str) {
         self.print_hello
             .call_unwrap(self::greeter_mock::PrintHelloArguments { name })
     }

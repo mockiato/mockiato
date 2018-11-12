@@ -1,5 +1,5 @@
 error: Unsupported syntax for #[mockable]
- --> $DIR/malformed-mockable-attr.rs:3:12
+ --> $DIR/malformed_mockable_attr.rs:3:12
   |
 3 | #[mockable("Bar")]
   |            ^^^^^

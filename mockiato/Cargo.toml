@@ -10,3 +10,6 @@ license = "MIT"
 
 [dependencies]
 mockiato_codegen = { path = "../mockiato_codegen" }
+
+[dev-dependencies]
+compiletest_rs = "0.3.14"

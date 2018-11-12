@@ -1,5 +1,5 @@
 error: #[mockable(name = "...") expects a string literal
- --> $DIR/malformed-name-attr.rs:3:12
+ --> $DIR/malformed_name_attr.rs:3:12
   |
 3 | #[mockable(name = 1)]
   |            ^^^^
@@ -7,7 +7,7 @@ error: #[mockable(name = "...") expects a string literal
   = help: Example usage: #[mockable(name = "FooMock")]
 
 error: #[mockable(name = "...") expects a string literal
- --> $DIR/malformed-name-attr.rs:6:12
+ --> $DIR/malformed_name_attr.rs:6:12
   |
 6 | #[mockable(name(FooMock))]
   |            ^^^^
@@ -15,7 +15,7 @@ error: #[mockable(name = "...") expects a string literal
   = help: Example usage: #[mockable(name = "FooMock")]
 
 error: #[mockable(name = "...") expects a string literal
- --> $DIR/malformed-name-attr.rs:9:12
+ --> $DIR/malformed_name_attr.rs:9:12
   |
 9 | #[mockable(name)]
   |            ^^^^
