@@ -1,11 +1,11 @@
 error: Ignored arguments are not supported
- --> $DIR/ignored-arguments.rs:5:19
+ --> $DIR/ignored_arguments.rs:5:19
   |
 5 |     fn bar(&self, _: u64);
   |                   ^
   |
 note: Required for mockable traits
- --> $DIR/ignored-arguments.rs:3:1
+ --> $DIR/ignored_arguments.rs:3:1
   |
 3 | #[mockable]
   | ^^^^^^^^^^^
