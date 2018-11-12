@@ -9,7 +9,7 @@ use syn::{Ident, Lifetime};
 pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
     let arguments_ident = arguments_ident(&method_decl.ident);
 
-    let mut lifetime_rewriter = LifetimeRewriter::new(LifetimeGeneratorImpl::default());
+    let mut lifetime_rewriter = LifetimeRewriter::new(UniformLifetimeGenerator::default());
     let arguments_fields = generate_arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
 
     let generics = generics(lifetime_rewriter.generator.has_lifetimes);
@@ -72,7 +72,7 @@ fn arguments_ident(method_ident: &Ident) -> Ident {
 }
 
 fn generate_arguments_fields(
-    lifetime_rewriter: &mut LifetimeRewriter<LifetimeGeneratorImpl>,
+    lifetime_rewriter: &mut LifetimeRewriter<UniformLifetimeGenerator>,
     method_inputs: &MethodInputs,
 ) -> TokenStream {
     method_inputs
@@ -98,12 +98,12 @@ fn args_lifetime() -> Lifetime {
 
 /// Replaces all lifetimes with the same lifetime
 #[derive(Default)]
-struct LifetimeGeneratorImpl {
+struct UniformLifetimeGenerator {
     // Indicates that the rewriter found at least one lifetime
     has_lifetimes: bool,
 }
 
-impl LifetimeGenerator for LifetimeGeneratorImpl {
+impl LifetimeGenerator for UniformLifetimeGenerator {
     fn generate_lifetime(&mut self) -> Lifetime {
         self.has_lifetimes = true;
         args_lifetime()

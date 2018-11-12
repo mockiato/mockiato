@@ -66,7 +66,7 @@ fn argument_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
             let ident = &input.ident;
             let mut ty = input.ty.clone();
 
-            let mut lifetime_rewriter = LifetimeRewriter::new(LifetimeGeneratorImpl::default());
+            let mut lifetime_rewriter = LifetimeRewriter::new(IncrementalLifetimeGenerator::default());
             visit_type_mut(&mut lifetime_rewriter, &mut ty);
 
             let bound_lifetimes = bound_lifetimes(lifetime_rewriter.generator.lifetimes);
@@ -94,11 +94,11 @@ fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
 /// can be used in a for<...> clause.
 /// It also gives explicit lifetimes to references without lifetimes
 #[derive(Default)]
-struct LifetimeGeneratorImpl {
+struct IncrementalLifetimeGenerator {
     lifetimes: Vec<Lifetime>,
 }
 
-impl LifetimeGenerator for LifetimeGeneratorImpl {
+impl LifetimeGenerator for IncrementalLifetimeGenerator {
     fn generate_lifetime(&mut self) -> Lifetime {
         // The only requirement for this lifetime is that it's unique.
         // The fixed prefix is arbitrary.
