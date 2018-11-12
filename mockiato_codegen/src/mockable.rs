@@ -40,6 +40,8 @@ impl Mockable {
             .map(generate_argument_matcher)
             .collect();
 
+        // The sub-mod is used to hide implementation details from the user
+        // and to prevent cluttering of the namespace of the trait's mod.
         TokenStream::from(quote! {
             #item_trait
 
@@ -61,11 +63,8 @@ fn mock_struct_ident(trait_decl: &TraitDecl, name_attr: Option<NameAttr>) -> Ide
         .unwrap_or_else(|| Ident::new(&format!("{}Mock", trait_decl.ident), trait_decl.span.into()))
 }
 
-/// Generates an [`struct@Ident`] for the internal sub-mod for `Arguments` and `ArgumentsMatcher` impls
+/// Generates a [`struct@Ident`] for the internal sub-mod for `Arguments` and `ArgumentsMatcher` impls
 /// for a mock struct.
-///
-/// The sub-mod is used to hide implementation details from the user
-/// and to prevent cluttering of the namespace of the trait's mod.
 fn mod_ident(mock_ident: &Ident) -> Ident {
     Ident::new(
         &format!("__mockiato_{}", mock_ident.to_string().to_snake_case()),

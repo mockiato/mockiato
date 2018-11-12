@@ -88,6 +88,8 @@ impl MethodArg {
 
                 match captured.pat {
                     Pat::Ident(pat_ident) => {
+                        // Subpat is the part behind the @ in a pattern match.
+                        // See: https://docs.rs/syn/0.15.20/syn/struct.PatIdent.html#structfield.subpat
                         if pat_ident.subpat.is_some() {
                             panic!("Sub-pattern should not appear within method declaration");
                         }
