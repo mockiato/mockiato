@@ -79,13 +79,13 @@ fn argument_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
 
 fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
     if lifetimes.is_empty() {
-        return None;
+        None
+    } else {
+        Some(BoundLifetimes {
+            lifgetimes: lifetimes.into_iter().map(LifetimeDef::new).collect(),
+            ..Default::default()
+        })
     }
-
-    Some(BoundLifetimes {
-        lifetimes: lifetimes.into_iter().map(LifetimeDef::new).collect(),
-        ..Default::default()
-    })
 }
 
 #[derive(Default)]
