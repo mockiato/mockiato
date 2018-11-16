@@ -1,3 +1,4 @@
+use super::constant::arguments_lifetime;
 use super::lifetime_rewriter::{LifetimeGenerator, LifetimeRewriter};
 use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
@@ -76,8 +77,10 @@ fn generate_arguments_matcher_impl(
         })
         .collect();
 
+    let arguments_lifetime = arguments_lifetime();
+
     quote! {
-        impl<'__mockiato_args> mockiato::internal::ArgumentsMatcher<'__mockiato_args> for #arguments_matcher_ident {
+        impl<#arguments_lifetime> mockiato::internal::ArgumentsMatcher<#arguments_lifetime> for #arguments_matcher_ident {
             type Arguments = #arguments_ident #arguments_generics;
 
             fn matches_arguments(&self, args: &Self::Arguments) -> bool {

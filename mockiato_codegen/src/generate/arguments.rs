@@ -1,8 +1,9 @@
+use super::constant::arguments_lifetime;
 use super::lifetime_rewriter::{LifetimeGenerator, LifetimeRewriter};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use heck::CamelCase;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use syn::visit_mut::visit_type_mut;
 use syn::{Ident, Lifetime};
 
@@ -43,7 +44,7 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> GeneratedArguments
 
 /// Generates the generics clause (including angled brackets) for the arguments struct.
 fn generics() -> TokenStream {
-    let lifetime = args_lifetime();
+    let lifetime = arguments_lifetime();
 
     quote! {
         <#lifetime>
@@ -102,11 +103,6 @@ fn generate_arguments_fields(
         .collect()
 }
 
-fn args_lifetime() -> Lifetime {
-    // The fixed prefix is arbitrary.
-    Lifetime::new("'__mockiato_args", Span::call_site())
-}
-
 /// Replaces all lifetimes with the same lifetime
 #[derive(Default)]
 struct UniformLifetimeGenerator {
@@ -117,6 +113,6 @@ struct UniformLifetimeGenerator {
 impl LifetimeGenerator for UniformLifetimeGenerator {
     fn generate_lifetime(&mut self) -> Lifetime {
         self.has_lifetimes = true;
-        args_lifetime()
+        arguments_lifetime()
     }
 }
