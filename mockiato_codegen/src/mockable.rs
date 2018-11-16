@@ -1,5 +1,5 @@
-use crate::generate::argument_matcher::generate_argument_matcher;
 use crate::generate::arguments::generate_arguments;
+use crate::generate::arguments_matcher::generate_arguments_matcher;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::name_attr::NameAttr;
@@ -61,7 +61,7 @@ impl Mockable {
 
 fn generate_argument_structs(method_decl: &MethodDecl) -> proc_macro2::TokenStream {
     let arguments = generate_arguments(method_decl);
-    let arguments_matcher = generate_argument_matcher(&method_decl, &arguments);
+    let arguments_matcher = generate_arguments_matcher(&method_decl, &arguments);
     let arguments_output = arguments.output;
 
     quote! {
