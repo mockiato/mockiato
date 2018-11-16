@@ -94,8 +94,15 @@ impl MethodArg {
                             panic!("Sub-pattern should not appear within method declaration");
                         }
 
+                        let ident_string = pat_ident.ident.to_string();
+                        let ident = if ident_string.starts_with('_') {
+                            &ident_string[1..]
+                        } else {
+                            &ident_string
+                        };
+
                         Ok(MethodArg {
-                            ident: pat_ident.ident,
+                            ident: Ident::new(ident, pat_ident.ident.span()),
                             ty: captured.ty,
                             span
                         })
