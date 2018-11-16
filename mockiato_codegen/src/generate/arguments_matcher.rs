@@ -62,6 +62,8 @@ fn generate_arguments_matcher_impl(
     let arguments_generics = &arguments.generics;
     let args = &method_decl.inputs.args;
 
+    // Since argument matchers for methods without any arguments should always match, we can
+    // fall back to the default impl on the trait `ArgumentsMatcher`.
     if args.is_empty() {
         return TokenStream::new();
     }
