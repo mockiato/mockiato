@@ -9,7 +9,9 @@ pub trait ArgumentMatcher<T>: MaybeDebug {
 pub trait ArgumentsMatcher<'args>: Debug {
     type Arguments: Arguments;
 
-    fn matches_arguments(&self, input: &Self::Arguments) -> bool;
+    fn matches_arguments(&self, _input: &Self::Arguments) -> bool {
+        true
+    }
 }
 
 impl<T, U> ArgumentMatcher<U> for T

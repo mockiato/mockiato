@@ -6,7 +6,13 @@ use proc_macro2::{Span, TokenStream};
 use syn::visit_mut::visit_type_mut;
 use syn::{Ident, Lifetime};
 
-pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
+pub(crate) struct GeneratedArguments {
+    pub(crate) output: TokenStream,
+    pub(crate) generics: TokenStream,
+    pub(crate) ident: Ident,
+}
+
+pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> GeneratedArguments {
     let arguments_ident = arguments_ident(&method_decl.ident);
 
     let mut lifetime_rewriter = LifetimeRewriter::new(UniformLifetimeGenerator::default());
@@ -20,14 +26,18 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> TokenStream {
 
     let debug_impl = generate_debug_impl(method_decl, &generics);
 
-    quote! {
-        pub(super) struct #arguments_ident #generics {
-            #arguments_fields
-        }
+    GeneratedArguments {
+        generics: generics.clone(),
+        ident: arguments_ident.clone(),
+        output: quote! {
+            pub(super) struct #arguments_ident #generics {
+                #arguments_fields
+            }
 
-        #debug_impl
+            #debug_impl
 
-        impl #generics mockiato::internal::Arguments for #arguments_ident #generics {}
+            impl #generics mockiato::internal::Arguments for #arguments_ident #generics {}
+        },
     }
 }
 
@@ -65,7 +75,7 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> Toke
     }
 }
 
-fn arguments_ident(method_ident: &Ident) -> Ident {
+pub fn arguments_ident(method_ident: &Ident) -> Ident {
     Ident::new(
         &format!("{}Arguments", method_ident.to_string().to_camel_case()),
         method_ident.span(),

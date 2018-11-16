@@ -1,15 +1,21 @@
 use super::lifetime_rewriter::{LifetimeGenerator, LifetimeRewriter};
+use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use heck::CamelCase;
 use proc_macro2::{Span, TokenStream};
+use syn::punctuated::Punctuated;
 use syn::visit_mut::visit_type_mut;
 use syn::{BoundLifetimes, Ident, Lifetime, LifetimeDef, LitStr};
 
-pub(crate) fn generate_argument_matcher(method_decl: &MethodDecl) -> TokenStream {
+pub(crate) fn generate_argument_matcher(
+    method_decl: &MethodDecl,
+    arguments: &GeneratedArguments,
+) -> TokenStream {
     let argument_matcher_ident = argument_matcher_ident(&method_decl.ident);
     let argument_matcher_fields = argument_matcher_fields(&method_decl.inputs);
     let debug_impl = generate_debug_impl(method_decl);
+    let argument_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments);
 
     quote! {
         pub(super) struct #argument_matcher_ident {
@@ -17,8 +23,7 @@ pub(crate) fn generate_argument_matcher(method_decl: &MethodDecl) -> TokenStream
         }
 
         #debug_impl
-
-        impl mockiato::internal::Arguments for #argument_matcher_ident {}
+        #argument_matcher_impl
     }
 }
 
@@ -43,6 +48,38 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
                 f.debug_tuple(#method_name_str)
                   #debug_fields
                  .finish()
+            }
+        }
+    }
+}
+
+fn generate_arguments_matcher_impl(
+    method_decl: &MethodDecl,
+    arguments: &GeneratedArguments,
+) -> TokenStream {
+    let arguments_matcher_ident = argument_matcher_ident(&method_decl.ident);
+    let arguments_ident = &arguments.ident;
+    let arguments_generics = &arguments.generics;
+    let args = &method_decl.inputs.args;
+
+    if args.is_empty() {
+        return TokenStream::new();
+    }
+
+    let matches_argument_calls: Punctuated<_, Token![&&]> = args
+        .iter()
+        .map(|arg| {
+            let ident = &arg.ident;
+            quote! { self.#ident.matches_argument(&args.#ident) }
+        })
+        .collect();
+
+    quote! {
+        impl<'__mockiato_args> mockiato::internal::ArgumentsMatcher<'__mockiato_args> for #arguments_matcher_ident {
+            type Arguments = #arguments_ident #arguments_generics;
+
+            fn matches_arguments(&self, args: &Self::Arguments) -> bool {
+                #matches_argument_calls
             }
         }
     }
