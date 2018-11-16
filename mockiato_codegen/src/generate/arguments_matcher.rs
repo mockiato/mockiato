@@ -1,31 +1,37 @@
+use super::constant::arguments_lifetime;
 use super::lifetime_rewriter::{LifetimeGenerator, LifetimeRewriter};
+use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use heck::CamelCase;
 use proc_macro2::{Span, TokenStream};
+use syn::punctuated::Punctuated;
 use syn::visit_mut::visit_type_mut;
 use syn::{BoundLifetimes, Ident, Lifetime, LifetimeDef, LitStr};
 
-pub(crate) fn generate_argument_matcher(method_decl: &MethodDecl) -> TokenStream {
-    let argument_matcher_ident = argument_matcher_ident(&method_decl.ident);
-    let argument_matcher_fields = argument_matcher_fields(&method_decl.inputs);
+pub(crate) fn generate_arguments_matcher(
+    method_decl: &MethodDecl,
+    arguments: &GeneratedArguments,
+) -> TokenStream {
+    let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
+    let arguments_matcher_fields = arguments_matcher_fields(&method_decl.inputs);
     let debug_impl = generate_debug_impl(method_decl);
+    let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments);
 
     quote! {
-        pub(super) struct #argument_matcher_ident {
-            #argument_matcher_fields
+        pub(super) struct #arguments_matcher_ident {
+            #arguments_matcher_fields
         }
 
         #debug_impl
-
-        impl mockiato::internal::Arguments for #argument_matcher_ident {}
+        #arguments_matcher_impl
     }
 }
 
 /// Generates a `Debug` implementation for an argument matcher.
 fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
     let method_name_str = LitStr::new(&method_decl.ident.to_string(), method_decl.ident.span());
-    let argument_matcher_ident = argument_matcher_ident(&method_decl.ident);
+    let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
 
     let debug_fields: TokenStream = method_decl
         .inputs
@@ -38,7 +44,7 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
         .collect();
 
     quote! {
-        impl std::fmt::Debug for #argument_matcher_ident {
+        impl std::fmt::Debug for #arguments_matcher_ident {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 f.debug_tuple(#method_name_str)
                   #debug_fields
@@ -48,7 +54,43 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
     }
 }
 
-fn argument_matcher_ident(method_ident: &Ident) -> Ident {
+fn generate_arguments_matcher_impl(
+    method_decl: &MethodDecl,
+    arguments: &GeneratedArguments,
+) -> TokenStream {
+    let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
+    let arguments_ident = &arguments.ident;
+    let arguments_generics = &arguments.generics;
+    let args = &method_decl.inputs.args;
+
+    // Since argument matchers for methods without any arguments should always match, we can
+    // fall back to the default impl on the trait `ArgumentsMatcher`.
+    if args.is_empty() {
+        return TokenStream::new();
+    }
+
+    let matches_argument_calls: Punctuated<_, Token![&&]> = args
+        .iter()
+        .map(|arg| {
+            let ident = &arg.ident;
+            quote! { self.#ident.matches_argument(&args.#ident) }
+        })
+        .collect();
+
+    let arguments_lifetime = arguments_lifetime();
+
+    quote! {
+        impl<#arguments_lifetime> mockiato::internal::ArgumentsMatcher<#arguments_lifetime> for #arguments_matcher_ident {
+            type Arguments = #arguments_ident #arguments_generics;
+
+            fn matches_arguments(&self, args: &Self::Arguments) -> bool {
+                #matches_argument_calls
+            }
+        }
+    }
+}
+
+fn arguments_matcher_ident(method_ident: &Ident) -> Ident {
     Ident::new(
         &format!(
             "{}ArgumentsMatcher",
@@ -58,7 +100,7 @@ fn argument_matcher_ident(method_ident: &Ident) -> Ident {
     )
 }
 
-fn argument_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
+fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
     method_inputs
         .args
         .iter()

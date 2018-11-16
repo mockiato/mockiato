@@ -9,7 +9,11 @@ pub trait ArgumentMatcher<T>: MaybeDebug {
 pub trait ArgumentsMatcher<'args>: Debug {
     type Arguments: Arguments;
 
-    fn matches_arguments(&self, input: &Self::Arguments) -> bool;
+    fn matches_arguments(&self, _input: &Self::Arguments) -> bool {
+        // Since argument matchers for methods without any arguments should always match, we can
+        // fall back to the default impl on the trait `ArgumentsMatcher`.
+        true
+    }
 }
 
 impl<T, U> ArgumentMatcher<U> for T
