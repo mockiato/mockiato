@@ -117,7 +117,7 @@ impl MethodArg {
     }
 }
 
-// Sanitizes a method identifier by removing all leading underscores
+/// Sanitizes a method identifier by removing all leading underscores
 fn sanitize_method_ident(ident: &Ident) -> Ident {
     let ident_string = ident.to_string();
     let sanitized_ident_str = ident_string.trim_start_matches('_');
