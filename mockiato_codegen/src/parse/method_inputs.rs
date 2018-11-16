@@ -94,15 +94,8 @@ impl MethodArg {
                             panic!("Sub-pattern should not appear within method declaration");
                         }
 
-                        let ident_string = pat_ident.ident.to_string();
-                        let ident = if ident_string.starts_with('_') {
-                            &ident_string[1..]
-                        } else {
-                            &ident_string
-                        };
-
                         Ok(MethodArg {
-                            ident: Ident::new(ident, pat_ident.ident.span()),
+                            ident: sanitize_method_ident(&pat_ident.ident),
                             ty: captured.ty,
                             span
                         })
@@ -122,4 +115,12 @@ impl MethodArg {
             ).note("This error should never appear, because rustc already enforces these requirements"))),
         }
     }
+}
+
+// Sanitizes a method identifier by removing all leading underscores
+fn sanitize_method_ident(ident: &Ident) -> Ident {
+    let ident_string = ident.to_string();
+    let sanitized_ident_str = ident_string.trim_start_matches('_');
+
+    Ident::new(sanitized_ident_str, ident.span())
 }
