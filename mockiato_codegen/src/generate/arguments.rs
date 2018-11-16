@@ -76,7 +76,7 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> Toke
     }
 }
 
-pub fn arguments_ident(method_ident: &Ident) -> Ident {
+fn arguments_ident(method_ident: &Ident) -> Ident {
     Ident::new(
         &format!("{}Arguments", method_ident.to_string().to_camel_case()),
         method_ident.span(),
