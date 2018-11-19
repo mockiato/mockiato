@@ -1,8 +1,8 @@
 use crate::generate::arguments::generate_arguments;
 use crate::generate::arguments_matcher::generate_arguments_matcher;
+use crate::generate::mock_struct::{generate_mock_struct, mock_struct_ident};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::mockable_attr::MockableAttr;
-use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
 use crate::spanned::SpannedUnstable;
 use crate::Error;
@@ -36,6 +36,8 @@ impl Mockable {
         let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
         let mod_ident = mod_ident(&mock_struct_ident);
 
+        let mock_struct = generate_mock_struct(&trait_decl, &mock_struct_ident, &mod_ident);
+
         let arguments: proc_macro2::TokenStream = trait_decl
             .methods
             .iter()
@@ -47,8 +49,7 @@ impl Mockable {
         TokenStream::from(quote! {
             #item_trait
 
-            #[derive(Debug)]
-            struct #mock_struct_ident;
+            #mock_struct
 
             mod #mod_ident {
                 use super::*;
@@ -68,12 +69,6 @@ fn generate_argument_structs(method_decl: &MethodDecl) -> proc_macro2::TokenStre
         #arguments_output
         #arguments_matcher
     }
-}
-
-fn mock_struct_ident(trait_decl: &TraitDecl, name_attr: Option<NameAttr>) -> Ident {
-    name_attr
-        .map(|attr| attr.ident)
-        .unwrap_or_else(|| Ident::new(&format!("{}Mock", trait_decl.ident), trait_decl.span.into()))
 }
 
 /// Generates a [`struct@Ident`] for the internal sub-mod for `Arguments` and `ArgumentsMatcher` impls

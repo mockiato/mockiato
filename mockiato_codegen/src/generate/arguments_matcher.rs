@@ -90,7 +90,7 @@ fn generate_arguments_matcher_impl(
     }
 }
 
-fn arguments_matcher_ident(method_ident: &Ident) -> Ident {
+pub fn arguments_matcher_ident(method_ident: &Ident) -> Ident {
     Ident::new(
         &format!(
             "{}ArgumentsMatcher",
