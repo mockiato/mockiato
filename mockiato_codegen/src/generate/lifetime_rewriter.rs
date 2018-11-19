@@ -1,3 +1,4 @@
+use super::constant::arguments_lifetime;
 use syn::visit_mut::{visit_type_reference_mut, VisitMut};
 use syn::{Lifetime, TypeReference};
 
@@ -37,5 +38,19 @@ where
         if type_reference.lifetime.is_none() {
             type_reference.lifetime = Some(self.generator.generate_lifetime());
         }
+    }
+}
+
+/// Replaces all lifetimes with the same lifetime
+#[derive(Default)]
+pub struct UniformLifetimeGenerator {
+    // Indicates that the rewriter found at least one lifetime
+    pub has_lifetimes: bool,
+}
+
+impl LifetimeGenerator for UniformLifetimeGenerator {
+    fn generate_lifetime(&mut self) -> Lifetime {
+        self.has_lifetimes = true;
+        arguments_lifetime()
     }
 }
