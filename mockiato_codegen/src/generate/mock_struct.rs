@@ -16,13 +16,13 @@ pub(crate) fn generate_mock_struct(
     mock_struct_ident: &Ident,
     mod_ident: &Ident,
 ) -> TokenStream {
-    let method_fields: TokenStream = trait_decl
+    let method_fields: Punctuated<_, Token![,]> = trait_decl
         .methods
         .iter()
         .map(|method_decl| generate_method_field(method_decl, &mod_ident))
         .collect();
 
-    let initializer_fields: TokenStream = trait_decl
+    let initializer_fields: Punctuated<_, Token![,]> = trait_decl
         .methods
         .iter()
         .map(|method_decl| generate_initializer_field(&method_decl.ident, &mock_struct_ident))
@@ -56,7 +56,7 @@ fn generate_method_field(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenSt
     let return_type = return_type(method_decl);
 
     quote! {
-        #ident: mockiato::internal::Method<self::#mod_ident::#arguments_matcher_ident, #return_type>,
+        #ident: mockiato::internal::Method<self::#mod_ident::#arguments_matcher_ident, #return_type>
     }
 }
 
@@ -78,7 +78,7 @@ fn generate_initializer_field(method_ident: &Ident, mock_struct_ident: &Ident) -
     );
 
     quote! {
-        #method_ident: mockiato::internal::Method::new(#name),
+        #method_ident: mockiato::internal::Method::new(#name)
     }
 }
 
