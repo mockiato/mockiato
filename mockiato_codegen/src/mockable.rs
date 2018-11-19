@@ -29,7 +29,7 @@ impl Mockable {
             .map_err(|err| err
                 .emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))));
 
-        generate_mock(mockable_attr, item_trait, trait_decl).into()
+        generate_mock(mockable_attr, &item_trait, &trait_decl).into()
     }
 }
 

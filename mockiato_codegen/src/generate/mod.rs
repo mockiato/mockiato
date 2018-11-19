@@ -17,8 +17,8 @@ mod mock_struct;
 
 pub(crate) fn generate_mock(
     mockable_attr: MockableAttr,
-    item_trait: ItemTrait,
-    trait_decl: TraitDecl,
+    item_trait: &ItemTrait,
+    trait_decl: &TraitDecl,
 ) -> TokenStream {
     let mock_struct_ident = mock_struct_ident(&trait_decl, mockable_attr.name_attr);
     let mod_ident = mod_ident(&mock_struct_ident);
@@ -33,7 +33,7 @@ pub(crate) fn generate_mock(
 
     // The sub-mod is used to hide implementation details from the user
     // and to prevent cluttering of the namespace of the trait's mod.
-    TokenStream::from(quote! {
+    quote! {
         #item_trait
 
         #mock_struct
@@ -43,7 +43,7 @@ pub(crate) fn generate_mock(
 
             #arguments
         }
-    })
+    }
 }
 
 fn generate_argument_structs(method_decl: &MethodDecl) -> proc_macro2::TokenStream {
