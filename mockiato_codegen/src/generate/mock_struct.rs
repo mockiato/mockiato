@@ -42,9 +42,7 @@ pub(crate) fn generate_mock_struct(
 
         impl #mock_struct_ident {
             fn new() -> Self {
-                Self {
-                    #initializer_fields
-                }
+                Self { #initializer_fields }
             }
 
             #expected_methods
