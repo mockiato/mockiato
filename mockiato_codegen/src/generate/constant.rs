@@ -54,7 +54,7 @@ pub(super) fn expect_method_ident(method_decl: &MethodDecl) -> Ident {
 
     Ident::new(
         &format!("{}{}", IDENTIFIER_PREFIX, method_decl.ident.to_string()),
-        Span::call_site(),
+        method_decl.ident.span(),
     )
 }
 
