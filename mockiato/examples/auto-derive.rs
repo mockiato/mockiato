@@ -7,8 +7,6 @@ trait Greeter: Debug {
 }
 
 fn main() {
-    // TODO: this example needs to be updated
-    // as soon as methods mocking is implemented.
     let greeter = GreeterMock::new();
 
     println!("{:?}", greeter);
