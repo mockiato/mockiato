@@ -1,7 +1,5 @@
 use super::bound_lifetimes::bound_lifetimes;
-use super::constant::{
-    arguments_matcher_ident, expect_method_ident, generic_argument_parameter_ident,
-};
+use super::constant::{arguments_matcher_ident, expect_method_ident, generic_parameter_ident};
 use super::lifetime_rewriter::{IncrementalLifetimeGenerator, LifetimeRewriter};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
@@ -95,7 +93,7 @@ fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenS
         .args
         .iter()
         .enumerate()
-        .map(|(index, argument)| (generic_argument_parameter_ident(index), argument))
+        .map(|(index, argument)| (generic_parameter_ident(index), argument))
         .collect();
 
     let generics = generics(&arguments_with_generics);

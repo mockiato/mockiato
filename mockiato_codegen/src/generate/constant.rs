@@ -59,7 +59,7 @@ pub(super) fn expect_method_ident(method_decl: &MethodDecl) -> Ident {
 }
 
 /// Generates the generic parameter for a given index
-pub(super) fn generic_argument_parameter_ident(index: usize) -> Ident {
+pub(super) fn generic_parameter_ident(index: usize) -> Ident {
     const IDENTIFIER_PREFIX: &str = "A";
 
     Ident::new(
