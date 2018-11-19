@@ -1,14 +1,13 @@
 use super::bound_lifetimes::bound_lifetimes;
-use super::constant::arguments_lifetime;
+use super::constant::{arguments_lifetime, arguments_matcher_ident};
 use super::lifetime_rewriter::{IncrementalLifetimeGenerator, LifetimeRewriter};
 use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
-use heck::CamelCase;
 use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, LitStr};
+use syn::LitStr;
 
 pub(crate) fn generate_arguments_matcher(
     method_decl: &MethodDecl,
@@ -97,16 +96,6 @@ fn generate_matches_arguments_method_impl(method_decl: &MethodDecl) -> TokenStre
             #matches_argument_calls
         }
     }
-}
-
-pub fn arguments_matcher_ident(method_ident: &Ident) -> Ident {
-    Ident::new(
-        &format!(
-            "{}ArgumentsMatcher",
-            method_ident.to_string().to_camel_case()
-        ),
-        method_ident.span(),
-    )
 }
 
 fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {

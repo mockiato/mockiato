@@ -1,9 +1,10 @@
 use super::bound_lifetimes::bound_lifetimes;
+use super::constant::{
+    arguments_matcher_ident, expect_method_ident, generic_argument_parameter_ident,
+};
 use super::lifetime_rewriter::{IncrementalLifetimeGenerator, LifetimeRewriter};
-use crate::generate::arguments_matcher::arguments_matcher_ident;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
-use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
@@ -53,12 +54,6 @@ pub(crate) fn generate_mock_struct(
     }
 }
 
-pub(crate) fn mock_struct_ident(trait_decl: &TraitDecl, name_attr: Option<NameAttr>) -> Ident {
-    name_attr
-        .map(|attr| attr.ident)
-        .unwrap_or_else(|| Ident::new(&format!("{}Mock", trait_decl.ident), trait_decl.span.into()))
-}
-
 fn generate_method_field(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStream {
     let ident = &method_decl.ident;
     let arguments_matcher_ident = arguments_matcher_ident(ident);
@@ -93,22 +88,14 @@ fn generate_initializer_field(method_ident: &Ident, mock_struct_ident: &Ident) -
 
 fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStream {
     let method_ident = &method_decl.ident;
-    let expect_method_ident = Ident::new(
-        &format!("expect_{}", method_ident.to_string()),
-        Span::call_site(),
-    );
+    let expect_method_ident = expect_method_ident(method_decl);
 
     let arguments_with_generics: Vec<_> = method_decl
         .inputs
         .args
         .iter()
         .enumerate()
-        .map(|(index, argument)| {
-            (
-                Ident::new(&format!("A{}", index), Span::call_site()),
-                argument,
-            )
-        })
+        .map(|(index, argument)| (generic_argument_parameter_ident(index), argument))
         .collect();
 
     let generics = generics(&arguments_with_generics);

@@ -1,5 +1,4 @@
-use super::constant::arguments_lifetime;
-use proc_macro2::Span;
+use super::constant::{argument_lifetime, arguments_lifetime};
 use syn::visit_mut::{visit_type_reference_mut, VisitMut};
 use syn::{Lifetime, TypeReference};
 
@@ -68,10 +67,7 @@ impl LifetimeGenerator for IncrementalLifetimeGenerator {
     fn generate_lifetime(&mut self) -> Lifetime {
         // The only requirement for this lifetime is that it's unique.
         // The fixed prefix is arbitrary.
-        let lifetime = Lifetime::new(
-            &format!("'__mockiato_arg{}", self.lifetimes.len()),
-            Span::call_site(),
-        );
+        let lifetime = argument_lifetime(self.lifetimes.len());
         self.lifetimes.push(lifetime.clone());
         lifetime
     }

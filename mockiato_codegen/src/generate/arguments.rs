@@ -1,8 +1,7 @@
-use super::constant::arguments_lifetime;
+use super::constant::{arguments_ident, arguments_lifetime};
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
-use heck::CamelCase;
 use proc_macro2::TokenStream;
 use syn::visit_mut::visit_type_mut;
 use syn::Ident;
@@ -74,13 +73,6 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> Toke
             }
         }
     }
-}
-
-fn arguments_ident(method_ident: &Ident) -> Ident {
-    Ident::new(
-        &format!("{}Arguments", method_ident.to_string().to_camel_case()),
-        method_ident.span(),
-    )
 }
 
 fn generate_arguments_fields(
