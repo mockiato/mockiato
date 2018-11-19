@@ -1,6 +1,6 @@
 use super::constant::arguments_lifetime;
 use syn::visit_mut::{visit_type_reference_mut, VisitMut};
-use syn::{Lifetime, TypeReference};
+use syn::{Lifetime, Span, TypeReference};
 
 pub(super) trait LifetimeGenerator {
     fn generate_lifetime(&mut self) -> Lifetime;
@@ -43,7 +43,7 @@ where
 
 /// Replaces all lifetimes with the same lifetime
 #[derive(Default)]
-pub struct UniformLifetimeGenerator {
+pub(crate) struct UniformLifetimeGenerator {
     // Indicates that the rewriter found at least one lifetime
     pub has_lifetimes: bool,
 }
@@ -52,5 +52,26 @@ impl LifetimeGenerator for UniformLifetimeGenerator {
     fn generate_lifetime(&mut self) -> Lifetime {
         self.has_lifetimes = true;
         arguments_lifetime()
+    }
+}
+
+/// Replaces all lifetimes in the given AST with auto-generated lifetimes that
+/// can be used in a for<...> clause.
+/// It also gives explicit lifetimes to references without lifetimes
+#[derive(Default)]
+pub(crate) struct IncrementalLifetimeGenerator {
+    lifetimes: Vec<Lifetime>,
+}
+
+impl LifetimeGenerator for IncrementalLifetimeGenerator {
+    fn generate_lifetime(&mut self) -> Lifetime {
+        // The only requirement for this lifetime is that it's unique.
+        // The fixed prefix is arbitrary.
+        let lifetime = Lifetime::new(
+            &format!("'__mockiato_arg{}", self.lifetimes.len()),
+            Span::call_site(),
+        );
+        self.lifetimes.push(lifetime.clone());
+        lifetime
     }
 }

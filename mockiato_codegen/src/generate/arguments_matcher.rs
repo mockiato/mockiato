@@ -139,24 +139,3 @@ fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
         })
     }
 }
-
-/// Replaces all lifetimes in the given AST with auto-generated lifetimes that
-/// can be used in a for<...> clause.
-/// It also gives explicit lifetimes to references without lifetimes
-#[derive(Default)]
-struct IncrementalLifetimeGenerator {
-    lifetimes: Vec<Lifetime>,
-}
-
-impl LifetimeGenerator for IncrementalLifetimeGenerator {
-    fn generate_lifetime(&mut self) -> Lifetime {
-        // The only requirement for this lifetime is that it's unique.
-        // The fixed prefix is arbitrary.
-        let lifetime = Lifetime::new(
-            &format!("'__mockiato_arg{}", self.lifetimes.len()),
-            Span::call_site(),
-        );
-        self.lifetimes.push(lifetime.clone());
-        lifetime
-    }
-}
