@@ -148,7 +148,7 @@ fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenS
 }
 
 fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
-    if arguments.len() == 0 {
+    if arguments.is_empty() {
         TokenStream::new()
     } else {
         let predicates: Punctuated<_, Token![,]> =
@@ -176,7 +176,7 @@ fn where_clause_predicate(
 }
 
 fn generics(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
-    if arguments.len() == 0 {
+    if arguments.is_empty() {
         TokenStream::new()
     } else {
         let parameters: Punctuated<_, Token![,]> = arguments
