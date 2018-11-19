@@ -111,7 +111,13 @@ fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenS
         .map(|argument_ident| quote! { #argument_ident: Box::new(#argument_ident), })
         .collect();
 
+    let must_use_annotation = match &method_decl.output {
+        ReturnType::Default => TokenStream::new(),
+        _ => quote!{ #[must_use] },
+    };
+
     quote! {
+        #must_use_annotation
         fn #expect_method_ident#generics(
             &mut self,
             #arguments
