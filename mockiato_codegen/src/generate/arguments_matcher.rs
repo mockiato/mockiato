@@ -1,13 +1,14 @@
+use super::bound_lifetimes::bound_lifetimes;
 use super::constant::arguments_lifetime;
-use super::lifetime_rewriter::{LifetimeGenerator, LifetimeRewriter};
+use super::lifetime_rewriter::{IncrementalLifetimeGenerator, LifetimeRewriter};
 use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use heck::CamelCase;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
 use syn::visit_mut::visit_type_mut;
-use syn::{BoundLifetimes, Ident, Lifetime, LifetimeDef, LitStr};
+use syn::{Ident, LitStr};
 
 pub(crate) fn generate_arguments_matcher(
     method_decl: &MethodDecl,
@@ -126,16 +127,4 @@ fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
             }
         })
         .collect()
-}
-
-/// Generates a for<...> clause from a list of given lifetimes
-fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
-    if lifetimes.is_empty() {
-        None
-    } else {
-        Some(BoundLifetimes {
-            lifetimes: lifetimes.into_iter().map(LifetimeDef::new).collect(),
-            ..Default::default()
-        })
-    }
 }

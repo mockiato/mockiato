@@ -1,6 +1,7 @@
 use super::constant::arguments_lifetime;
+use proc_macro2::Span;
 use syn::visit_mut::{visit_type_reference_mut, VisitMut};
-use syn::{Lifetime, Span, TypeReference};
+use syn::{Lifetime, TypeReference};
 
 pub(super) trait LifetimeGenerator {
     fn generate_lifetime(&mut self) -> Lifetime;
@@ -45,7 +46,7 @@ where
 #[derive(Default)]
 pub(crate) struct UniformLifetimeGenerator {
     // Indicates that the rewriter found at least one lifetime
-    pub has_lifetimes: bool,
+    pub(crate) has_lifetimes: bool,
 }
 
 impl LifetimeGenerator for UniformLifetimeGenerator {
@@ -60,7 +61,7 @@ impl LifetimeGenerator for UniformLifetimeGenerator {
 /// It also gives explicit lifetimes to references without lifetimes
 #[derive(Default)]
 pub(crate) struct IncrementalLifetimeGenerator {
-    lifetimes: Vec<Lifetime>,
+    pub(crate) lifetimes: Vec<Lifetime>,
 }
 
 impl LifetimeGenerator for IncrementalLifetimeGenerator {
