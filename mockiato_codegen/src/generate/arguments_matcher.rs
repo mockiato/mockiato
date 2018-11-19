@@ -61,6 +61,20 @@ fn generate_arguments_matcher_impl(
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
     let arguments_ident = &arguments.ident;
     let arguments_generics = &arguments.generics;
+
+    let matches_argument_method = generate_matches_arguments_method_impl(method_decl);
+    let arguments_lifetime = arguments_lifetime();
+
+    quote! {
+        impl<#arguments_lifetime> mockiato::internal::ArgumentsMatcher<#arguments_lifetime> for #arguments_matcher_ident {
+            type Arguments = #arguments_ident #arguments_generics;
+
+            #matches_argument_method
+        }
+    }
+}
+
+fn generate_matches_arguments_method_impl(method_decl: &MethodDecl) -> TokenStream {
     let args = &method_decl.inputs.args;
 
     // Since argument matchers for methods without any arguments should always match, we can
@@ -77,15 +91,9 @@ fn generate_arguments_matcher_impl(
         })
         .collect();
 
-    let arguments_lifetime = arguments_lifetime();
-
     quote! {
-        impl<#arguments_lifetime> mockiato::internal::ArgumentsMatcher<#arguments_lifetime> for #arguments_matcher_ident {
-            type Arguments = #arguments_ident #arguments_generics;
-
-            fn matches_arguments(&self, args: &Self::Arguments) -> bool {
-                #matches_argument_calls
-            }
+        fn matches_arguments(&self, args: &Self::Arguments) -> bool {
+            #matches_argument_calls
         }
     }
 }
