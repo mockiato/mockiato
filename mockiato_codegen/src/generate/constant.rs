@@ -68,7 +68,7 @@ pub(super) fn generic_parameter_ident(index: usize) -> Ident {
     )
 }
 
-/// Generates the identifer for an arguments struct
+/// Generates the identifer for an `Arguments` struct
 pub(super) fn arguments_ident(method_ident: &Ident) -> Ident {
     const IDENTIFIER_POSTFIX: &str = "Arguments";
 
