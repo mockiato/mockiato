@@ -149,8 +149,12 @@ fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
     if arguments.is_empty() {
         TokenStream::new()
     } else {
-        let predicates: Punctuated<_, Token![,]> =
-            arguments.iter().map(where_clause_predicate).collect();
+        let predicates: Punctuated<_, Token![,]> = arguments
+            .iter()
+            .map(|(generic_type_ident, method_argument)| {
+                where_clause_predicate(generic_type_ident, method_argument)
+            })
+            .collect();
 
         quote! {
             where #predicates
@@ -158,9 +162,7 @@ fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
     }
 }
 
-fn where_clause_predicate(
-    (generic_type_ident, method_argument): &(Ident, &MethodArg),
-) -> TokenStream {
+fn where_clause_predicate(generic_type_ident: &Ident, method_argument: &MethodArg) -> TokenStream {
     let mut ty = method_argument.ty.clone();
 
     let mut lifetime_rewriter = LifetimeRewriter::new(IncrementalLifetimeGenerator::default());
