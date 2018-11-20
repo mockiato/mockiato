@@ -111,13 +111,7 @@ fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenS
         .map(|argument_ident| quote! { #argument_ident: Box::new(#argument_ident), })
         .collect();
 
-    let requires_must_use_annotation = match &method_decl.output {
-        ReturnType::Default => false,
-        ReturnType::Type(_, ty) => match ty {
-            box Type::Tuple(tuple) => !tuple.elems.is_empty(),
-            _ => true,
-        },
-    };
+    let requires_must_use_annotation = !is_empty_return_value(&method_decl.output);
 
     let must_use_annotation = if requires_must_use_annotation {
         quote!{ #[must_use] }
@@ -142,6 +136,16 @@ fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenS
                 }
             )
         }
+    }
+}
+
+fn is_empty_return_value(return_value: &ReturnType) -> bool {
+    match return_value {
+        ReturnType::Default => true,
+        ReturnType::Type(_, ty) => match ty {
+            box Type::Tuple(tuple) => tuple.elems.is_empty(),
+            _ => false,
+        },
     }
 }
 
