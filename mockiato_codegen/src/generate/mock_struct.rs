@@ -28,7 +28,7 @@ pub(crate) fn generate_mock_struct(
         .map(|method_decl| generate_initializer_field(&method_decl.ident, &mock_struct_ident))
         .collect();
 
-    let expected_methods: TokenStream = trait_decl
+    let expect_methods: TokenStream = trait_decl
         .methods
         .iter()
         .map(|method_decl| generate_expect_method(method_decl, &mod_ident))
@@ -45,7 +45,7 @@ pub(crate) fn generate_mock_struct(
                 Self { #initializer_fields }
             }
 
-            #expected_methods
+            #expect_methods
         }
     }
 }
