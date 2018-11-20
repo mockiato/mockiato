@@ -7,7 +7,7 @@ use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, LitStr, ReturnType};
+use syn::{Ident, LitStr, ReturnType, Type};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 
@@ -111,9 +111,18 @@ fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenS
         .map(|argument_ident| quote! { #argument_ident: Box::new(#argument_ident), })
         .collect();
 
-    let must_use_annotation = match &method_decl.output {
-        ReturnType::Default => TokenStream::new(),
-        _ => quote!{ #[must_use] },
+    let requires_must_use_annotation = match &method_decl.output {
+        ReturnType::Default => false,
+        ReturnType::Type(_, ty) => match ty {
+            box Type::Tuple(tuple) => !tuple.elems.is_empty(),
+            _ => true,
+        },
+    };
+
+    let must_use_annotation = if requires_must_use_annotation {
+        quote!{ #[must_use] }
+    } else {
+        TokenStream::new()
     };
 
     quote! {
