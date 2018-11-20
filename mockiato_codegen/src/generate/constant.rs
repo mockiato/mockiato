@@ -82,7 +82,7 @@ pub(super) fn arguments_ident(method_ident: &Ident) -> Ident {
     )
 }
 
-/// Generates the identifer for an arguments matcher struct
+/// Generates the identifer for an `ArgumentsMatcher` struct
 pub(super) fn arguments_matcher_ident(method_ident: &Ident) -> Ident {
     const IDENTIFIER_POSTFIX: &str = "ArgumentsMatcher";
 
