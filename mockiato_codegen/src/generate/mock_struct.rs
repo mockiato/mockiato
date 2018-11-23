@@ -1,4 +1,4 @@
-use super::bound_lifetimes::rewrite_lifetimes;
+use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{arguments_matcher_ident, expect_method_ident, generic_parameter_ident};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
@@ -166,7 +166,7 @@ fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
 
 fn where_clause_predicate(generic_type_ident: &Ident, method_argument: &MethodArg) -> TokenStream {
     let mut ty = method_argument.ty.clone();
-    let bound_lifetimes = rewrite_lifetimes(&mut ty);
+    let bound_lifetimes = rewrite_lifetimes_incrementally(&mut ty);
 
     quote! {
         #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'static

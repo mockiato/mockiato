@@ -1,4 +1,4 @@
-use super::bound_lifetimes::rewrite_lifetimes;
+use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{arguments_lifetime, arguments_matcher_ident};
 use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
@@ -103,7 +103,7 @@ fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
         .map(|input| {
             let ident = &input.ident;
             let mut ty = input.ty.clone();
-            let bound_lifetimes = rewrite_lifetimes(&mut ty);
+            let bound_lifetimes = rewrite_lifetimes_incrementally(&mut ty);
 
             quote! {
                 pub(super) #ident: std::boxed::Box<dyn #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty>>,
