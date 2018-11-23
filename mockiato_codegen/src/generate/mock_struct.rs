@@ -1,6 +1,5 @@
 use super::bound_lifetimes::rewrite_lifetimes;
 use super::constant::{arguments_matcher_ident, expect_method_ident, generic_parameter_ident};
-use super::lifetime_rewriter::{IncrementalLifetimeGenerator, LifetimeRewriter};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
