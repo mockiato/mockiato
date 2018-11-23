@@ -61,7 +61,7 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> Toke
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            quote!{ .field(&mockiato::internal::MaybeDebugWrapper(&self.#ident)) }
+            quote! { .field(&mockiato::internal::MaybeDebugWrapper(&self.#ident)) }
         })
         .collect();
 
