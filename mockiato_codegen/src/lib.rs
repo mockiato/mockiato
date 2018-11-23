@@ -1,6 +1,5 @@
 #![feature(
     quote,
-    extern_crate_item_prelude,
     proc_macro_diagnostic,
     proc_macro_span,
     proc_macro_hygiene,

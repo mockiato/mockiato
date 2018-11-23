@@ -39,7 +39,7 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            quote!{ .field(&mockiato::internal::MaybeDebugExtWrapper(&self.#ident)) }
+            quote! { .field(&mockiato::internal::MaybeDebugExtWrapper(&self.#ident)) }
         })
         .collect();
 
