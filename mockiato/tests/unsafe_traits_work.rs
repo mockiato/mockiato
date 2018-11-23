@@ -6,5 +6,5 @@ unsafe trait Foo {
 }
 
 fn main() {
-    let _mock = FooMock;
+    let _mock = FooMock::new();
 }

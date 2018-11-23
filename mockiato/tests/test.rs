@@ -12,5 +12,5 @@ trait Greeter: fmt::Debug {
 
 #[test]
 fn test() {
-    let _mock = GreeterMock;
+    let _mock = GreeterMock::new();
 }

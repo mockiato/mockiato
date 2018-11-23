@@ -18,7 +18,7 @@ struct GreeterMock {
 
 impl GreeterMock {
     fn new() -> Self {
-        GreeterMock {
+        Self {
             say_hello: mockiato::internal::Method::new("GreeterMock::say_hello"),
             print_hello: mockiato::internal::Method::new("GreeterMock::print_hello"),
             borrow_hello: mockiato::internal::Method::new("GreeterMock::borrow_hello"),

@@ -1,11 +1,10 @@
-use super::constant::arguments_lifetime;
-use super::lifetime_rewriter::{LifetimeGenerator, LifetimeRewriter};
+use super::constant::{arguments_ident, arguments_lifetime};
+use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
-use heck::CamelCase;
 use proc_macro2::TokenStream;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, Lifetime};
+use syn::Ident;
 
 pub(crate) struct GeneratedArguments {
     pub(crate) output: TokenStream,
@@ -76,13 +75,6 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> Toke
     }
 }
 
-fn arguments_ident(method_ident: &Ident) -> Ident {
-    Ident::new(
-        &format!("{}Arguments", method_ident.to_string().to_camel_case()),
-        method_ident.span(),
-    )
-}
-
 fn generate_arguments_fields(
     lifetime_rewriter: &mut LifetimeRewriter<UniformLifetimeGenerator>,
     method_inputs: &MethodInputs,
@@ -101,18 +93,4 @@ fn generate_arguments_fields(
             }
         })
         .collect()
-}
-
-/// Replaces all lifetimes with the same lifetime
-#[derive(Default)]
-struct UniformLifetimeGenerator {
-    // Indicates that the rewriter found at least one lifetime
-    has_lifetimes: bool,
-}
-
-impl LifetimeGenerator for UniformLifetimeGenerator {
-    fn generate_lifetime(&mut self) -> Lifetime {
-        self.has_lifetimes = true;
-        arguments_lifetime()
-    }
 }

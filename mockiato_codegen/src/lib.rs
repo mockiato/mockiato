@@ -5,7 +5,8 @@
     proc_macro_hygiene,
     bind_by_move_pattern_guards,
     decl_macro,
-    box_syntax
+    box_syntax,
+    box_patterns
 )]
 
 extern crate proc_macro;
