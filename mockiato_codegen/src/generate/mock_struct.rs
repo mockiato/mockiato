@@ -1,4 +1,4 @@
-use super::bound_lifetimes::bound_lifetimes;
+use super::bound_lifetimes::rewrite_lifetimes;
 use super::constant::{arguments_matcher_ident, expect_method_ident, generic_parameter_ident};
 use super::lifetime_rewriter::{IncrementalLifetimeGenerator, LifetimeRewriter};
 use crate::parse::method_decl::MethodDecl;
@@ -6,7 +6,6 @@ use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
-use syn::visit_mut::visit_type_mut;
 use syn::{Ident, LitStr, ReturnType, Type};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
@@ -114,7 +113,7 @@ fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenS
     let requires_must_use_annotation = !is_empty_return_value(&method_decl.output);
 
     let must_use_annotation = if requires_must_use_annotation {
-        quote!{ #[must_use] }
+        quote! { #[must_use] }
     } else {
         TokenStream::new()
     };
@@ -168,11 +167,7 @@ fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
 
 fn where_clause_predicate(generic_type_ident: &Ident, method_argument: &MethodArg) -> TokenStream {
     let mut ty = method_argument.ty.clone();
-
-    let mut lifetime_rewriter = LifetimeRewriter::new(IncrementalLifetimeGenerator::default());
-    visit_type_mut(&mut lifetime_rewriter, &mut ty);
-
-    let bound_lifetimes = bound_lifetimes(lifetime_rewriter.generator.lifetimes);
+    let bound_lifetimes = rewrite_lifetimes(&mut ty);
 
     quote! {
         #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'static
@@ -188,7 +183,7 @@ fn generics(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
             .map(|(generic_type_ident, _)| generic_type_ident)
             .collect();
 
-        quote!{ <#parameters> }
+        quote! { <#parameters> }
     }
 }
 

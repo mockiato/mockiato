@@ -1,12 +1,10 @@
-use super::bound_lifetimes::bound_lifetimes;
+use super::bound_lifetimes::rewrite_lifetimes;
 use super::constant::{arguments_lifetime, arguments_matcher_ident};
-use super::lifetime_rewriter::{IncrementalLifetimeGenerator, LifetimeRewriter};
 use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
-use syn::visit_mut::visit_type_mut;
 use syn::LitStr;
 
 pub(crate) fn generate_arguments_matcher(
@@ -105,11 +103,7 @@ fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
         .map(|input| {
             let ident = &input.ident;
             let mut ty = input.ty.clone();
-
-            let mut lifetime_rewriter = LifetimeRewriter::new(IncrementalLifetimeGenerator::default());
-            visit_type_mut(&mut lifetime_rewriter, &mut ty);
-
-            let bound_lifetimes = bound_lifetimes(lifetime_rewriter.generator.lifetimes);
+            let bound_lifetimes = rewrite_lifetimes(&mut ty);
 
             quote! {
                 pub(super) #ident: std::boxed::Box<dyn #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty>>,

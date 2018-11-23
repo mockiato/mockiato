@@ -1,7 +1,16 @@
-use syn::{BoundLifetimes, Lifetime, LifetimeDef};
+use super::lifetime_rewriter::{IncrementalLifetimeGenerator, LifetimeRewriter};
+use syn::visit_mut::visit_type_mut;
+use syn::{BoundLifetimes, Lifetime, LifetimeDef, Type};
+
+pub(super) fn rewrite_lifetimes(mut ty: &mut Type) -> Option<BoundLifetimes> {
+    let mut lifetime_rewriter = LifetimeRewriter::new(IncrementalLifetimeGenerator::default());
+    visit_type_mut(&mut lifetime_rewriter, &mut ty);
+
+    bound_lifetimes(lifetime_rewriter.generator.lifetimes)
+}
 
 /// Generates a for<...> clause from a list of given lifetimes
-pub(crate) fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
+fn bound_lifetimes(lifetimes: Vec<Lifetime>) -> Option<BoundLifetimes> {
     if lifetimes.is_empty() {
         None
     } else {
