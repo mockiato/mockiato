@@ -1,11 +1,9 @@
-use super::bound_lifetimes::rewrite_lifetimes_incrementally;
-use super::constant::{arguments_ident, arguments_matcher_ident, expect_method_ident};
+use super::constant::arguments_ident;
 use crate::parse::method_decl::MethodDecl;
-use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
-use syn::{Ident, LitStr, ReturnType, Type};
+use syn::Ident;
 
 pub(crate) fn generate_trait_impl(
     trait_decl: &TraitDecl,
