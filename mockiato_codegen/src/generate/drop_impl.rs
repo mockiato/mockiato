@@ -4,7 +4,7 @@ use proc_macro2::TokenStream;
 use syn::Ident;
 
 pub(crate) fn generate_drop_impl(mock_ident: &Ident, trait_decl: &TraitDecl) -> TokenStream {
-    let verification_calls: TokenStream = trait_decl
+    let verify_calls: TokenStream = trait_decl
         .methods
         .iter()
         .map(generate_verify_call)
@@ -14,7 +14,7 @@ pub(crate) fn generate_drop_impl(mock_ident: &Ident, trait_decl: &TraitDecl) -> 
         impl Drop for #mock_ident {
             fn drop(&mut self) {
                 if !std::thread::panicking() {
-                    #verification_calls
+                    #verify_calls
                 }
             }
         }
