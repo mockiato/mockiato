@@ -37,9 +37,18 @@ fn generate_method_impl(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStr
     let arguments: Punctuated<_, Token![,]> = method_decl.inputs.args.iter().collect();
     let output = &method_decl.output;
 
+    let arguments_struct_ident = arguments_ident(method_ident);
+
+    let arguments_struct_fields: Punctuated<_, Token![,]> = method_decl
+        .inputs
+        .args
+        .iter()
+        .map(|argument| &argument.ident)
+        .collect();
+
     quote! {
-            unimplemented!()
         #unsafety fn #method_ident#generics(#self_arg, #arguments) #output #where_clause {
+            self.#method_ident.call_unwrap(self::#mod_ident::#arguments_struct_ident { #arguments_struct_fields })
         }
     }
 }
