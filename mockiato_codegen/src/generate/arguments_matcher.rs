@@ -17,7 +17,8 @@ pub(crate) fn generate_arguments_matcher(
     let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments);
 
     quote! {
-        pub(super) struct #arguments_matcher_ident {
+        #[doc(hidden)]
+        pub struct #arguments_matcher_ident {
             #arguments_matcher_fields
         }
 

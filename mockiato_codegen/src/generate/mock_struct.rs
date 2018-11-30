@@ -29,17 +29,19 @@ pub(crate) fn generate_mock_struct(
     let expect_methods: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_expect_method(method_decl, &mod_ident))
+        .map(|method_decl| generate_expect_method(trait_decl, method_decl, &mod_ident))
         .collect();
+
+    let visibility = &trait_decl.visibility;
 
     quote! {
         #[derive(Debug)]
-        struct #mock_struct_ident {
+        #visibility struct #mock_struct_ident {
             #method_fields
         }
 
         impl #mock_struct_ident {
-            fn new() -> Self {
+            #visibility fn new() -> Self {
                 Self { #initializer_fields }
             }
 
@@ -80,8 +82,13 @@ fn generate_initializer_field(method_ident: &Ident, mock_struct_ident: &Ident) -
     }
 }
 
-fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStream {
+fn generate_expect_method(
+    trait_decl: &TraitDecl,
+    method_decl: &MethodDecl,
+    mod_ident: &Ident,
+) -> TokenStream {
     let method_ident = &method_decl.ident;
+    let visibility = &trait_decl.visibility;
     let expect_method_ident = expect_method_ident(method_decl);
 
     let arguments_with_generics: Vec<_> = method_decl
@@ -119,7 +126,7 @@ fn generate_expect_method(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenS
 
     quote! {
         #must_use_annotation
-        fn #expect_method_ident#generics(
+        #visibility fn #expect_method_ident#generics(
             &mut self,
             #arguments
         ) -> mockiato::internal::MethodCallBuilder<
