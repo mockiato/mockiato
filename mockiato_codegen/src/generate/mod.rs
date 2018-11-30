@@ -1,6 +1,7 @@
 use self::arguments::generate_arguments;
 use self::arguments_matcher::generate_arguments_matcher;
 use self::constant::{mock_struct_ident, mod_ident};
+use self::drop_impl::generate_drop_impl;
 use self::mock_struct::generate_mock_struct;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::mockable_attr::MockableAttr;
@@ -12,6 +13,7 @@ pub(crate) mod arguments;
 pub(crate) mod arguments_matcher;
 mod bound_lifetimes;
 mod constant;
+mod drop_impl;
 mod lifetime_rewriter;
 mod mock_struct;
 
@@ -31,12 +33,16 @@ pub(crate) fn generate_mock(
         .map(generate_argument_structs)
         .collect();
 
+    let drop_impl = generate_drop_impl(&mock_struct_ident, &trait_decl);
+
     // The sub-mod is used to hide implementation details from the user
     // and to prevent cluttering of the namespace of the trait's mod.
     quote! {
         #item_trait
 
         #mock_struct
+
+        #drop_impl
 
         mod #mod_ident {
             use super::*;
