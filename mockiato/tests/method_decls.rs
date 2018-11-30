@@ -11,6 +11,9 @@ trait Foo {
     fn arg_ownership(&self, list: Vec<u32>);
     fn explicit_lifetime<'a>(&self, buf: &'a mut [u8]);
     fn explicit_lifetime_2<'a>(&self, names: &std::fmt::Formatter<'a>);
+    fn where_clause<'a>(&self, buf: &'a mut [u8])
+    where
+        'a: 'static;
     fn multiple_ref_params(&self, name: (&str, &str));
 }
 

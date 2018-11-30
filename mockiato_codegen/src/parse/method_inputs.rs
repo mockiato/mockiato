@@ -1,6 +1,8 @@
 use crate::spanned::SpannedUnstable;
 use crate::{merge_results, Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
+use proc_macro2::TokenStream;
+use quote::ToTokens;
 use syn::punctuated::Punctuated;
 use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Type};
 
@@ -68,6 +70,18 @@ impl MethodSelfArg {
     }
 }
 
+impl ToTokens for MethodSelfArg {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let inner: &ToTokens = match self {
+            MethodSelfArg::Ref(ref arg_self_ref) => arg_self_ref,
+            MethodSelfArg::Value(ref arg_self) => arg_self,
+            MethodSelfArg::Captured(ref arg_captured) => arg_captured,
+        };
+
+        inner.to_tokens(tokens);
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct MethodArg {
     pub(crate) ident: Ident,
@@ -114,6 +128,18 @@ impl MethodArg {
                 "Only captured arguments are supported",
             ).note("This error should never appear, because rustc already enforces these requirements"))),
         }
+    }
+}
+
+impl ToTokens for MethodArg {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let Self {
+            ref ident, ref ty, ..
+        } = self;
+
+        tokens.extend(quote! {
+            #ident: #ty
+        });
     }
 }
 
