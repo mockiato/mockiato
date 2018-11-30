@@ -1,5 +1,5 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
-use super::constant::{arguments_matcher_ident, expect_method_ident, generic_parameter_ident};
+use super::constant::{arguments_ident, arguments_matcher_ident, expect_method_ident};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
@@ -13,6 +13,7 @@ pub(crate) fn generate_trait_impl(
     mod_ident: &Ident,
 ) -> TokenStream {
     let trait_ident = &trait_decl.ident;
+    let unsafety = &trait_decl.unsafety;
 
     let method_impls: TokenStream = trait_decl
         .methods
@@ -21,7 +22,7 @@ pub(crate) fn generate_trait_impl(
         .collect();
 
     quote! {
-        impl #trait_ident for #mock_struct_ident {
+        #unsafety impl #trait_ident for #mock_struct_ident {
             #method_impls
         }
     }
@@ -29,6 +30,7 @@ pub(crate) fn generate_trait_impl(
 
 fn generate_method_impl(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStream {
     let method_ident = &method_decl.ident;
+    let unsafety = &method_decl.unsafety;
     let generics = &method_decl.generics;
     let where_clause = &generics.where_clause;
     let self_arg = &method_decl.inputs.self_arg;
@@ -36,8 +38,8 @@ fn generate_method_impl(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStr
     let output = &method_decl.output;
 
     quote! {
-        fn #method_ident#generics(#self_arg, #arguments) #output #where_clause {
             unimplemented!()
+        #unsafety fn #method_ident#generics(#self_arg, #arguments) #output #where_clause {
         }
     }
 }
