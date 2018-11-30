@@ -27,16 +27,21 @@ pub(crate) fn generate_trait_impl(
 }
 
 fn generate_method_impl(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStream {
-    let method_ident = &method_decl.ident;
-    let unsafety = &method_decl.unsafety;
-    let generics = &method_decl.generics;
-    let where_clause = &generics.where_clause;
-    let self_arg = &method_decl.inputs.self_arg;
+    let MethodDecl {
+        ident,
+        unsafety,
+        generics,
+        inputs,
+        output,
+        ..
+    } = method_decl;
+
+    let self_arg = &inputs.self_arg;
     let arguments: Punctuated<_, Token![,]> = method_decl.inputs.args.iter().collect();
-    let output = &method_decl.output;
 
-    let arguments_struct_ident = arguments_ident(method_ident);
+    let where_clause = &generics.where_clause;
 
+    let arguments_struct_ident = arguments_ident(ident);
     let arguments_struct_fields: Punctuated<_, Token![,]> = method_decl
         .inputs
         .args
@@ -45,8 +50,8 @@ fn generate_method_impl(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStr
         .collect();
 
     quote! {
-        #unsafety fn #method_ident#generics(#self_arg, #arguments) #output #where_clause {
-            self.#method_ident.call_unwrap(self::#mod_ident::#arguments_struct_ident { #arguments_struct_fields })
+        #unsafety fn #ident#generics(#self_arg, #arguments) #output #where_clause {
+            self.#ident.call_unwrap(self::#mod_ident::#arguments_struct_ident { #arguments_struct_fields })
         }
     }
 }
