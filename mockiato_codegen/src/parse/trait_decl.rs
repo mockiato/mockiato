@@ -5,10 +5,11 @@ use crate::{merge_results, Error, Result};
 use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
-use syn::{Generics, Ident, ItemTrait, TypeParamBound};
+use syn::{Generics, Ident, ItemTrait, TypeParamBound, Visibility};
 
 #[derive(Debug, Clone)]
 pub(crate) struct TraitDecl {
+    pub(crate) visibility: Visibility,
     pub(crate) span: Span,
     pub(crate) ident: Ident,
     pub(crate) generics: Generics,
@@ -27,6 +28,7 @@ impl TraitDecl {
             supertraits,
             items,
             ident,
+            vis: visibility,
             ..
         } = item;
 
@@ -41,6 +43,7 @@ impl TraitDecl {
         let methods = items.into_iter().map(MethodDecl::parse);
 
         Ok(TraitDecl {
+            visibility,
             ident,
             span,
             unsafety,
