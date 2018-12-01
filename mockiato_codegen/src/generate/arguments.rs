@@ -30,7 +30,8 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> GeneratedArguments
         generics: generics.clone(),
         ident: arguments_ident.clone(),
         output: quote! {
-            pub(super) struct #arguments_ident #generics {
+            #[doc(hidden)]
+            pub struct #arguments_ident #generics {
                 #arguments_fields
             }
 
