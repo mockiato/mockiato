@@ -47,7 +47,7 @@ pub(crate) fn generate_mock(
         #mock_struct
 
         #trait_impl
-      
+
         #drop_impl
 
         mod #mod_ident {
