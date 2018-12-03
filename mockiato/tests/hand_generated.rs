@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-trait Greeter<'a>: Debug {
+trait Greeter<'a>: Debug + Clone {
     fn say_hello(&self, name: &str) -> String;
 
     fn print_hello(&self, name: &'a str);
@@ -8,7 +8,7 @@ trait Greeter<'a>: Debug {
     fn borrow_hello(&self, name: &str) -> &str;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct GreeterMock {
     say_hello: mockiato::internal::Method<self::greeter_mock::SayHelloArgumentsMatcher, String>,
     print_hello: mockiato::internal::Method<self::greeter_mock::PrintHelloArgumentsMatcher, ()>,

@@ -1,16 +1,17 @@
 use crate::internal::fmt::MaybeDebug;
 use crate::internal::matcher::ArgumentsMatcher;
 use std::fmt::{self, Debug, Display};
+use std::rc::Rc;
 
 pub trait DefaultReturnValue {
-    fn default_return_value<A>() -> Option<Box<dyn ReturnValueGenerator<A, Self>>>
+    fn default_return_value<A>() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>>
     where
         Self: Sized,
         A: for<'args> ArgumentsMatcher<'args>;
 }
 
 impl<T> DefaultReturnValue for T {
-    default fn default_return_value<A>() -> Option<Box<dyn ReturnValueGenerator<A, T>>>
+    default fn default_return_value<A>() -> Option<Rc<dyn ReturnValueGenerator<A, T>>>
     where
         Self: Sized,
         A: for<'args> ArgumentsMatcher<'args>,
@@ -20,12 +21,12 @@ impl<T> DefaultReturnValue for T {
 }
 
 impl DefaultReturnValue for () {
-    fn default_return_value<A>() -> Option<Box<dyn ReturnValueGenerator<A, ()>>>
+    fn default_return_value<A>() -> Option<Rc<dyn ReturnValueGenerator<A, ()>>>
     where
         Self: Sized,
         A: for<'args> ArgumentsMatcher<'args>,
     {
-        Some(Box::new(Cloned(())))
+        Some(Rc::new(Cloned(())))
     }
 }
 

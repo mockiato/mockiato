@@ -1,13 +1,11 @@
 # Trait Bounds
 
-Trait bounds are currently not supported.
+Trait bounds are currently not supported meaning that the supertraits will not be implemented for mocks.
 
-The only exception are traits from `std` that can be automatically derived.
-Mockiato automatically adds the correct `#[derive]` attribute to the generated mock.
-A list of derivable traits can be found in the [Rust Book](https://doc.rust-lang.org/book/2018-edition/appendix-03-derivable-traits.html).
+The following traits are always implemented for mocks:
 
-## Example
+- [Debug](https://doc.rust-lang.org/std/fmt/trait.Debug.html)  
+  Example: `cargo run --example debug`
+- [Clone](https://doc.rust-lang.org/std/clone/trait.Clone.html)  
+  Example: `cargo test --example clone` 
 
-An example can be found in [`examples/auto-derive.rs`](../mockiato/examples/auto-derive.rs)
-
-It can be run using: `cargo run --example auto-derive`

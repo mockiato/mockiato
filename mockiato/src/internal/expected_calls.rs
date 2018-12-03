@@ -4,10 +4,10 @@ use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive};
 
 /// Defines how often a method call is expected
 /// to be called.
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub struct ExpectedCalls(ExpectedCallsKind);
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 enum ExpectedCallsKind {
     Any,
     Exact(u64),
