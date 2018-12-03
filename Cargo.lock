@@ -121,6 +121,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mockiato_doc_example"
+version = "0.1.0"
+dependencies = [
+ "mockiato 0.1.0",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
