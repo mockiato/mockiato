@@ -11,6 +11,18 @@ where
     calls: Vec<MethodCall<A, R>>,
 }
 
+impl<A, R> Clone for Method<A, R>
+where
+    A: for<'args> ArgumentsMatcher<'args>,
+{
+    fn clone(&self) -> Self {
+        Self {
+            name: self.name,
+            calls: self.calls.clone(),
+        }
+    }
+}
+
 impl<A, R> Method<A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
