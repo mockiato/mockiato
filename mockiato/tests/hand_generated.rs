@@ -8,7 +8,7 @@ trait Greeter<'a>: Debug {
     fn borrow_hello(&self, name: &str) -> &str;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct GreeterMock {
     say_hello: std::rc::Rc<mockiato::internal::Method<self::greeter_mock::SayHelloArgumentsMatcher, String>>,
     print_hello: std::rc::Rc<mockiato::internal::Method<self::greeter_mock::PrintHelloArgumentsMatcher, ()>>,
