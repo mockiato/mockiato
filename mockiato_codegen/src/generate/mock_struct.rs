@@ -35,7 +35,7 @@ pub(crate) fn generate_mock_struct(
     let visibility = &trait_decl.visibility;
 
     quote! {
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         #visibility struct #mock_struct_ident {
             #method_fields
         }
@@ -56,7 +56,7 @@ fn generate_method_field(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenSt
     let return_type = return_type(method_decl);
 
     quote! {
-        #ident: mockiato::internal::Method<self::#mod_ident::#arguments_matcher_ident, #return_type>
+        #ident: std::rc::Rc<mockiato::internal::Method<self::#mod_ident::#arguments_matcher_ident, #return_type>>
     }
 }
 
@@ -78,7 +78,7 @@ fn generate_initializer_field(method_ident: &Ident, mock_struct_ident: &Ident) -
     );
 
     quote! {
-        #method_ident: mockiato::internal::Method::new(#name)
+        #method_ident: std::rc::Rc::new(mockiato::internal::Method::new(#name))
     }
 }
 
@@ -135,7 +135,7 @@ fn generate_expect_method(
             #return_type
         > #where_clause
         {
-            self.#method_ident.add_expected_call(
+            std::rc::Rc::get_mut(&mut self.#method_ident).expect("Cannot add expect calls to a cloned mock").add_expected_call(
                 self::#mod_ident::#arguments_matcher_ident {
                     #expected_parameters
                 }

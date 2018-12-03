@@ -10,18 +10,18 @@ trait Greeter<'a>: Debug {
 
 #[derive(Debug)]
 struct GreeterMock {
-    say_hello: mockiato::internal::Method<self::greeter_mock::SayHelloArgumentsMatcher, String>,
-    print_hello: mockiato::internal::Method<self::greeter_mock::PrintHelloArgumentsMatcher, ()>,
+    say_hello: std::rc::Rc<mockiato::internal::Method<self::greeter_mock::SayHelloArgumentsMatcher, String>>,
+    print_hello: std::rc::Rc<mockiato::internal::Method<self::greeter_mock::PrintHelloArgumentsMatcher, ()>>,
     borrow_hello:
-        mockiato::internal::Method<self::greeter_mock::BorrowHelloArgumentsMatcher, &'static str>,
+        std::rc::Rc<mockiato::internal::Method<self::greeter_mock::BorrowHelloArgumentsMatcher, &'static str>>,
 }
 
 impl GreeterMock {
     fn new() -> Self {
         Self {
-            say_hello: mockiato::internal::Method::new("GreeterMock::say_hello"),
-            print_hello: mockiato::internal::Method::new("GreeterMock::print_hello"),
-            borrow_hello: mockiato::internal::Method::new("GreeterMock::borrow_hello"),
+            say_hello: std::rc::Rc::new(mockiato::internal::Method::new("GreeterMock::say_hello")),
+            print_hello: std::rc::Rc::new(mockiato::internal::Method::new("GreeterMock::print_hello")),
+            borrow_hello: std::rc::Rc::new(mockiato::internal::Method::new("GreeterMock::borrow_hello")),
         }
     }
 
@@ -38,7 +38,7 @@ impl GreeterMock {
     where
         A0: for<'a> mockiato::internal::ArgumentMatcher<&'a str> + 'static,
     {
-        self.say_hello
+        std::rc::Rc::get_mut(&mut self.say_hello).expect("Cannot add expect calls to a cloned mock")
             .add_expected_call(self::greeter_mock::SayHelloArgumentsMatcher {
                 name: Box::new(name),
             })
@@ -56,7 +56,7 @@ impl GreeterMock {
     where
         A0: for<'a> mockiato::internal::ArgumentMatcher<&'a str> + 'static,
     {
-        self.borrow_hello
+        std::rc::Rc::get_mut(&mut self.borrow_hello).expect("Cannot add expect calls to a cloned mock")
             .add_expected_call(self::greeter_mock::BorrowHelloArgumentsMatcher {
                 name: Box::new(name),
             })
@@ -69,7 +69,7 @@ impl GreeterMock {
     where
         A0: for<'a> mockiato::internal::ArgumentMatcher<&'a str> + 'static,
     {
-        self.print_hello
+        std::rc::Rc::get_mut(&mut self.print_hello).expect("Cannot add expect calls to a cloned mock")
             .add_expected_call(self::greeter_mock::PrintHelloArgumentsMatcher {
                 name: Box::new(name),
             })
