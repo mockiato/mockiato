@@ -35,7 +35,7 @@ pub(crate) fn generate_mock_struct(
     let visibility = &trait_decl.visibility;
 
     quote! {
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         #visibility struct #mock_struct_ident {
             #method_fields
         }
