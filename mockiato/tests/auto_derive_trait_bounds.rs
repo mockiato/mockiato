@@ -1,8 +1,8 @@
-use mockiato_codegen::mockable;
+use mockiato::mockable;
 use std::fmt;
 
 #[mockable]
-trait Foo: fmt::Debug + Clone + Copy {}
+trait Foo: fmt::Debug {}
 
 fn main() {
     let _assert_debug: &fmt::Debug = &FooMock::new();

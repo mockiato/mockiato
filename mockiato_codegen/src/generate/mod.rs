@@ -3,6 +3,7 @@ use self::arguments_matcher::generate_arguments_matcher;
 use self::constant::{mock_struct_ident, mod_ident};
 use self::drop_impl::generate_drop_impl;
 use self::mock_struct::generate_mock_struct;
+use self::trait_impl::generate_trait_impl;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::trait_decl::TraitDecl;
@@ -16,6 +17,7 @@ mod constant;
 mod drop_impl;
 mod lifetime_rewriter;
 mod mock_struct;
+mod trait_impl;
 
 pub(crate) fn generate_mock(
     mockable_attr: MockableAttr,
@@ -26,6 +28,8 @@ pub(crate) fn generate_mock(
     let mod_ident = mod_ident(&mock_struct_ident);
 
     let mock_struct = generate_mock_struct(&trait_decl, &mock_struct_ident, &mod_ident);
+
+    let trait_impl = generate_trait_impl(&trait_decl, &mock_struct_ident, &mod_ident);
 
     let arguments: TokenStream = trait_decl
         .methods
@@ -41,6 +45,8 @@ pub(crate) fn generate_mock(
         #item_trait
 
         #mock_struct
+
+        #trait_impl
 
         #drop_impl
 
