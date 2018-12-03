@@ -1,3 +1,5 @@
+//! Codegen for `mockiato`. Do not use this crate directly.
+
 #![feature(
     quote,
     proc_macro_diagnostic,

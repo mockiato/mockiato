@@ -9,8 +9,8 @@ use std::{fs::Metadata, io, time::SystemTime};
 
 #[derive(Copy, Clone)]
 enum Kind {
-    Dynamic,
     #[allow(dead_code)]
+    Dynamic,
     Static,
 }
 
@@ -123,7 +123,7 @@ fn run_mode(mode: &'static str) {
             String::from("--edition=2018"),
             link_flag("-L", "crate", &[]),
             link_flag("-L", "dependency", &["deps"]),
-            extern_dep("mockiato_codegen", Kind::Dynamic).expect("find codegen dep"),
+            extern_dep("mockiato", Kind::Static).expect("find codegen dep"),
         ]
         .join(" "),
     );

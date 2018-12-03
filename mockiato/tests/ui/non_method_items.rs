@@ -1,4 +1,4 @@
-use mockiato_codegen::mockable;
+use mockiato::mockable;
 
 macro_rules! macro_in_trait {
     () => {};

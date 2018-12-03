@@ -1,4 +1,4 @@
-use mockiato_codegen::mockable;
+use mockiato::mockable;
 
 #[mockable]
 trait Foo {
