@@ -3,6 +3,7 @@ use crate::internal::fmt::{MaybeDebug};
 use std::fmt::{Debug};
 
 pub(crate) mod partial_eq;
+pub(crate) mod any;
 
 pub trait ArgumentMatcher<T>: MaybeDebug {
     fn matches_argument(&self, input: &T) -> bool;
