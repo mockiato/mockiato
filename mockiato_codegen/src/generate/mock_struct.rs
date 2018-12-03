@@ -141,7 +141,10 @@ fn generate_expect_method(
 
     let documentation = LitStr::new(
         &format!(
-            "Expects a call to [`{0}::{1}`].\n\n[`{0}::{1}`]: ./trait.{0}.html#tymethod.{1}",
+            "Expects a call to [`{0}::{1}`],
+panicking if the function was not called by the time the object goes out of scope.
+
+[`{0}::{1}`]: ./trait.{0}.html#tymethod.{1}",
             trait_decl.ident, method_decl.ident,
         ),
         Span::call_site(),
