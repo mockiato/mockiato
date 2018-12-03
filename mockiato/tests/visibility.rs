@@ -1,5 +1,5 @@
 mod greeter {
-    use mockiato_codegen::mockable;
+    use mockiato::mockable;
 
     #[derive(Eq, PartialEq)]
     pub(super) struct Name {
