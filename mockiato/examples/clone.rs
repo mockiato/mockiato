@@ -1,4 +1,4 @@
-use mockiato::mockable;
+use mockiato::{mockable, partial_eq};
 
 #[mockable]
 trait Greeter: GreeterClone {
@@ -23,7 +23,7 @@ fn main() {
     let mut greeter = GreeterMock::new();
 
     greeter
-        .expect_greet("Tom")
+        .expect_greet(partial_eq("Tom"))
         .times(2)
         .returns(String::from("Hello Tom"));
 
