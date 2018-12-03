@@ -1,9 +1,9 @@
 use crate::internal::arguments::Arguments;
-use crate::internal::fmt::{MaybeDebug};
-use std::fmt::{Debug};
+use crate::internal::fmt::MaybeDebug;
+use std::fmt::Debug;
 
-pub(crate) mod partial_eq;
 pub(crate) mod any;
+pub(crate) mod partial_eq;
 
 pub trait ArgumentMatcher<T>: MaybeDebug {
     fn matches_argument(&self, input: &T) -> bool;

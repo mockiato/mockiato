@@ -14,8 +14,9 @@ fn cloneable_mocks_work() {
         .times(2)
         .returns(String::from("Hello Tom"));
 
-    greeter.expect_greet(partial_eq(String::from("Peter")))
-           .returns(String::from("Hello Peter"));
+    greeter
+        .expect_greet(partial_eq(String::from("Peter")))
+        .returns(String::from("Hello Peter"));
 
     assert_eq!("Hello Tom", greeter.greet("Tom"));
     assert_eq!("Hello Tom", greeter.greet("Tom"));

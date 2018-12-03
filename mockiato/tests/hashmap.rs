@@ -11,6 +11,6 @@ fn works_with_hashmap() {
     let mut mock = FooMock::new();
 
     mock.expect_bar(partial_eq_owned(HashMap::new())).times(1);
-    
+
     mock.bar(&HashMap::new());
 }

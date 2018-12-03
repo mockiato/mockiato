@@ -1,6 +1,6 @@
+use super::ArgumentMatcher;
 use crate::internal::fmt::{MaybeDebug, MaybeDebugWrapper};
 use std::fmt::{self, Debug};
-use super::ArgumentMatcher;
 
 /// Creates a new `ArgumentMatcher` that matches against values using [`PartialEq`]
 pub fn partial_eq<T>(value: T) -> PartialEqArgumentMatcher<T>
