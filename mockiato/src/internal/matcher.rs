@@ -2,6 +2,9 @@ use crate::internal::arguments::Arguments;
 use crate::internal::fmt::MaybeDebug;
 use std::fmt::Debug;
 
+/// A matcher that matches against any given value
+pub struct AnyMatcher;
+
 pub trait ArgumentMatcher<T>: MaybeDebug {
     fn matches_argument(&self, input: &T) -> bool;
 }
@@ -22,6 +25,12 @@ where
 {
     fn matches_argument(&self, input: &U) -> bool {
         self == input
+    }
+}
+
+impl<U> PartialEq<U> for AnyMatcher {
+    fn eq(&self, _other: &U) -> bool {
+        true
     }
 }
 
