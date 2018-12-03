@@ -32,7 +32,7 @@ impl ExpectedCalls {
 
 impl Default for ExpectedCalls {
     fn default() -> Self {
-        ExpectedCalls(ExpectedCallsKind::Any)
+        ExpectedCalls(ExpectedCallsKind::Exact(1))
     }
 }
 
