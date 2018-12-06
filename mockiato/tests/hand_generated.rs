@@ -1,5 +1,5 @@
-use std::fmt::Debug;
 use mockiato::ExpectedCalls;
+use std::fmt::Debug;
 
 trait Greeter<'a>: Debug + Clone {
     fn say_hello(&self, name: &str) -> String;
@@ -226,7 +226,9 @@ fn hand_generated_mock_works() {
         .returns("Hello Peter")
         .times(1);
 
-    mock.expect_say_hello("baz").panics_with_message("foo").times(ExpectedCalls::any());
+    mock.expect_say_hello("baz")
+        .panics_with_message("foo")
+        .times(ExpectedCalls::any());
 
     mock.expect_print_hello("foo").times(..=8);
 
