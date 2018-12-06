@@ -7,6 +7,13 @@ use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive};
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub struct ExpectedCalls(ExpectedCallsKind);
 
+impl ExpectedCalls {
+    /// Matches any number of calls
+    pub fn any() -> ExpectedCalls {
+        ExpectedCalls(ExpectedCallsKind::Any)
+    }
+}
+
 #[derive(Eq, PartialEq, Debug, Clone)]
 enum ExpectedCallsKind {
     Any,
@@ -32,7 +39,7 @@ impl ExpectedCalls {
 
 impl Default for ExpectedCalls {
     fn default() -> Self {
-        ExpectedCalls(ExpectedCallsKind::Any)
+        ExpectedCalls(ExpectedCallsKind::Exact(1))
     }
 }
 
