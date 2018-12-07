@@ -2,6 +2,7 @@
 name = "mockiato_doc_example"
 version = "0.1.0"
 authors = [
+    "Jan Nils Ferner <jan@myelin.ch>",
     "Ruben Schmidmeister <ruben@myelin.ch>",
     "Jeremy Stucki <jeremy@myelin.ch>",
 ]
