@@ -6,7 +6,7 @@
 pub use self::arguments::*;
 pub use self::expected_calls::*;
 pub use self::fmt::*;
-pub use self::matcher::*;
+pub use self::matcher::{ArgumentMatcher, ArgumentsMatcher};
 pub use self::method::*;
 pub use self::method_call::*;
 pub use self::return_value::*;
@@ -14,7 +14,7 @@ pub use self::return_value::*;
 mod arguments;
 mod expected_calls;
 mod fmt;
-mod matcher;
+pub(crate) mod matcher;
 mod method;
 mod method_call;
 mod return_value;

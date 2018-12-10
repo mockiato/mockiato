@@ -2,6 +2,9 @@ use crate::internal::arguments::Arguments;
 use crate::internal::fmt::MaybeDebug;
 use std::fmt::Debug;
 
+pub(crate) mod any;
+pub(crate) mod partial_eq;
+
 pub trait ArgumentMatcher<T>: MaybeDebug {
     fn matches_argument(&self, input: &T) -> bool;
 }
@@ -13,15 +16,6 @@ pub trait ArgumentsMatcher<'args>: Debug {
         // Since argument matchers for methods without any arguments should always match, we can
         // fall back to the default impl on the trait `ArgumentsMatcher`.
         true
-    }
-}
-
-impl<T, U> ArgumentMatcher<U> for T
-where
-    T: PartialEq<U> + MaybeDebug + 'static,
-{
-    fn matches_argument(&self, input: &U) -> bool {
-        self == input
     }
 }
 
