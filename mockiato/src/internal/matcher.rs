@@ -4,6 +4,7 @@ use std::fmt::Debug;
 
 pub(crate) mod any;
 pub(crate) mod partial_eq;
+pub(crate) mod unordered_vec_eq;
 
 pub trait ArgumentMatcher<T>: MaybeDebug {
     fn matches_argument(&self, input: &T) -> bool;
