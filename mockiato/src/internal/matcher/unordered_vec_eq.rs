@@ -61,8 +61,12 @@ where
     T: PartialEq<U>,
     U: PartialEq<T>,
 {
-    all_slice_elements_are_found_in_other(expected, actual)
-        && all_slice_elements_are_found_in_other(actual, expected)
+    if expected.len() == actual.len() {
+        all_slice_elements_are_found_in_other(expected, actual)
+            && all_slice_elements_are_found_in_other(actual, expected)
+    } else {
+        false
+    }
 }
 
 /// Checks every element of `left` exists in `right`
@@ -92,6 +96,14 @@ mod test {
     #[test]
     fn works_with_duplicated_items() {
         assert!(compare_slices_unordered(
+            &["foo", "foo", "bar"],
+            &["foo", "bar", "foo"]
+        ))
+    }
+
+    #[test]
+    fn does_not_work_with_different_lengths() {
+        assert!(!compare_slices_unordered(
             &["foo", "foo", "bar"],
             &["foo", "bar"]
         ))
