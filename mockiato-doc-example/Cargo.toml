@@ -1,5 +1,5 @@
 [package]
-name = "mockiato_doc_example"
+name = "mockiato-doc-example"
 version = "0.1.0"
 authors = [
     "Jan Nils Ferner <jan@myelin.ch>",

@@ -1,6 +1,6 @@
 [workspace]
 members = [
     "mockiato",
-    "mockiato_codegen",
-    "mockiato_doc_example",
+    "mockiato-codegen",
+    "mockiato-doc-example",
 ]
