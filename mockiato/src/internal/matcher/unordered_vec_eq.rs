@@ -46,6 +46,16 @@ where
     }
 }
 
+impl<'a, T, U> ArgumentMatcher<&'a mut [U]> for UnorderedVecArgumentMatcher<T>
+where
+    T: PartialEq<U> + 'static,
+    U: PartialEq<T>,
+{
+    fn matches_argument(&self, input: &&'a mut [U]) -> bool {
+        compare_slices_unordered(&self.0, *input)
+    }
+}
+
 fn compare_slices_unordered<T, U>(expected: &[T], actual: &[U]) -> bool
 where
     T: PartialEq<U>,
