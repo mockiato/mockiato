@@ -61,11 +61,12 @@ where
     T: PartialEq<U>,
     U: PartialEq<T>,
 {
-    slice_is_contained_in_other(expected, actual) && slice_is_contained_in_other(actual, expected)
+    all_slice_elements_are_found_in_other(expected, actual)
+        && all_slice_elements_are_found_in_other(actual, expected)
 }
 
 /// Checks every element of `left` exists in `right`
-fn slice_is_contained_in_other<T, U>(left: &[T], right: &[U]) -> bool
+fn all_slice_elements_are_found_in_other<T, U>(left: &[T], right: &[U]) -> bool
 where
     T: PartialEq<U>,
     U: PartialEq<T>,
