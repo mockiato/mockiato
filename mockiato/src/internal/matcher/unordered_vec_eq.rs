@@ -61,12 +61,9 @@ where
     T: PartialEq<U>,
     U: PartialEq<T>,
 {
-    if expected.len() == actual.len() {
-        all_slice_elements_are_found_in_other(expected, actual)
-            && all_slice_elements_are_found_in_other(actual, expected)
-    } else {
-        false
-    }
+    expected.len() == actual.len()
+        && all_slice_elements_are_found_in_other(expected, actual)
+        && all_slice_elements_are_found_in_other(actual, expected)
 }
 
 /// Checks every element of `left` exists in `right`
