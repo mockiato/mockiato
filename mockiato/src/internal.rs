@@ -3,13 +3,13 @@
 //! It may change at any time. Do not use this module directly.
 //!
 
-pub use self::arguments::*;
-pub use self::expected_calls::*;
-pub use self::fmt::*;
+pub use self::arguments::Arguments;
+pub use self::expected_calls::ExpectedCalls;
+pub(crate) use self::fmt::DisplayOption;
+pub use self::fmt::{MaybeDebugExtWrapper, MaybeDebugWrapper};
 pub use self::matcher::{ArgumentMatcher, ArgumentsMatcher};
-pub use self::method::*;
-pub use self::method_call::*;
-pub use self::return_value::*;
+pub use self::method::Method;
+pub use self::method_call::MethodCallBuilder;
 
 mod arguments;
 mod expected_calls;
