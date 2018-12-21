@@ -101,22 +101,25 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CallError::NoMatching(arguments, method) => write!(
+            CallError::NoMatching(arguments, method) => {
+                let message = if method.calls.is_empty() {
+                    String::from("No calls were expected")
+                } else {
+                    format!(
+                        "The following calls were expected:\n{}",
+                        DisplayCalls(&method.calls.iter().collect::<Vec<_>>())
+                    )
+                };
+
+                writeln!(
+                    f,
+                    "\nThe call {:?} was not expected.\n{}\n",
+                    arguments, message
+                )
+            }
+            CallError::MoreThanOneMatching(arguments, calls) => writeln!(
                 f,
-                r#"
-The call {:?} was not expected.
-The following calls were expected:
-{}
-"#,
-                arguments,
-                DisplayCalls(&method.calls.iter().collect::<Vec<_>>())
-            ),
-            CallError::MoreThanOneMatching(arguments, calls) => write!(
-                f,
-                r#"
-The call {:?} matches more than one expected call:
-{}
-"#,
+                "\nThe call {:?} matches more than one expected call:\n{}",
                 arguments,
                 DisplayCalls(&calls)
             ),
