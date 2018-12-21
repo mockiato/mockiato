@@ -38,16 +38,18 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            quote! { .field(&mockiato::internal::MaybeDebugExtWrapper(&self.#ident)) }
+            quote! { format!("{:?}", &mockiato::internal::MaybeDebugWrapper(&self.#ident)), }
         })
         .collect();
 
     quote! {
         impl std::fmt::Debug for #arguments_matcher_ident {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                f.debug_tuple(#method_name_str)
-                  #debug_fields
-                 .finish()
+                let arguments: Vec<String> = vec![
+                    #debug_fields
+                ];
+
+                write!(f, "{}({})", #method_name_str, arguments.join(", "))
             }
         }
     }
