@@ -12,3 +12,5 @@ trait Foo {
 
     macro_in_trait!();
 }
+
+fn main() {}

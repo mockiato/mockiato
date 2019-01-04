@@ -11,3 +11,5 @@ fn foo() {}
 
 #[mockable]
 type Foo = usize;
+
+fn main() {}
