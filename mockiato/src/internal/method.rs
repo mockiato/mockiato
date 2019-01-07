@@ -43,7 +43,8 @@ where
     }
 
     pub fn call_unwrap<'a>(&'a self, arguments: <A as ArgumentsMatcher<'a>>::Arguments) -> R {
-        self.call(arguments).unwrap_or_else(|err| panic!("{}", err))
+        self.call(arguments)
+            .unwrap_or_else(|err| panic!("\n\n{}\n", err))
     }
 
     pub fn verify_unwrap(&self) {
@@ -102,20 +103,17 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CallError::NoMatching(arguments, method) => {
-                let message = if method.calls.is_empty() {
-                    String::from("No calls were expected")
+                writeln!(f, "The call {:?} was not expected.", arguments,)?;
+
+                if method.calls.is_empty() {
+                    writeln!(f, "No calls to {} were expected.", method.name)
                 } else {
-                    format!(
+                    writeln!(
+                        f,
                         "The following calls were expected:\n{}",
                         DisplayCalls(&method.calls.iter().collect::<Vec<_>>())
                     )
-                };
-
-                writeln!(
-                    f,
-                    "\nThe call {:?} was not expected.\n{}\n",
-                    arguments, message
-                )
+                }
             }
             CallError::MoreThanOneMatching(arguments, calls) => writeln!(
                 f,
