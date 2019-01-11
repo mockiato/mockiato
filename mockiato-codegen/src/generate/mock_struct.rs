@@ -62,6 +62,13 @@ pub(crate) fn generate_mock_struct(
 
             #expect_methods
         }
+
+        impl Default for #mock_struct_ident {
+            /// Creates a new mock with no expectations.
+            fn default() -> Self {
+                Self::new()
+            }
+        }
     }
 }
 

@@ -12,3 +12,5 @@ The following traits are always implemented for mocks:
   Example: `cargo run --example debug`
 - [Clone](https://doc.rust-lang.org/std/clone/trait.Clone.html)  
   Example: `cargo test --example clone` 
+- [Default](https://doc.rust-lang.org/std/default/trait.Default.html)  
+  Example: `cargo test --example default` 
