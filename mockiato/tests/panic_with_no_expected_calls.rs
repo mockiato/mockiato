@@ -7,7 +7,7 @@ trait Greeter {
 
 #[test]
 #[should_panic(
-    expected = "The call (\"John\",) was not expected.\nNo calls to GreeterMock::greet were expected."
+    expected = "The call GreeterMock::greet(\"John\") was not expected.\nNo calls to GreeterMock::greet were expected."
 )]
 fn panics_with_no_expected_calls() {
     let greeter = GreeterMock::new();
