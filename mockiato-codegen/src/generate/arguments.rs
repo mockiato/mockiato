@@ -61,16 +61,18 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> Toke
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            quote! { .field(&mockiato::internal::MaybeDebugWrapper(&self.#ident)) }
+            quote! { format!("{:?}", &mockiato::internal::MaybeDebugWrapper(&self.#ident)), }
         })
         .collect();
 
     quote! {
         impl #generics std::fmt::Debug for #arguments_ident #generics {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                f.debug_tuple("")
-                  #debug_fields
-                 .finish()
+                let arguments: Vec<String> = vec![
+                    #debug_fields
+                ];
+
+                write!(f, "({})", arguments.join(", "))
             }
         }
     }
