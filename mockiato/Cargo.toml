@@ -9,6 +9,7 @@ authors = [
 ]
 edition = "2018"
 license = "MIT"
+keywords = [ "test", "mock" ]
 
 [dependencies]
 mockiato-codegen = { path = "../mockiato-codegen", version = "0.1" }
