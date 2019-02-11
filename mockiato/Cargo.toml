@@ -1,5 +1,6 @@
 [package]
 name = "mockiato"
+description = "Minimalistic mocking framework, ready for Rust 2018! 🎉"
 version = "0.1.0"
 authors = [
     "Jan Nils Ferner <jan@myelin.ch>",

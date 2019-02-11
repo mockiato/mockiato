@@ -1,5 +1,6 @@
 [package]
 name = "mockiato-codegen"
+description = "Internally used by mockiato for code generation. This crate should never be used directly"
 version = "0.1.0"
 authors = [
     "Jan Nils Ferner <jan@myelin.ch>",
