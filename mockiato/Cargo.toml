@@ -1,7 +1,7 @@
 [package]
 name = "mockiato"
 description = "Minimalistic mocking framework, ready for Rust 2018! 🎉"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     "Jan Nils Ferner <jan@myelin.ch>",
     "Ruben Schmidmeister <ruben@myelin.ch>",
@@ -15,7 +15,7 @@ license = "MIT"
 keywords = [ "test", "mock" ]
 
 [dependencies]
-mockiato-codegen = { path = "../mockiato-codegen", version = "0.1" }
+mockiato-codegen = { path = "../mockiato-codegen", version = "0.1.1" }
 
 [dev-dependencies]
 compiletest_rs = "0.3.14"
