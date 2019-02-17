@@ -9,15 +9,23 @@ use syn::{Ident, LitStr, ReturnType, Type};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 
+#[derive(Debug)]
+pub(crate) struct GenerateMockStructOptions<'a> {
+    pub(crate) mock_struct_ident: &'a Ident,
+    pub(crate) mod_ident: &'a Ident,
+    pub(crate) force_static_lifetimes: bool,
+}
+
 pub(crate) fn generate_mock_struct(
     trait_decl: &TraitDecl,
-    mock_struct_ident: &Ident,
-    mod_ident: &Ident,
+    options: GenerateMockStructOptions<'_>,
 ) -> TokenStream {
+    let mock_struct_ident = &options.mock_struct_ident;
+
     let method_fields: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_method_field(method_decl, &mod_ident))
+        .map(|method_decl| generate_method_field(method_decl, &options.mod_ident))
         .collect();
 
     let initializer_fields: TokenStream = trait_decl
@@ -29,8 +37,14 @@ pub(crate) fn generate_mock_struct(
     let expect_methods: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_expect_method(trait_decl, method_decl, &mod_ident))
+        .map(|method_decl| generate_expect_method(trait_decl, method_decl, &options.mod_ident))
         .collect();
+
+    let static_lifetime_restriction = if options.force_static_lifetimes {
+        Some(quote! { where 'mock: 'static })
+    } else {
+        None
+    };
 
     let visibility = &trait_decl.visibility;
 
@@ -50,7 +64,7 @@ pub(crate) fn generate_mock_struct(
     quote! {
         #[derive(Debug, Clone)]
         #[doc = #documentation]
-        #visibility struct #mock_struct_ident<'mock> {
+        #visibility struct #mock_struct_ident<'mock> #static_lifetime_restriction {
             #method_fields
             phantom_data: std::marker::PhantomData<&'mock ()>,
         }

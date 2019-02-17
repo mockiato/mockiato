@@ -1,5 +1,4 @@
 use crate::parse::method_decl::MethodDecl;
-use crate::parse::name_attr::NameAttr;
 use crate::parse::trait_decl::TraitDecl;
 use heck::{CamelCase, SnakeCase};
 use proc_macro2::Span;
@@ -20,17 +19,13 @@ pub(super) fn arguments_lifetime() -> Lifetime {
 }
 
 /// Generates the mock identifier
-///
-/// The name_attr is used if it is supplied
-pub(super) fn mock_struct_ident(trait_decl: &TraitDecl, name_attr: Option<NameAttr>) -> Ident {
+pub(super) fn mock_struct_ident(trait_decl: &TraitDecl) -> Ident {
     const IDENTIFIER_POSTFIX: &str = "Mock";
 
-    name_attr.map(|attr| attr.ident).unwrap_or_else(|| {
-        Ident::new(
-            &format!("{}{}", trait_decl.ident, IDENTIFIER_POSTFIX),
-            trait_decl.span.into(),
-        )
-    })
+    Ident::new(
+        &format!("{}{}", trait_decl.ident, IDENTIFIER_POSTFIX),
+        trait_decl.span.into(),
+    )
 }
 
 /// Generates a [`struct@Ident`] for the internal sub-mod
