@@ -14,13 +14,13 @@ pub(crate) fn generate_mock_struct(
     mock_struct_ident: &Ident,
     mod_ident: &Ident,
 ) -> TokenStream {
-    let method_fields: Punctuated<_, Token![,]> = trait_decl
+    let method_fields: TokenStream = trait_decl
         .methods
         .iter()
         .map(|method_decl| generate_method_field(method_decl, &mod_ident))
         .collect();
 
-    let initializer_fields: Punctuated<_, Token![,]> = trait_decl
+    let initializer_fields: TokenStream = trait_decl
         .methods
         .iter()
         .map(|method_decl| generate_initializer_field(&method_decl.ident, &mock_struct_ident))
@@ -50,20 +50,24 @@ pub(crate) fn generate_mock_struct(
     quote! {
         #[derive(Debug, Clone)]
         #[doc = #documentation]
-        #visibility struct #mock_struct_ident {
+        #visibility struct #mock_struct_ident<'mock> {
             #method_fields
+            phantom_data: std::marker::PhantomData<&'mock ()>,
         }
 
-        impl #mock_struct_ident {
+        impl<'mock> #mock_struct_ident<'mock> {
             /// Creates a new mock with no expectations.
             #visibility fn new() -> Self {
-                Self { #initializer_fields }
+                Self {
+                    #initializer_fields
+                    phantom_data: std::marker::PhantomData,
+                }
             }
 
             #expect_methods
         }
 
-        impl Default for #mock_struct_ident {
+        impl<'mock> Default for #mock_struct_ident<'mock> {
             /// Creates a new mock with no expectations.
             fn default() -> Self {
                 Self::new()
@@ -78,7 +82,7 @@ fn generate_method_field(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenSt
     let return_type = return_type(method_decl);
 
     quote! {
-        #ident: mockiato::internal::Method<self::#mod_ident::#arguments_matcher_ident, #return_type>
+        #ident: mockiato::internal::Method<self::#mod_ident::#arguments_matcher_ident<'mock>, #return_type>,
     }
 }
 
@@ -100,7 +104,7 @@ fn generate_initializer_field(method_ident: &Ident, mock_struct_ident: &Ident) -
     );
 
     quote! {
-        #method_ident: mockiato::internal::Method::new(#name)
+        #method_ident: mockiato::internal::Method::new(#name),
     }
 }
 
@@ -165,13 +169,14 @@ panicking if the function was not called by the time the object goes out of scop
             #arguments
         ) -> mockiato::internal::MethodCallBuilder<
             '_,
-            self::#mod_ident::#arguments_matcher_ident,
+            self::#mod_ident::#arguments_matcher_ident<'mock>,
             #return_type
         > #where_clause
         {
             self.#method_ident.add_expected_call(
                 self::#mod_ident::#arguments_matcher_ident {
                     #expected_parameters
+                    phantom_data: std::marker::PhantomData,
                 }
             )
         }
@@ -210,7 +215,7 @@ fn where_clause_predicate(generic_type_ident: &Ident, method_argument: &MethodAr
     let bound_lifetimes = rewrite_lifetimes_incrementally(&mut ty);
 
     quote! {
-        #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'static
+        #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'mock
     }
 }
 

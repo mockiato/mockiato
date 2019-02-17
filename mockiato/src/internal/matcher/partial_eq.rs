@@ -5,7 +5,7 @@ use std::fmt::{self, Debug};
 /// Creates a new `ArgumentMatcher` that matches against values using [`PartialEq`]
 pub fn partial_eq<T>(value: T) -> PartialEqArgumentMatcher<T>
 where
-    T: MaybeDebug + 'static,
+    T: MaybeDebug,
 {
     PartialEqArgumentMatcher { value }
 }
@@ -14,7 +14,7 @@ where
 /// Supports comparing a reference against an owned value.
 pub fn partial_eq_owned<T>(value: T) -> OwnedPartialEqArgumentMatcher<T>
 where
-    T: MaybeDebug + 'static,
+    T: MaybeDebug,
 {
     OwnedPartialEqArgumentMatcher { value }
 }
@@ -37,7 +37,7 @@ where
 
 impl<T, U> ArgumentMatcher<U> for PartialEqArgumentMatcher<T>
 where
-    T: PartialEq<U> + MaybeDebug + 'static,
+    T: PartialEq<U> + MaybeDebug,
 {
     fn matches_argument(&self, input: &U) -> bool {
         &self.value == input
@@ -62,7 +62,7 @@ where
 
 impl<'args, T, U> ArgumentMatcher<&'args U> for OwnedPartialEqArgumentMatcher<T>
 where
-    T: PartialEq<U> + MaybeDebug + 'static,
+    T: PartialEq<U> + MaybeDebug,
 {
     fn matches_argument(&self, input: &&U) -> bool {
         &self.value == *input

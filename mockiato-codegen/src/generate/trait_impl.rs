@@ -20,7 +20,7 @@ pub(crate) fn generate_trait_impl(
         .collect();
 
     quote! {
-        #unsafety impl #trait_ident for #mock_struct_ident {
+        #unsafety impl<'mock> #trait_ident for #mock_struct_ident<'mock> {
             #method_impls
         }
     }

@@ -18,8 +18,9 @@ pub(crate) fn generate_arguments_matcher(
 
     quote! {
         #[doc(hidden)]
-        pub struct #arguments_matcher_ident {
+        pub struct #arguments_matcher_ident<'mock> {
             #arguments_matcher_fields
+            pub(super) phantom_data: std::marker::PhantomData<&'mock ()>,
         }
 
         #debug_impl
@@ -43,7 +44,7 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
         .collect();
 
     quote! {
-        impl std::fmt::Debug for #arguments_matcher_ident {
+        impl<'mock> std::fmt::Debug for #arguments_matcher_ident<'mock> {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let arguments: Vec<String> = vec![
                     #debug_fields
@@ -67,7 +68,7 @@ fn generate_arguments_matcher_impl(
     let arguments_lifetime = arguments_lifetime();
 
     quote! {
-        impl<#arguments_lifetime> mockiato::internal::ArgumentsMatcher<#arguments_lifetime> for #arguments_matcher_ident {
+        impl<'mock, #arguments_lifetime> mockiato::internal::ArgumentsMatcher<#arguments_lifetime> for #arguments_matcher_ident<'mock> {
             type Arguments = #arguments_ident #arguments_generics;
 
             #matches_argument_method
@@ -109,7 +110,7 @@ fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
             let bound_lifetimes = rewrite_lifetimes_incrementally(&mut ty);
 
             quote! {
-                pub(super) #ident: std::boxed::Box<dyn #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty>>,
+                pub(super) #ident: std::boxed::Box<dyn #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'mock>,
             }
         })
         .collect()
