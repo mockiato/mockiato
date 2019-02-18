@@ -5,18 +5,24 @@ use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
 use syn::Ident;
 
+#[derive(Debug)]
+pub(crate) struct GenerateTraitImplOptions<'a> {
+    pub(crate) mock_struct_ident: &'a Ident,
+    pub(crate) mod_ident: &'a Ident,
+}
+
 pub(crate) fn generate_trait_impl(
     trait_decl: &TraitDecl,
-    mock_struct_ident: &Ident,
-    mod_ident: &Ident,
+    options: GenerateTraitImplOptions<'_>,
 ) -> TokenStream {
     let trait_ident = &trait_decl.ident;
     let unsafety = &trait_decl.unsafety;
+    let mock_struct_ident = &options.mock_struct_ident;
 
     let method_impls: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_method_impl(method_decl, mod_ident))
+        .map(|method_decl| generate_method_impl(method_decl, options.mod_ident))
         .collect();
 
     quote! {

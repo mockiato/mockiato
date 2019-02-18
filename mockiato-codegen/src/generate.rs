@@ -39,7 +39,13 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
         },
     );
 
-    let trait_impl = generate_trait_impl(&trait_decl, &mock_struct_ident, &mod_ident);
+    let trait_impl = generate_trait_impl(
+        &trait_decl,
+        GenerateTraitImplOptions {
+            mod_ident: &mod_ident,
+            mock_struct_ident: &mock_struct_ident,
+        },
+    );
 
     let arguments: TokenStream = trait_decl
         .methods
