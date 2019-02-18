@@ -24,9 +24,15 @@ impl StaticAttr {
             Diagnostic::spanned(
                 meta_item_span,
                 Level::Error,
-                format!("#[{}(static_references) does not take any parameters", ATTR_NAME),
+                format!(
+                    "#[{}(static_references) does not take any parameters",
+                    ATTR_NAME
+                ),
             )
-            .help(format!("Example usage: #[{}(static_references)]", ATTR_NAME)),
+            .help(format!(
+                "Example usage: #[{}(static_references)]",
+                ATTR_NAME
+            )),
         ))
     }
 }
