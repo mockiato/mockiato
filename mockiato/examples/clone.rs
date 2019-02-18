@@ -1,6 +1,6 @@
 use mockiato::{mockable, partial_eq};
 
-#[mockable(static)]
+#[mockable(static_references)]
 trait Greeter: GreeterClone {
     fn greet(&self, name: &str) -> String;
 }

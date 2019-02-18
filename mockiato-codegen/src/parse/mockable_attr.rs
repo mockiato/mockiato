@@ -49,12 +49,12 @@ impl MockableAttr {
                     Diagnostic::spanned(item.span_unstable(), Level::Warning, "`name` is specified more than once. The latter definition will take precedence.").emit();
                 }
                 name_attr = Some(NameAttr::parse(item)?);
-            } else if item_name == "static" {
+            } else if item_name == "static_references" {
                 if static_attr.is_some() {
                     Diagnostic::spanned(
                         item.span_unstable(),
                         Level::Warning,
-                        "`static` is specified more than once.",
+                        "`static_references` is specified more than once.",
                     )
                     .emit();
                 }
