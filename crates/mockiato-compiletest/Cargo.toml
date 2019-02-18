@@ -1,5 +1,6 @@
 [package]
 name = "mockiato-compiletest"
+description = "Compilation tests for mockiato"
 version = "0.1.0"
 authors = [
     "Jan Nils Ferner <jan@myelin.ch>",
