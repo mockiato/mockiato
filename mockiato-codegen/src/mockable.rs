@@ -32,7 +32,7 @@ impl Mockable {
         let generated_mock = generate_mock(
             &trait_decl,
             GenerateMockOptions {
-                mock_struct_ident: mockable_attr.name_attr.map(|attr| attr.ident),
+                custom_struct_ident: mockable_attr.name_attr.map(|attr| attr.ident),
                 force_static_lifetimes: mockable_attr.static_attr.is_some(),
             },
         );

@@ -19,13 +19,13 @@ mod trait_impl;
 
 #[derive(Debug, Default)]
 pub(crate) struct GenerateMockOptions {
-    pub(crate) mock_struct_ident: Option<Ident>,
+    pub(crate) custom_struct_ident: Option<Ident>,
     pub(crate) force_static_lifetimes: bool,
 }
 
 pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions) -> TokenStream {
     let mock_struct_ident = options
-        .mock_struct_ident
+        .custom_struct_ident
         .unwrap_or_else(|| mock_struct_ident(&trait_decl));
 
     let mod_ident = mod_ident(&mock_struct_ident);
