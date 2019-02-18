@@ -1,5 +1,10 @@
 # Mockiato
 
+[![Build Status](https://travis-ci.com/myelin-ai/mockiato.svg?branch=master)](https://travis-ci.com/myelin-ai/mockiato)
+[![Latest Version](https://img.shields.io/crates/v/mockiato.svg)](https://crates.io/crates/mockiato)
+[![Documentation](https://docs.rs/mockiato/badge.svg)](https://docs.rs/mockiato)
+
+
 Minimalistic mocking framework, ready for Rust 2018! 🎉
 
 ## Trait Bounds
