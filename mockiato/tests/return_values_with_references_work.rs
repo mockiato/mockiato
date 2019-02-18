@@ -12,5 +12,5 @@ fn test() {
 
     greeter.expect_greeting().returns(&greeting);
 
-    assert_eq!("Foo", greeter.greeting())
+    assert_eq!("Foo", greeter.greeting());
 }
