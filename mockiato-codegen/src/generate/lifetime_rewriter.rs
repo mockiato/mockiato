@@ -44,16 +44,20 @@ where
 /// Replaces all lifetimes with the same lifetime
 pub(crate) struct UniformLifetimeGenerator {
     // Indicates that the rewriter found at least one lifetime
-    pub(crate) has_lifetimes: bool,
+    has_lifetimes: bool,
     lifetime: Lifetime,
 }
 
 impl UniformLifetimeGenerator {
-    pub fn new(lifetime: Lifetime) -> Self {
+    pub(crate) fn new(lifetime: Lifetime) -> Self {
         Self {
             lifetime,
             has_lifetimes: false,
         }
+    }
+
+    pub(crate) fn has_lifetimes(&self) -> bool {
+        self.has_lifetimes
     }
 }
 
