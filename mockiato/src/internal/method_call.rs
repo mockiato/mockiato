@@ -9,14 +9,14 @@ use std::rc::Rc;
 
 /// Configures an expected method call.
 /// This builder is returned from the `expect_*` methods on a generated mock.
-pub struct MethodCallBuilder<'a, A, R>
+pub struct MethodCallBuilder<'mock, 'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
-    call: &'a mut MethodCall<A, R>,
+    call: &'a mut MethodCall<'mock, A, R>,
 }
 
-impl<'a, A, R> MethodCallBuilder<'a, A, R>
+impl<'mock, 'a, A, R> MethodCallBuilder<'mock, 'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
@@ -24,7 +24,7 @@ where
     /// The value must be [`Clone`]able.g
     pub fn returns(&mut self, return_value: R) -> &mut Self
     where
-        R: Clone + 'static,
+        R: Clone + 'mock,
     {
         self.call.return_value = Some(Rc::new(return_value::Cloned(return_value)));
         self
@@ -51,20 +51,20 @@ where
         self
     }
 
-    pub(crate) fn new(call: &'a mut MethodCall<A, R>) -> Self {
+    pub(crate) fn new(call: &'a mut MethodCall<'mock, A, R>) -> Self {
         Self { call }
     }
 }
 
 #[derive(Debug)]
-pub struct MethodCall<A, R> {
+pub struct MethodCall<'mock, A, R> {
     expected_calls: ExpectedCalls,
     actual_number_of_calls: RefCell<u64>,
     matcher: Rc<A>,
-    return_value: Option<Rc<dyn ReturnValueGenerator<A, R>>>,
+    return_value: Option<Rc<dyn ReturnValueGenerator<A, R> + 'mock>>,
 }
 
-impl<A, R> Clone for MethodCall<A, R>
+impl<'mock, A, R> Clone for MethodCall<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
@@ -78,7 +78,7 @@ where
     }
 }
 
-impl<A, R> MethodCall<A, R>
+impl<'mock, A, R> MethodCall<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
@@ -113,7 +113,7 @@ where
     }
 }
 
-impl<'mock, A, R> Display for MethodCall<A, R>
+impl<'mock, A, R> Display for MethodCall<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
