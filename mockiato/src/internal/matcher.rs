@@ -56,13 +56,11 @@ mod mock {
 
     impl Drop for ArgumentsMatcherMock {
         fn drop(&mut self) {
-            if !panicking() {
-                if self.matches_arguments_return.is_some() {
-                    assert!(
-                        *self.matches_arguments_was_called.borrow(),
-                        "matches_arguments() was never called"
-                    );
-                }
+            if !panicking() && self.matches_arguments_return.is_some() {
+                assert!(
+                    *self.matches_arguments_was_called.borrow(),
+                    "matches_arguments() was never called"
+                );
             }
         }
     }
