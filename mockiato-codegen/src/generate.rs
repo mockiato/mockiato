@@ -3,7 +3,7 @@ use self::arguments_matcher::generate_arguments_matcher;
 use self::constant::{mock_struct_ident, mod_ident};
 use self::drop_impl::generate_drop_impl;
 use self::mock_struct::{generate_mock_struct, GenerateMockStructOptions};
-use self::trait_impl::generate_trait_impl;
+use self::trait_impl::{generate_trait_impl, GenerateTraitImplOptions};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Ident, TokenStream};
@@ -30,12 +30,18 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
 
     let mod_ident = mod_ident(&mock_struct_ident);
 
+    let static_lifetime_restriction = if options.force_static_lifetimes {
+        Some(get_static_lifetime_restriction())
+    } else {
+        None
+    };
+
     let mock_struct = generate_mock_struct(
         &trait_decl,
         GenerateMockStructOptions {
             mod_ident: &mod_ident,
             mock_struct_ident: &mock_struct_ident,
-            force_static_lifetimes: options.force_static_lifetimes,
+            static_lifetime_restriction: static_lifetime_restriction.as_ref(),
         },
     );
 
@@ -70,6 +76,10 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
             #arguments
         }
     }
+}
+
+fn get_static_lifetime_restriction() -> TokenStream {
+    quote! { where 'mock: 'static }
 }
 
 fn generate_argument_structs(method_decl: &MethodDecl) -> proc_macro2::TokenStream {

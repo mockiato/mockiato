@@ -13,7 +13,7 @@ type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 pub(crate) struct GenerateMockStructOptions<'a> {
     pub(crate) mock_struct_ident: &'a Ident,
     pub(crate) mod_ident: &'a Ident,
-    pub(crate) force_static_lifetimes: bool,
+    pub(crate) static_lifetime_restriction: Option<&'a TokenStream>,
 }
 
 pub(crate) fn generate_mock_struct(
@@ -21,6 +21,7 @@ pub(crate) fn generate_mock_struct(
     options: GenerateMockStructOptions<'_>,
 ) -> TokenStream {
     let mock_struct_ident = &options.mock_struct_ident;
+    let static_lifetime_restriction = &options.static_lifetime_restriction;
 
     let method_fields: TokenStream = trait_decl
         .methods
@@ -39,12 +40,6 @@ pub(crate) fn generate_mock_struct(
         .iter()
         .map(|method_decl| generate_expect_method(trait_decl, method_decl, &options.mod_ident))
         .collect();
-
-    let static_lifetime_restriction = if options.force_static_lifetimes {
-        Some(quote! { where 'mock: 'static })
-    } else {
-        None
-    };
 
     let visibility = &trait_decl.visibility;
 
@@ -69,7 +64,7 @@ pub(crate) fn generate_mock_struct(
             phantom_data: std::marker::PhantomData<&'mock ()>,
         }
 
-        impl<'mock> #mock_struct_ident<'mock> {
+        impl<'mock> #mock_struct_ident<'mock> #static_lifetime_restriction {
             /// Creates a new mock with no expectations.
             #visibility fn new() -> Self {
                 Self {
@@ -81,7 +76,7 @@ pub(crate) fn generate_mock_struct(
             #expect_methods
         }
 
-        impl<'mock> Default for #mock_struct_ident<'mock> {
+        impl<'mock> Default for #mock_struct_ident<'mock> #static_lifetime_restriction {
             /// Creates a new mock with no expectations.
             fn default() -> Self {
                 Self::new()
