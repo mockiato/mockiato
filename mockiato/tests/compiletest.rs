@@ -93,10 +93,10 @@ fn extern_dep(name: &str, kind: Kind) -> io::Result<String> {
         if lib_name == dep_name && filename.ends_with(kind.extension()) {
             if let Some(ref mut existing) = dep_path {
                 if best_time_for(&entry.metadata()?) > best_time_for(&existing.metadata()?) {
-                    *existing = entry.path().into();
+                    *existing = entry.path();
                 }
             } else {
-                dep_path = Some(entry.path().into());
+                dep_path = Some(entry.path());
             }
         }
     }

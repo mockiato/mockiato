@@ -1,3 +1,5 @@
+#![allow(clippy::blacklisted_name)]
+
 use mockiato::mockable;
 
 #[mockable]
