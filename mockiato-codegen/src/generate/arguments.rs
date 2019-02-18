@@ -19,7 +19,7 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> GeneratedArguments
         LifetimeRewriter::new(UniformLifetimeGenerator::new(arguments_lifetime()));
     let arguments_fields = generate_arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
 
-    let generics = if lifetime_rewriter.generator.has_lifetimes {
+    let generics = if lifetime_rewriter.generator.has_lifetimes() {
         generics()
     } else {
         TokenStream::new()
