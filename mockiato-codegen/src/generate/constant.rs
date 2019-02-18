@@ -18,6 +18,13 @@ pub(super) fn arguments_lifetime() -> Lifetime {
     Lifetime::new(LIFETIME_NAME, Span::call_site())
 }
 
+/// Generates a mock lifetime
+pub(super) fn mock_lifetime() -> Lifetime {
+    const LIFETIME_NAME: &str = "'mock";
+
+    Lifetime::new(LIFETIME_NAME, Span::call_site())
+}
+
 /// Generates the mock identifier
 pub(super) fn mock_struct_ident(trait_decl: &TraitDecl) -> Ident {
     const IDENTIFIER_POSTFIX: &str = "Mock";

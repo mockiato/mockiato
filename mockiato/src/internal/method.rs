@@ -3,15 +3,15 @@ use crate::internal::method_call::{MethodCall, MethodCallBuilder};
 use std::fmt::{self, Display};
 
 #[derive(Debug)]
-pub struct Method<A, R>
+pub struct Method<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
     name: &'static str,
-    calls: Vec<MethodCall<A, R>>,
+    calls: Vec<MethodCall<'mock, A, R>>,
 }
 
-impl<A, R> Clone for Method<A, R>
+impl<'mock, A, R> Clone for Method<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
@@ -23,7 +23,7 @@ where
     }
 }
 
-impl<A, R> Method<A, R>
+impl<'mock, A, R> Method<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
@@ -34,7 +34,7 @@ where
         }
     }
 
-    pub fn add_expected_call(&mut self, matcher: A) -> MethodCallBuilder<'_, A, R> {
+    pub fn add_expected_call(&mut self, matcher: A) -> MethodCallBuilder<'mock, '_, A, R> {
         let call = MethodCall::new(matcher);
 
         self.calls.push(call);
@@ -54,7 +54,7 @@ where
     fn call<'a>(
         &'a self,
         arguments: <A as ArgumentsMatcher<'a>>::Arguments,
-    ) -> Result<R, CallError<'a, A, R>> {
+    ) -> Result<R, CallError<'mock, 'a, A, R>> {
         let matching_method_calls = self
             .calls
             .iter()
@@ -71,7 +71,7 @@ where
         }
     }
 
-    fn verify(&self) -> Result<(), VerificationError<'_, A, R>> {
+    fn verify(&self) -> Result<(), VerificationError<'mock, '_, A, R>> {
         if self
             .calls
             .iter()
@@ -85,18 +85,21 @@ where
 }
 
 #[derive(Debug)]
-enum CallError<'a, A, R>
+enum CallError<'mock, 'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
-    NoMatching(<A as ArgumentsMatcher<'a>>::Arguments, &'a Method<A, R>),
+    NoMatching(
+        <A as ArgumentsMatcher<'a>>::Arguments,
+        &'a Method<'mock, A, R>,
+    ),
     MoreThanOneMatching(
         <A as ArgumentsMatcher<'a>>::Arguments,
-        Vec<&'a MethodCall<A, R>>,
+        Vec<&'a MethodCall<'mock, A, R>>,
     ),
 }
 
-impl<'a, A, R> Display for CallError<'a, A, R>
+impl<'mock, 'a, A, R> Display for CallError<'mock, 'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
@@ -130,14 +133,14 @@ where
 }
 
 #[derive(Debug)]
-struct VerificationError<'a, A, R>
+struct VerificationError<'mock, 'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
-    method: &'a Method<A, R>,
+    method: &'a Method<'mock, A, R>,
 }
 
-impl<'a, A, R> Display for VerificationError<'a, A, R>
+impl<'mock, 'a, A, R> Display for VerificationError<'mock, 'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
@@ -156,9 +159,9 @@ where
     }
 }
 
-struct DisplayCalls<'a, A, R>(&'a [&'a MethodCall<A, R>]);
+struct DisplayCalls<'mock, 'a, A, R>(&'a [&'a MethodCall<'mock, A, R>]);
 
-impl<'a, A, R> Display for DisplayCalls<'a, A, R>
+impl<'mock, 'a, A, R> Display for DisplayCalls<'mock, 'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {

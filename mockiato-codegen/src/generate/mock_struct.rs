@@ -1,11 +1,16 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
-use super::constant::{arguments_matcher_ident, expect_method_ident, generic_parameter_ident};
+use super::constant::{
+    arguments_matcher_ident, expect_method_ident, generic_parameter_ident, mock_lifetime,
+};
+use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
-use syn::{Ident, LitStr, ReturnType, Type};
+use syn::token::Paren;
+use syn::visit_mut::visit_type_mut;
+use syn::{Ident, LitStr, ReturnType, Type, TypeTuple};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 
@@ -22,11 +27,15 @@ pub(crate) fn generate_mock_struct(
 ) -> TokenStream {
     let mock_struct_ident = &options.mock_struct_ident;
     let static_lifetime_restriction = &options.static_lifetime_restriction;
+    let mut lifetime_rewriter =
+        LifetimeRewriter::new(UniformLifetimeGenerator::new(mock_lifetime()));
 
     let method_fields: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_method_field(method_decl, &options.mod_ident))
+        .map(|method_decl| {
+            generate_method_field(method_decl, &options.mod_ident, &mut lifetime_rewriter)
+        })
         .collect();
 
     let initializer_fields: TokenStream = trait_decl
@@ -38,7 +47,14 @@ pub(crate) fn generate_mock_struct(
     let expect_methods: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_expect_method(trait_decl, method_decl, &options.mod_ident))
+        .map(|method_decl| {
+            generate_expect_method(
+                trait_decl,
+                method_decl,
+                &options.mod_ident,
+                &mut lifetime_rewriter,
+            )
+        })
         .collect();
 
     let visibility = &trait_decl.visibility;
@@ -85,20 +101,31 @@ pub(crate) fn generate_mock_struct(
     }
 }
 
-fn generate_method_field(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStream {
+fn generate_method_field(
+    method_decl: &MethodDecl,
+    mod_ident: &Ident,
+    lifetime_rewriter: &mut LifetimeRewriter<UniformLifetimeGenerator>,
+) -> TokenStream {
     let ident = &method_decl.ident;
     let arguments_matcher_ident = arguments_matcher_ident(ident);
-    let return_type = return_type(method_decl);
+    let mut return_type = return_type(method_decl);
+
+    visit_type_mut(lifetime_rewriter, &mut return_type);
 
     quote! {
-        #ident: mockiato::internal::Method<self::#mod_ident::#arguments_matcher_ident<'mock>, #return_type>,
+        #ident: mockiato::internal::Method<'mock, self::#mod_ident::#arguments_matcher_ident<'mock>, #return_type>,
     }
 }
 
-fn return_type(method_decl: &MethodDecl) -> TokenStream {
+fn return_type(method_decl: &MethodDecl) -> Type {
     match &method_decl.output {
-        ReturnType::Default => quote! { () },
-        ReturnType::Type(_, ty) => quote! { #ty },
+        ReturnType::Default => Type::Tuple(TypeTuple {
+            paren_token: Paren {
+                span: Span::call_site(),
+            },
+            elems: Punctuated::new(),
+        }),
+        ReturnType::Type(_, ty) => ty.as_ref().clone(),
     }
 }
 
@@ -121,6 +148,7 @@ fn generate_expect_method(
     trait_decl: &TraitDecl,
     method_decl: &MethodDecl,
     mod_ident: &Ident,
+    lifetime_rewriter: &mut LifetimeRewriter<UniformLifetimeGenerator>,
 ) -> TokenStream {
     let method_ident = &method_decl.ident;
     let visibility = &trait_decl.visibility;
@@ -141,7 +169,8 @@ fn generate_expect_method(
         .collect();
 
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
-    let return_type = return_type(method_decl);
+    let mut return_type = return_type(method_decl);
+    visit_type_mut(lifetime_rewriter, &mut return_type);
 
     let where_clause = where_clause(&arguments_with_generics);
 
@@ -177,6 +206,7 @@ panicking if the function was not called by the time the object goes out of scop
             &mut self,
             #arguments
         ) -> mockiato::internal::MethodCallBuilder<
+            'mock,
             '_,
             self::#mod_ident::#arguments_matcher_ident<'mock>,
             #return_type

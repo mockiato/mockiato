@@ -1,4 +1,4 @@
-use super::constant::{argument_lifetime, arguments_lifetime};
+use super::constant::argument_lifetime;
 use syn::visit_mut::{visit_type_reference_mut, VisitMut};
 use syn::{Lifetime, TypeReference};
 
@@ -42,16 +42,29 @@ where
 }
 
 /// Replaces all lifetimes with the same lifetime
-#[derive(Default)]
 pub(crate) struct UniformLifetimeGenerator {
     // Indicates that the rewriter found at least one lifetime
-    pub(crate) has_lifetimes: bool,
+    has_lifetimes: bool,
+    lifetime: Lifetime,
+}
+
+impl UniformLifetimeGenerator {
+    pub(crate) fn new(lifetime: Lifetime) -> Self {
+        Self {
+            lifetime,
+            has_lifetimes: false,
+        }
+    }
+
+    pub(crate) fn has_lifetimes(&self) -> bool {
+        self.has_lifetimes
+    }
 }
 
 impl LifetimeGenerator for UniformLifetimeGenerator {
     fn generate_lifetime(&mut self) -> Lifetime {
         self.has_lifetimes = true;
-        arguments_lifetime()
+        self.lifetime.clone()
     }
 }
 
