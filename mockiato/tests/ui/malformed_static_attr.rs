@@ -1,12 +1,12 @@
 use mockiato::mockable;
 
-#[mockable(static = 1)]
+#[mockable(static_references = 1)]
 trait Foo {}
 
-#[mockable(static = "foo")]
+#[mockable(static_references = "foo")]
 trait Foo {}
 
-#[mockable(static, static)]
+#[mockable(static_references, static_references)]
 trait Foo {}
 
 fn main() {}

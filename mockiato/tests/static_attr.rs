@@ -1,6 +1,6 @@
 use mockiato::mockable;
 
-#[mockable(static)]
+#[mockable(static_references)]
 trait Greeter: 'static {
     fn greet(&self, name: &str) -> String;
 }

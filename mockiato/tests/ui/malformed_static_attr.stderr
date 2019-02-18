@@ -1,24 +1,24 @@
-error: #[mockable(static) does not take any parameters
+error: #[mockable(static_references) does not take any parameters
  --> $DIR/malformed_static_attr.rs:3:12
   |
-3 | #[mockable(static = 1)]
-  |            ^^^^^^
+3 | #[mockable(static_references = 1)]
+  |            ^^^^^^^^^^^^^^^^^
   |
-  = help: Example usage: #[mockable(static)]
+  = help: Example usage: #[mockable(static_references)]
 
-error: #[mockable(static) does not take any parameters
+error: #[mockable(static_references) does not take any parameters
  --> $DIR/malformed_static_attr.rs:6:12
   |
-6 | #[mockable(static = "foo")]
-  |            ^^^^^^
+6 | #[mockable(static_references = "foo")]
+  |            ^^^^^^^^^^^^^^^^^
   |
-  = help: Example usage: #[mockable(static)]
+  = help: Example usage: #[mockable(static_references)]
 
-warning: `static` is specified more than once.
- --> $DIR/malformed_static_attr.rs:9:20
+warning: `static_references` is specified more than once.
+ --> $DIR/malformed_static_attr.rs:9:31
   |
-9 | #[mockable(static, static)]
-  |                    ^^^^^^
+9 | #[mockable(static_references, static_references)]
+  |                               ^^^^^^^^^^^^^^^^^
 
 error: aborting due to 2 previous errors
 
