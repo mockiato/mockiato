@@ -1,4 +1,4 @@
-use crate::generate::generate_mock;
+use crate::generate::{generate_mock, GenerateMockOptions};
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::trait_decl::TraitDecl;
 use crate::spanned::SpannedUnstable;
@@ -29,7 +29,18 @@ impl Mockable {
             .map_err(|err| err
                 .emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))));
 
-        generate_mock(mockable_attr, &item_trait, &trait_decl).into()
+        let generated_mock = generate_mock(
+            &trait_decl,
+            GenerateMockOptions {
+                custom_struct_ident: mockable_attr.name_attr.map(|attr| attr.ident),
+                force_static_lifetimes: mockable_attr.static_attr.is_some(),
+            },
+        );
+
+        TokenStream::from(quote! {
+            #item_trait
+            #generated_mock
+        })
     }
 }
 

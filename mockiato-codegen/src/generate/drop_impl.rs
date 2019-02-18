@@ -11,7 +11,7 @@ pub(crate) fn generate_drop_impl(mock_ident: &Ident, trait_decl: &TraitDecl) -> 
         .collect();
 
     quote! {
-        impl Drop for #mock_ident {
+        impl<'mock> Drop for #mock_ident<'mock> {
             fn drop(&mut self) {
                 if !std::thread::panicking() {
                     #verify_calls

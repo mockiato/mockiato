@@ -6,21 +6,13 @@ use std::fmt::{self, Debug};
 /// while disregarding the exact order of the elements.
 ///
 /// [`slice`]: https://doc.rust-lang.org/std/primitive.slice.html
-pub fn unordered_vec_eq<T>(vec: Vec<T>) -> UnorderedVecArgumentMatcher<T>
-where
-    T: 'static,
-{
+pub fn unordered_vec_eq<T>(vec: Vec<T>) -> UnorderedVecArgumentMatcher<T> {
     UnorderedVecArgumentMatcher(vec)
 }
 
-pub struct UnorderedVecArgumentMatcher<T>(Vec<T>)
-where
-    T: 'static;
+pub struct UnorderedVecArgumentMatcher<T>(Vec<T>);
 
-impl<T> Debug for UnorderedVecArgumentMatcher<T>
-where
-    T: 'static,
-{
+impl<T> Debug for UnorderedVecArgumentMatcher<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Debug::fmt(&MaybeDebugWrapper(&self.0), f)
     }
@@ -28,7 +20,7 @@ where
 
 impl<T, U> ArgumentMatcher<Vec<U>> for UnorderedVecArgumentMatcher<T>
 where
-    T: PartialEq<U> + 'static,
+    T: PartialEq<U>,
     U: PartialEq<T>,
 {
     fn matches_argument(&self, input: &Vec<U>) -> bool {
@@ -38,7 +30,7 @@ where
 
 impl<'a, T, U> ArgumentMatcher<&'a [U]> for UnorderedVecArgumentMatcher<T>
 where
-    T: PartialEq<U> + 'static,
+    T: PartialEq<U>,
     U: PartialEq<T>,
 {
     fn matches_argument(&self, input: &&'a [U]) -> bool {
@@ -48,7 +40,7 @@ where
 
 impl<'a, T, U> ArgumentMatcher<&'a mut [U]> for UnorderedVecArgumentMatcher<T>
 where
-    T: PartialEq<U> + 'static,
+    T: PartialEq<U>,
     U: PartialEq<T>,
 {
     fn matches_argument(&self, input: &&'a mut [U]) -> bool {

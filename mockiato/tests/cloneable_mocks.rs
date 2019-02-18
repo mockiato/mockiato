@@ -6,24 +6,30 @@ trait Greeter: GreeterClone {
 }
 
 trait GreeterClone {
-    fn clone_box(&self) -> Box<dyn Greeter>;
+    fn clone_box<'a>(&self) -> Box<dyn Greeter + 'a>
+    where
+        Self: 'a;
 }
 
 impl<T> GreeterClone for T
 where
-    T: Greeter + Clone + 'static,
+    T: Greeter + Clone,
 {
-    fn clone_box(&self) -> Box<dyn Greeter> {
+    fn clone_box<'a>(&self) -> Box<dyn Greeter + 'a>
+    where
+        Self: 'a,
+    {
         Box::new(self.clone())
     }
 }
 
 #[test]
 fn cloneable_mocks_work() {
+    let name = String::from("Tom");
     let mut greeter = GreeterMock::new();
 
     greeter
-        .expect_greet(partial_eq("Tom"))
+        .expect_greet(partial_eq(&name))
         .times(2)
         .returns(String::from("Hello Tom"));
 
