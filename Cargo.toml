@@ -17,11 +17,9 @@ keywords = [ "test", "mock" ]
 [dependencies]
 mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.2.0" }
 
-[dev-dependencies]
-compiletest_rs = "0.3.14"
-
 [workspace]
 members = [
     "crates/mockiato-codegen",
     "crates/mockiato-doc-example",
+    "crates/mockiato-compiletest",
 ]

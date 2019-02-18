@@ -48,6 +48,8 @@ fn target_path() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .unwrap()
+        .parent()
+        .unwrap()
         .join("target")
         .join(ENVIRONMENT)
 }
