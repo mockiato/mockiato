@@ -1,4 +1,4 @@
-use mockiato::{mockable, partial_eq};
+use mockiato::mockable;
 
 #[mockable]
 trait Greeter {
