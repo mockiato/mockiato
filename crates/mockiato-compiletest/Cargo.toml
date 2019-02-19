@@ -1,5 +1,6 @@
 [package]
-name = "mockiato-doc-example"
+name = "mockiato-compiletest"
+description = "Compilation tests for mockiato"
 version = "0.1.0"
 authors = [
     "Jan Nils Ferner <jan@myelin.ch>",
@@ -10,4 +11,7 @@ edition = "2018"
 license = "MIT"
 
 [dependencies]
-mockiato = { path = "../mockiato" }
+mockiato = { path = "../.." }
+
+[dev-dependencies]
+compiletest_rs = "0.3.14"
