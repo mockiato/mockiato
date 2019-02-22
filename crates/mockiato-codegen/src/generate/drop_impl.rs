@@ -1,6 +1,7 @@
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
+use quote::quote;
 use syn::Ident;
 
 pub(crate) fn generate_drop_impl(mock_ident: &Ident, trait_decl: &TraitDecl) -> TokenStream {

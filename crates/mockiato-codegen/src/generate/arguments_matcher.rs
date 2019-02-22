@@ -4,8 +4,9 @@ use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use proc_macro2::TokenStream;
+use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::LitStr;
+use syn::{LitStr, Token};
 
 pub(crate) fn generate_arguments_matcher(
     method_decl: &MethodDecl,

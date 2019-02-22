@@ -2,7 +2,9 @@ use crate::parse::method_inputs::MethodInputs;
 use crate::spanned::SpannedUnstable;
 use crate::{Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
-use syn::{Attribute, FnDecl, Generics, Ident, MethodSig, ReturnType, TraitItem, TraitItemMethod};
+use syn::{
+    Attribute, FnDecl, Generics, Ident, MethodSig, ReturnType, Token, TraitItem, TraitItemMethod,
+};
 
 /// Holds everything required to generate a mock struct
 /// from a trait declaration.

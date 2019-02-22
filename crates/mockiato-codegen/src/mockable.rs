@@ -4,6 +4,7 @@ use crate::parse::trait_decl::TraitDecl;
 use crate::spanned::SpannedUnstable;
 use crate::Error;
 use proc_macro::{Diagnostic, Level, Span, TokenStream};
+use quote::quote;
 use syn::{AttributeArgs, Item, ItemTrait};
 
 #[derive(Default)]
