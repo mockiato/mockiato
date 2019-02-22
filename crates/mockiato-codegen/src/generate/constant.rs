@@ -27,10 +27,10 @@ pub(super) fn mock_lifetime() -> Lifetime {
 
 /// Generates the mock identifier
 pub(super) fn mock_struct_ident(trait_decl: &TraitDecl) -> Ident {
-    const IDENTIFIER_POSTFIX: &str = "Mock";
+    const IDENTIFIER_SUFFIX: &str = "Mock";
 
     Ident::new(
-        &format!("{}{}", trait_decl.ident, IDENTIFIER_POSTFIX),
+        &format!("{}{}", trait_decl.ident, IDENTIFIER_SUFFIX),
         trait_decl.span.into(),
     )
 }
@@ -72,13 +72,13 @@ pub(super) fn generic_parameter_ident(index: usize) -> Ident {
 
 /// Generates the identifer for an `Arguments` struct
 pub(super) fn arguments_ident(method_ident: &Ident) -> Ident {
-    const IDENTIFIER_POSTFIX: &str = "Arguments";
+    const IDENTIFIER_SUFFIX: &str = "Arguments";
 
     Ident::new(
         &format!(
             "{}{}",
             method_ident.to_string().to_camel_case(),
-            IDENTIFIER_POSTFIX
+            IDENTIFIER_SUFFIX
         ),
         method_ident.span(),
     )
@@ -86,13 +86,13 @@ pub(super) fn arguments_ident(method_ident: &Ident) -> Ident {
 
 /// Generates the identifer for an `ArgumentsMatcher` struct
 pub(super) fn arguments_matcher_ident(method_ident: &Ident) -> Ident {
-    const IDENTIFIER_POSTFIX: &str = "ArgumentsMatcher";
+    const IDENTIFIER_SUFFIX: &str = "ArgumentsMatcher";
 
     Ident::new(
         &format!(
             "{}{}",
             method_ident.to_string().to_camel_case(),
-            IDENTIFIER_POSTFIX
+            IDENTIFIER_SUFFIX
         ),
         method_ident.span(),
     )
