@@ -2,9 +2,9 @@ use crate::spanned::SpannedUnstable;
 use crate::{merge_results, Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
 use proc_macro2::TokenStream;
-use quote::ToTokens;
+use quote::{quote, ToTokens};
 use syn::punctuated::Punctuated;
-use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Type};
+use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Token, Type};
 
 #[derive(Clone)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]

@@ -3,6 +3,7 @@ use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use proc_macro2::TokenStream;
+use quote::quote;
 use syn::visit_mut::visit_type_mut;
 use syn::Ident;
 

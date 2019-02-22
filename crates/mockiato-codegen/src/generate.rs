@@ -7,6 +7,7 @@ use self::trait_impl::{generate_trait_impl, GenerateTraitImplOptions};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Ident, TokenStream};
+use quote::quote;
 
 pub(crate) mod arguments;
 pub(crate) mod arguments_matcher;

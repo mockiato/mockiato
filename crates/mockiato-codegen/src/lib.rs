@@ -12,12 +12,6 @@
 
 extern crate proc_macro;
 
-#[macro_use]
-extern crate quote;
-
-#[macro_use]
-extern crate syn;
-
 mod constant;
 mod generate;
 mod mockable;
@@ -28,7 +22,7 @@ mod spanned;
 use self::mockable::Mockable;
 pub(crate) use self::result::*;
 use proc_macro::TokenStream;
-use syn::{AttributeArgs, Item};
+use syn::{parse_macro_input, AttributeArgs, Item};
 
 /// Generates a mock struct from a trait.
 ///

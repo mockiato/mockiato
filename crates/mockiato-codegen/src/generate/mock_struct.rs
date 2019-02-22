@@ -7,10 +7,11 @@ use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Span, TokenStream};
+use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::token::Paren;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, LitStr, ReturnType, Type, TypeTuple};
+use syn::{Ident, LitStr, ReturnType, Token, Type, TypeTuple};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 

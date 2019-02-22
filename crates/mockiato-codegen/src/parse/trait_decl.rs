@@ -5,7 +5,7 @@ use crate::{merge_results, Error, Result};
 use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
-use syn::{Generics, Ident, ItemTrait, TypeParamBound, Visibility};
+use syn::{Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
 
 #[derive(Clone)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]

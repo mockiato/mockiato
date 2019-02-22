@@ -2,8 +2,9 @@ use super::constant::arguments_ident;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
+use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::Ident;
+use syn::{Ident, Token};
 
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct GenerateTraitImplOptions<'a> {
