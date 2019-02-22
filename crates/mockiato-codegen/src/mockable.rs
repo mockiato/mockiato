@@ -23,8 +23,8 @@ impl Mockable {
             }
         }
 
-        let mockable_attr = try_or_return!(MockableAttr::parse(attr).map_err(|err| err.emit()));
-        let item_trait = try_or_return!(extract_item_trait(item).map_err(|err| err.emit()));
+        let mockable_attr = try_or_return!(MockableAttr::parse(attr).map_err(Error::emit));
+        let item_trait = try_or_return!(extract_item_trait(item).map_err(Error::emit));
         let trait_decl = try_or_return!(TraitDecl::parse(item_trait.clone())
             .map_err(|err| err
                 .emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))));

@@ -154,14 +154,14 @@ dependencies = [
 
 [[package]]
 name = "mockiato"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
- "mockiato-codegen 0.2.0",
+ "mockiato-codegen 0.2.1",
 ]
 
 [[package]]
 name = "mockiato-codegen"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "heck 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 0.4.20 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -174,14 +174,14 @@ name = "mockiato-compiletest"
 version = "0.1.0"
 dependencies = [
  "compiletest_rs 0.3.18 (registry+https://github.com/rust-lang/crates.io-index)",
- "mockiato 0.2.0",
+ "mockiato 0.2.1",
 ]
 
 [[package]]
 name = "mockiato-doc-example"
 version = "0.1.0"
 dependencies = [
- "mockiato 0.2.0",
+ "mockiato 0.2.1",
 ]
 
 [[package]]
