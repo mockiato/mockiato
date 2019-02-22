@@ -1,13 +1,11 @@
 use crate::constant::ATTR_NAME;
 use crate::spanned::SpannedUnstable;
 use crate::{Error, Result};
-use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::{Ident, Lit, Meta, MetaNameValue};
 
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct NameAttr {
-    pub(crate) span: Span,
     pub(crate) ident: Ident,
 }
 
@@ -19,7 +17,6 @@ impl NameAttr {
             if let Lit::Str(str_lit) = lit {
                 return Ok(Self {
                     ident: Ident::new(&str_lit.value(), str_lit.span()),
-                    span: str_lit.span().unstable(),
                 });
             }
         }
