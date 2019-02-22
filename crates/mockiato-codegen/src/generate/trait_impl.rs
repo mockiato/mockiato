@@ -6,7 +6,7 @@ use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::{Ident, Token};
 
-#[derive(Debug)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct GenerateTraitImplOptions<'a> {
     pub(crate) mock_struct_ident: &'a Ident,
     pub(crate) mod_ident: &'a Ident,

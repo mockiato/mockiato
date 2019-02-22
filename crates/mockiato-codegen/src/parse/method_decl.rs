@@ -8,7 +8,8 @@ use syn::{
 
 /// Holds everything required to generate a mock struct
 /// from a trait declaration.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct MethodDecl {
     /// A list of attributes decorating this method. (E.g. `#[inline(always)]`)
     pub(crate) attrs: Vec<Attribute>,

@@ -22,8 +22,11 @@ heck = "0.3"
 
 [dependencies.syn]
 version = "0.15"
-features = ["full", "extra-traits", "visit-mut"]
+features = ["full", "visit-mut"]
 
 [dependencies.proc-macro2]
 version = "0.4"
 features = ["nightly"]
+
+[features]
+debug-impls = ["syn/extra-traits"]

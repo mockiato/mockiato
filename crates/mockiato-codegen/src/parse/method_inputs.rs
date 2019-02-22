@@ -6,7 +6,8 @@ use quote::{quote, ToTokens};
 use syn::punctuated::Punctuated;
 use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Token, Type};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct MethodInputs {
     pub(crate) self_arg: MethodSelfArg,
     pub(crate) args: Vec<MethodArg>,
@@ -38,7 +39,8 @@ impl MethodInputs {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) enum MethodSelfArg {
     /// `self` is taken by reference: `&self` or `&mut self`
     Ref(ArgSelfRef),
@@ -82,7 +84,8 @@ impl ToTokens for MethodSelfArg {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct MethodArg {
     pub(crate) ident: Ident,
     pub(crate) ty: Type,
