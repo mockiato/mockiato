@@ -7,7 +7,8 @@ use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
 use syn::{Generics, Ident, ItemTrait, TypeParamBound, Visibility};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct TraitDecl {
     pub(crate) visibility: Visibility,
     pub(crate) span: Span,

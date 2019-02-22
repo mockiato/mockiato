@@ -14,7 +14,7 @@ use syn::{Ident, LitStr, ReturnType, Type, TypeTuple};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 
-#[derive(Debug)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct GenerateMockStructOptions<'a> {
     pub(crate) mock_struct_ident: &'a Ident,
     pub(crate) mod_ident: &'a Ident,

@@ -17,7 +17,8 @@ mod lifetime_rewriter;
 mod mock_struct;
 mod trait_impl;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct GenerateMockOptions {
     pub(crate) custom_struct_ident: Option<Ident>,
     pub(crate) force_static_lifetimes: bool,

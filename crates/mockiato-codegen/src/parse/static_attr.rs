@@ -5,7 +5,7 @@ use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::Meta;
 
-#[derive(Debug)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct StaticAttr {
     pub(crate) span: Span,
 }

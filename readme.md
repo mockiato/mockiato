@@ -47,3 +47,11 @@ The following traits are always implemented for mocks:
   Example: `cargo test --example clone` 
 - [Default](https://doc.rust-lang.org/std/default/trait.Default.html)  
   Example: `cargo test --example default` 
+
+## Contributing
+
+### Enable debug impls in codegen
+
+```bash
+cargo test --features mockiato-codegen/debug-impls
+```

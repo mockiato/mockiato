@@ -5,7 +5,7 @@ use proc_macro::Span;
 use proc_macro::{Diagnostic, Level};
 use syn::{Ident, Lit, Meta, MetaNameValue};
 
-#[derive(Debug)]
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct NameAttr {
     pub(crate) span: Span,
     pub(crate) ident: Ident,
