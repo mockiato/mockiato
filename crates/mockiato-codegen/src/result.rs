@@ -55,7 +55,7 @@ where
     I: Iterator<Item = Result<T>>,
 {
     let results: Vec<_> = results.collect();
-    if results.iter().any(|r| r.is_err()) {
+    if results.iter().any(Result::is_err) {
         Err(Error::merge(results.into_iter().filter_map(Result::err)))
     } else {
         Ok(results.into_iter().map(Result::unwrap))
