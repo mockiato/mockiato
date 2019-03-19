@@ -7,4 +7,4 @@
   `#[mockable(static_references)]`.
 
 ## TBD
-- Removed `ExpectedCalls::any()` use the range `0..` instead.
+- `ExpectedCalls::any()` has been removed. Use the range `0..` instead.
