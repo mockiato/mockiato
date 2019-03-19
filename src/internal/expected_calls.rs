@@ -7,16 +7,8 @@ use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive};
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub struct ExpectedCalls(ExpectedCallsKind);
 
-impl ExpectedCalls {
-    /// Matches any number of calls
-    pub fn any() -> ExpectedCalls {
-        ExpectedCalls(ExpectedCallsKind::Any)
-    }
-}
-
 #[derive(Eq, PartialEq, Debug, Clone)]
 enum ExpectedCallsKind {
-    Any,
     Exact(u64),
     AtLeast(u64),
     AtMost(u64),
@@ -27,7 +19,6 @@ enum ExpectedCallsKind {
 impl ExpectedCalls {
     pub(crate) fn matches_value(&self, value: u64) -> bool {
         match self.0 {
-            ExpectedCallsKind::Any => true,
             ExpectedCallsKind::Exact(expected) => expected == value,
             ExpectedCallsKind::AtLeast(min) => value >= min,
             ExpectedCallsKind::AtMost(max) => value <= max,
@@ -81,8 +72,10 @@ impl From<RangeToInclusive<u64>> for ExpectedCalls {
 impl Display for ExpectedCalls {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            ExpectedCallsKind::Any => write!(f, "any amount of times"),
-            ExpectedCallsKind::AtLeast(min) => write!(f, "at least {}", DisplayTimes(min)),
+            ExpectedCallsKind::AtLeast(min) => match min {
+                _ if min == 0 => write!(f, "any amount of times"),
+                _ => write!(f, "at least {}", DisplayTimes(min)),
+            },
             ExpectedCallsKind::AtMost(max) => write!(f, "at most {}", DisplayTimes(max)),
             ExpectedCallsKind::Between { start, end } => {
                 write!(f, "between {} and {} times", start, end)
@@ -98,14 +91,6 @@ impl Display for ExpectedCalls {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    #[test]
-    fn any_matches_any_value() {
-        assert!(ExpectedCalls(ExpectedCallsKind::Any).matches_value(0));
-        assert!(ExpectedCalls(ExpectedCallsKind::Any).matches_value(1));
-        assert!(ExpectedCalls(ExpectedCallsKind::Any).matches_value(23));
-        assert!(ExpectedCalls(ExpectedCallsKind::Any).matches_value(100));
-    }
 
     #[test]
     fn exact_matches_specified_value() {
