@@ -1,6 +1,6 @@
 use crate::internal::fmt::MaybeDebug;
 use crate::internal::{ArgumentMatcher, MaybeDebugWrapper};
-use nameof::name_of_type;
+use nameof::{name_of, name_of_type};
 use nearly_eq::NearlyEq;
 use std::fmt::{self, Debug};
 
@@ -40,9 +40,15 @@ where
     U: MaybeDebug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct(name_of_type!(Self))
-            .field("value", &MaybeDebugWrapper(&self.value))
-            .field("accuracy", &MaybeDebugWrapper(&self.accuracy))
+        f.debug_struct(name_of!(type NearlyEqArgumentMatcher<T, U>))
+            .field(
+                name_of!(value in NearlyEqArgumentMatcher<T, U>),
+                &MaybeDebugWrapper(&self.value),
+            )
+            .field(
+                name_of!(accuracy in NearlyEqArgumentMatcher<T, U>),
+                &MaybeDebugWrapper(&self.accuracy),
+            )
             .finish()
     }
 }
