@@ -6,6 +6,6 @@
 - To revert to the old behaviour (only static references) there is a new attribute for that:
   `#[mockable(static_references)]`.
 
-## TBD
+## 0.3.0
 - `ExpectedCalls::any()` has been removed. Use the range `0..` instead.
 - Support for nearly equals expectations has been added. (`nearly_eq` and `nearly_eq_with_accuracy`)
