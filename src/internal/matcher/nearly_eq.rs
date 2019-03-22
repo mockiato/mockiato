@@ -2,8 +2,7 @@ use crate::internal::fmt::MaybeDebug;
 use crate::internal::{ArgumentMatcher, MaybeDebugWrapper};
 use nameof::name_of_type;
 use nearly_eq::NearlyEq;
-use std::fmt;
-use std::fmt::Debug;
+use std::fmt::{self, Debug};
 
 /// Creates a new `ArgumentMatcher` that matches against values using [`NearlyEq`]
 pub fn nearly_eq<T, U>(value: T) -> NearlyEqArgumentMatcher<T, U>
