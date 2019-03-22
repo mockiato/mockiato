@@ -8,3 +8,4 @@
 
 ## TBD
 - `ExpectedCalls::any()` has been removed. Use the range `0..` instead.
+- Support for nearly equals expectations has been added. (`nearly_eq` and `nearly_eq_with_accuracy`)
