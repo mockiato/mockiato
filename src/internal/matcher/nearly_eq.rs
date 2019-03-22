@@ -95,12 +95,21 @@ mod test {
     }
 
     #[test]
-    fn nearly_eq_with_accuracy_works_with_slightly_different_f64() {
+    fn nearly_eq_with_accuracy_works_with_slightly_different_f64_and_too_small_accuracy() {
         let first_value = 3.0;
         let second_value = first_value + 0.1;
         let accuracy = 0.1;
 
-        assert!(!nearly_eq_with_accuracy(first_value, accuracy).matches_argument(&second_value));
+        assert!(nearly_eq_with_accuracy(first_value, accuracy).matches_argument(&second_value));
+    }
+
+    #[test]
+    fn nearly_eq_with_accuracy_works_with_slightly_different_f64() {
+        let first_value = 3.0;
+        let second_value = first_value + 0.01;
+        let accuracy = 0.1;
+
+        assert!(nearly_eq_with_accuracy(first_value, accuracy).matches_argument(&second_value));
     }
 
     #[test]
