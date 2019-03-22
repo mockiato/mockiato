@@ -297,4 +297,18 @@ mod test {
         })
         .matches_value(100));
     }
+
+    #[test]
+    fn at_least_is_displayed_correctly() {
+        let formatted = format!("{}", ExpectedCalls::from(5..));
+
+        assert_eq!("at least 5 times", formatted);
+    }
+
+    #[test]
+    fn at_least_zero_is_displayed_correctly() {
+        let formatted = format!("{}", ExpectedCalls::from(0..));
+
+        assert_eq!("any amount of times", formatted);
+    }
 }
