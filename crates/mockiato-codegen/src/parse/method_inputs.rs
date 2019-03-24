@@ -74,7 +74,7 @@ impl MethodSelfArg {
 
 impl ToTokens for MethodSelfArg {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let inner: &ToTokens = match self {
+        let inner: &dyn ToTokens = match self {
             MethodSelfArg::Ref(ref arg_self_ref) => arg_self_ref,
             MethodSelfArg::Value(ref arg_self) => arg_self,
             MethodSelfArg::Captured(ref arg_captured) => arg_captured,

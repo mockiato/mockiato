@@ -5,7 +5,7 @@ trait Greeter: GreeterClone {
     fn greet(&self, name: &str) -> String;
 }
 
-/// See: https://stackoverflow.com/a/30353928
+/// See: <https://stackoverflow.com/a/30353928>
 trait GreeterClone {
     fn clone_box(&self) -> Box<dyn Greeter>;
 }

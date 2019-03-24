@@ -34,7 +34,7 @@ pub trait ReturnValueGenerator<A, R>: Display + Debug
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
-    fn generate_return_value(&self, input: <A as ArgumentsMatcher>::Arguments) -> R;
+    fn generate_return_value(&self, input: <A as ArgumentsMatcher<'_>>::Arguments) -> R;
 }
 
 pub struct Cloned<T>(pub(crate) T)
@@ -64,7 +64,7 @@ where
     A: for<'args> ArgumentsMatcher<'args>,
     R: Clone,
 {
-    fn generate_return_value(&self, _: <A as ArgumentsMatcher>::Arguments) -> R {
+    fn generate_return_value(&self, _: <A as ArgumentsMatcher<'_>>::Arguments) -> R {
         self.0.clone()
     }
 }
@@ -88,7 +88,7 @@ impl<A, R> ReturnValueGenerator<A, R> for Panic
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
-    fn generate_return_value(&self, _: <A as ArgumentsMatcher>::Arguments) -> R {
+    fn generate_return_value(&self, _: <A as ArgumentsMatcher<'_>>::Arguments) -> R {
         match self.0 {
             Some(message) => panic!(message),
             None => panic!(),

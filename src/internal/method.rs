@@ -30,7 +30,7 @@ where
     pub fn new(name: &'static str) -> Self {
         Self {
             name,
-            calls: Default::default(),
+            calls: Vec::new(),
         }
     }
 
@@ -77,7 +77,7 @@ where
             .iter()
             .any(|method_call| !method_call.was_called_expected_number_of_times())
         {
-            Err(VerificationError { method: &self })
+            Err(VerificationError { method: self })
         } else {
             Ok(())
         }
@@ -126,7 +126,7 @@ where
                 f,
                 "\nThe call {:?} matches more than one expected call:\n{}",
                 arguments,
-                DisplayCalls(&calls)
+                DisplayCalls(calls)
             ),
         }
     }
@@ -227,7 +227,7 @@ mod test {
 
         method
             .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
-            .returns(Default::default())
+            .returns(String::default())
             .times(1);
 
         method.call(ArgumentsMock).unwrap();
@@ -241,7 +241,7 @@ mod test {
 
         method
             .add_expected_call(ArgumentsMatcherMock::new(None))
-            .returns(Default::default())
+            .returns(String::default())
             .times(2);
 
         assert!(method.verify().is_err());
