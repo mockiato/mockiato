@@ -238,7 +238,7 @@ fn generate_expect_method_calls_in_order_method(
 ) -> TokenStream {
     let documentation = LitStr::new(
         &format!(
-            "Expects calls to [`{0}::{1}`] in the order they were added in.
+            "Configures [`{0}::{1}`] to expect calls in the order they were added in.
 
 [`{0}::{1}`]: ./trait.{0}.html#tymethod.{1}",
             trait_decl.ident, method_decl.ident,
