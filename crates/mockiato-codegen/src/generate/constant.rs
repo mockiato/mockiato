@@ -60,6 +60,7 @@ pub(super) fn expect_method_ident(method_decl: &MethodDecl) -> Ident {
     )
 }
 
+/// Generates the method identifier for a method configuring calls to be expected sequentially.
 pub(super) fn expect_method_calls_in_order_ident(method_decl: &MethodDecl) -> Ident {
     const IDENTIFIER_PREFIX: &str = "expect_";
     const IDENTIFIER_SUFFIX: &str = "_calls_in_order";
