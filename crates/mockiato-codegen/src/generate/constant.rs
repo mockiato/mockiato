@@ -1,4 +1,5 @@
 use crate::parse::method_decl::MethodDecl;
+use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
 use heck::{CamelCase, SnakeCase};
 use proc_macro2::Span;
@@ -56,6 +57,21 @@ pub(super) fn expect_method_ident(method_decl: &MethodDecl) -> Ident {
 
     Ident::new(
         &format!("{}{}", IDENTIFIER_PREFIX, method_decl.ident.to_string()),
+        method_decl.ident.span(),
+    )
+}
+
+pub(super) fn expect_method_calls_in_order_ident(method_decl: &MethodDecl) -> Ident {
+    const IDENTIFIER_PREFIX: &str = "expect_";
+    const IDENTIFIER_SUFFIX: &str = "_calls_in_order";
+
+    Ident::new(
+        &format!(
+            "{}{}{}",
+            IDENTIFIER_PREFIX,
+            method_decl.ident.to_string(),
+            IDENTIFIER_SUFFIX
+        ),
         method_decl.ident.span(),
     )
 }

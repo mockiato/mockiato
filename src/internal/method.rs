@@ -1,6 +1,13 @@
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::method_call::{MethodCall, MethodCallBuilder};
+use std::collections::vec_deque::VecDeque;
 use std::fmt::{self, Display};
+
+#[derive(Clone, Debug)]
+enum ExpectedCallOrder {
+    Sequentially,
+    Unordered,
+}
 
 #[derive(Debug)]
 pub struct Method<'mock, A, R>
@@ -8,7 +15,8 @@ where
     A: for<'args> ArgumentsMatcher<'args>,
 {
     name: &'static str,
-    calls: Vec<MethodCall<'mock, A, R>>,
+    calls: VecDeque<MethodCall<'mock, A, R>>,
+    call_order: ExpectedCallOrder,
 }
 
 impl<'mock, A, R> Clone for Method<'mock, A, R>
@@ -19,6 +27,7 @@ where
         Self {
             name: self.name,
             calls: self.calls.clone(),
+            call_order: self.call_order.clone(),
         }
     }
 }
@@ -30,16 +39,21 @@ where
     pub fn new(name: &'static str) -> Self {
         Self {
             name,
-            calls: Vec::new(),
+            calls: VecDeque::new(),
+            call_order: ExpectedCallOrder::Unordered,
         }
     }
 
     pub fn add_expected_call(&mut self, matcher: A) -> MethodCallBuilder<'mock, '_, A, R> {
         let call = MethodCall::new(matcher);
 
-        self.calls.push(call);
+        self.calls.push_back(call);
 
-        MethodCallBuilder::new(self.calls.last_mut().unwrap())
+        MethodCallBuilder::new(self.calls.back_mut().unwrap())
+    }
+
+    pub fn expect_method_calls_in_order(&mut self) {
+        self.call_order = ExpectedCallOrder::Sequentially;
     }
 
     pub fn call_unwrap<'a>(&'a self, arguments: <A as ArgumentsMatcher<'a>>::Arguments) -> R {
@@ -52,6 +66,38 @@ where
     }
 
     fn call<'a>(
+        &'a self,
+        arguments: <A as ArgumentsMatcher<'a>>::Arguments,
+    ) -> Result<R, CallError<'mock, 'a, A, R>> {
+        match self.call_order {
+            ExpectedCallOrder::Sequentially => {
+                self.handle_call_with_sequentially_ordered_expectations(arguments)
+            }
+            ExpectedCallOrder::Unordered => self.handle_call_with_unordered_expectations(arguments),
+        }
+    }
+
+    fn handle_call_with_sequentially_ordered_expectations<'a>(
+        &'a self,
+        arguments: <A as ArgumentsMatcher<'a>>::Arguments,
+    ) -> Result<R, CallError<'mock, 'a, A, R>> {
+        let matching_method_call = self
+            .calls
+            .iter()
+            .filter(|call| !call.was_called_expected_number_of_times())
+            .next();
+
+        match matching_method_call {
+            Some(matching_method_call)
+                if matching_method_call.matches_expected_arguments(&arguments) =>
+            {
+                Ok(matching_method_call.call(arguments))
+            }
+            _ => Err(CallError::NoMatching(arguments, self)),
+        }
+    }
+
+    fn handle_call_with_unordered_expectations<'a>(
         &'a self,
         arguments: <A as ArgumentsMatcher<'a>>::Arguments,
     ) -> Result<R, CallError<'mock, 'a, A, R>> {

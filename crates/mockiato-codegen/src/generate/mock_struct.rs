@@ -1,6 +1,7 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{
-    arguments_matcher_ident, expect_method_ident, generic_parameter_ident, mock_lifetime,
+    arguments_matcher_ident, expect_method_calls_in_order_ident, expect_method_ident,
+    generic_parameter_ident, mock_lifetime,
 };
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use crate::parse::method_decl::MethodDecl;
@@ -58,6 +59,12 @@ pub(crate) fn generate_mock_struct(
         })
         .collect();
 
+    let expect_method_call_in_order_methods: TokenStream = trait_decl
+        .methods
+        .iter()
+        .map(|method_decl| generate_expect_method_calls_in_order_method(trait_decl, method_decl))
+        .collect();
+
     let visibility = &trait_decl.visibility;
 
     const GITHUB_REPOSITORY: &str = "https://github.com/myelin-ai/mockiato";
@@ -91,6 +98,8 @@ pub(crate) fn generate_mock_struct(
             }
 
             #expect_methods
+
+            #expect_method_call_in_order_methods
         }
 
         impl<'mock> Default for #mock_struct_ident<'mock> #static_lifetime_restriction {
@@ -219,6 +228,33 @@ panicking if the function was not called by the time the object goes out of scop
                     phantom_data: std::marker::PhantomData,
                 }
             )
+        }
+    }
+}
+
+fn generate_expect_method_calls_in_order_method(
+    trait_decl: &TraitDecl,
+    method_decl: &MethodDecl,
+) -> TokenStream {
+    let documentation = LitStr::new(
+        &format!(
+            "Expects calls to [`{0}::{1}`] in the order they were added in.
+
+[`{0}::{1}`]: ./trait.{0}.html#tymethod.{1}",
+            trait_decl.ident, method_decl.ident,
+        ),
+        Span::call_site(),
+    );
+
+    let visibility = &trait_decl.visibility;
+
+    let ident = expect_method_calls_in_order_ident(&method_decl);
+    let method_ident = &method_decl.ident;
+
+    quote! {
+        #[doc = #documentation]
+        #visibility fn #ident(&mut self) {
+            self.#method_ident.expect_method_calls_in_order()
         }
     }
 }
