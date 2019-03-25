@@ -1,6 +1,5 @@
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::method_call::{MethodCall, MethodCallBuilder};
-use std::collections::vec_deque::VecDeque;
 use std::fmt::{self, Display};
 
 #[derive(Clone, Debug)]
@@ -15,7 +14,7 @@ where
     A: for<'args> ArgumentsMatcher<'args>,
 {
     name: &'static str,
-    calls: VecDeque<MethodCall<'mock, A, R>>,
+    calls: Vec<MethodCall<'mock, A, R>>,
     call_order: ExpectedCallOrder,
 }
 
@@ -39,7 +38,7 @@ where
     pub fn new(name: &'static str) -> Self {
         Self {
             name,
-            calls: VecDeque::new(),
+            calls: Vec::new(),
             call_order: ExpectedCallOrder::Unordered,
         }
     }
@@ -47,9 +46,9 @@ where
     pub fn add_expected_call(&mut self, matcher: A) -> MethodCallBuilder<'mock, '_, A, R> {
         let call = MethodCall::new(matcher);
 
-        self.calls.push_back(call);
+        self.calls.push(call);
 
-        MethodCallBuilder::new(self.calls.back_mut().unwrap())
+        MethodCallBuilder::new(self.calls.last_mut().unwrap())
     }
 
     pub fn expect_method_calls_in_order(&mut self) {
