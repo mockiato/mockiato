@@ -11,4 +11,4 @@
 - Support for nearly equals expectations has been added. (`nearly_eq` and `nearly_eq_with_accuracy`)
 
 ## TBD
-- Ordered expectations are now possible using `mock.expect_<method_name>_calls_in_order()`
+- Ordered expectations are now available using `mock.expect_<method_name>_calls_in_order()`
