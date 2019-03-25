@@ -1,5 +1,4 @@
 use mockiato::mockable;
-use std::collections::HashMap;
 
 #[mockable]
 trait Foo {
