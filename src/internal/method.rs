@@ -84,8 +84,7 @@ where
         let matching_method_call = self
             .calls
             .iter()
-            .filter(|call| !call.was_called_expected_number_of_times())
-            .next();
+            .find(|call| !call.was_called_expected_number_of_times());
 
         match matching_method_call {
             Some(matching_method_call)

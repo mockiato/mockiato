@@ -1,5 +1,4 @@
 use crate::parse::method_decl::MethodDecl;
-use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
 use heck::{CamelCase, SnakeCase};
 use proc_macro2::Span;
