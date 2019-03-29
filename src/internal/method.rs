@@ -297,4 +297,56 @@ mod test {
 
         assert!(method.verify().is_ok());
     }
+
+    #[test]
+    fn unordered_expectations_work_with_one_matching_expected_call() {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+
+        let result = method.call(ArgumentsMock { });
+
+        assert!(result.is_ok())
+    }
+
+    #[test]
+    fn unordered_expectations_fail_with_multiple_matching_calls() {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+
+        let result = method.call(ArgumentsMock { });
+
+        assert!(result.is_err())
+    }
+
+    #[test]
+    fn ordered_expectations_fail_if_first_call_does_not_match() {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
+        method.add_expected_call(ArgumentsMatcherMock::new(None));
+        method.expect_method_calls_in_order();
+
+        let result = method.call(ArgumentsMock { });
+
+        assert!(result.is_err())
+    }
+
+    #[test]
+    fn ordered_expectations_use_first_matching_call_regardless_of_other_expected_calls() {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+        method.add_expected_call(ArgumentsMatcherMock::new(None));
+        method.expect_method_calls_in_order();
+
+        let result = method.call(ArgumentsMock { });
+
+        assert!(result.is_ok())
+    }
+
 }
