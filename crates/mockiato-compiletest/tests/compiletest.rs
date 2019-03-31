@@ -1,8 +1,20 @@
-//!
 //! Shamelessly stolen from:
-//! https://github.com/SergioBenitez/Rocket/blob/master/core/codegen/tests/compiletest.rs
-//!
-extern crate compiletest_rs as compiletest;
+//! <https://github.com/SergioBenitez/Rocket/blob/master/core/codegen/tests/compiletest.rs>
+
+#![warn(missing_docs, clippy::dbg_macro, clippy::unimplemented)]
+#![deny(
+    rust_2018_idioms,
+    future_incompatible,
+    missing_debug_implementations,
+    clippy::doc_markdown,
+    clippy::default_trait_access,
+    clippy::enum_glob_use,
+    clippy::needless_borrow,
+    clippy::large_digit_groups,
+    clippy::explicit_into_iter_loop
+)]
+
+use compiletest_rs as compiletest;
 
 use std::path::{Path, PathBuf};
 use std::{fs::Metadata, io, time::SystemTime};
