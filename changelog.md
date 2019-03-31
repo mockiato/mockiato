@@ -9,3 +9,6 @@
 ## 0.3.0
 - `ExpectedCalls::any()` has been removed. Use the range `0..` instead.
 - Support for nearly equals expectations has been added. (`nearly_eq` and `nearly_eq_with_accuracy`)
+
+## TBD
+- Ordered expectations are now available using `mock.expect_<method_name>_calls_in_order()`
