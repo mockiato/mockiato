@@ -2,6 +2,12 @@ use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::method_call::{MethodCall, MethodCallBuilder};
 use std::fmt::{self, Display};
 
+#[derive(Clone, Debug)]
+enum ExpectedCallOrder {
+    Sequentially,
+    Unordered,
+}
+
 #[derive(Debug)]
 pub struct Method<'mock, A, R>
 where
@@ -9,6 +15,7 @@ where
 {
     name: &'static str,
     calls: Vec<MethodCall<'mock, A, R>>,
+    call_order: ExpectedCallOrder,
 }
 
 impl<'mock, A, R> Clone for Method<'mock, A, R>
@@ -19,6 +26,7 @@ where
         Self {
             name: self.name,
             calls: self.calls.clone(),
+            call_order: self.call_order.clone(),
         }
     }
 }
@@ -31,6 +39,7 @@ where
         Self {
             name,
             calls: Vec::new(),
+            call_order: ExpectedCallOrder::Unordered,
         }
     }
 
@@ -40,6 +49,10 @@ where
         self.calls.push(call);
 
         MethodCallBuilder::new(self.calls.last_mut().unwrap())
+    }
+
+    pub fn expect_method_calls_in_order(&mut self) {
+        self.call_order = ExpectedCallOrder::Sequentially;
     }
 
     pub fn call_unwrap<'a>(&'a self, arguments: <A as ArgumentsMatcher<'a>>::Arguments) -> R {
@@ -52,6 +65,37 @@ where
     }
 
     fn call<'a>(
+        &'a self,
+        arguments: <A as ArgumentsMatcher<'a>>::Arguments,
+    ) -> Result<R, CallError<'mock, 'a, A, R>> {
+        match self.call_order {
+            ExpectedCallOrder::Sequentially => {
+                self.handle_call_with_sequentially_ordered_expectations(arguments)
+            }
+            ExpectedCallOrder::Unordered => self.handle_call_with_unordered_expectations(arguments),
+        }
+    }
+
+    fn handle_call_with_sequentially_ordered_expectations<'a>(
+        &'a self,
+        arguments: <A as ArgumentsMatcher<'a>>::Arguments,
+    ) -> Result<R, CallError<'mock, 'a, A, R>> {
+        let matching_method_call = self
+            .calls
+            .iter()
+            .find(|call| !call.was_called_expected_number_of_times());
+
+        match matching_method_call {
+            Some(matching_method_call)
+                if matching_method_call.matches_expected_arguments(&arguments) =>
+            {
+                Ok(matching_method_call.call(arguments))
+            }
+            _ => Err(CallError::NoMatching(arguments, self)),
+        }
+    }
+
+    fn handle_call_with_unordered_expectations<'a>(
         &'a self,
         arguments: <A as ArgumentsMatcher<'a>>::Arguments,
     ) -> Result<R, CallError<'mock, 'a, A, R>> {
@@ -253,4 +297,56 @@ mod test {
 
         assert!(method.verify().is_ok());
     }
+
+    #[test]
+    fn unordered_expectations_work_with_one_matching_expected_call() {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+
+        let result = method.call(ArgumentsMock {});
+
+        assert!(result.is_ok())
+    }
+
+    #[test]
+    fn unordered_expectations_fail_with_multiple_matching_calls() {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+
+        let result = method.call(ArgumentsMock {});
+
+        assert!(result.is_err())
+    }
+
+    #[test]
+    fn ordered_expectations_fail_if_first_call_does_not_match() {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
+        method.add_expected_call(ArgumentsMatcherMock::new(None));
+        method.expect_method_calls_in_order();
+
+        let result = method.call(ArgumentsMock {});
+
+        assert!(result.is_err())
+    }
+
+    #[test]
+    fn ordered_expectations_use_first_matching_call_regardless_of_other_expected_calls() {
+        let mut method = Method::<_, ()>::new("test");
+
+        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+        method.add_expected_call(ArgumentsMatcherMock::new(None));
+        method.expect_method_calls_in_order();
+
+        let result = method.call(ArgumentsMock {});
+
+        assert!(result.is_ok())
+    }
+
 }
