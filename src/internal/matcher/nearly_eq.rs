@@ -1,6 +1,6 @@
 use crate::internal::fmt::MaybeDebug;
 use crate::internal::{ArgumentMatcher, MaybeDebugWrapper};
-use nameof::{name_of, name_of_type};
+use nameof::name_of;
 use nearly_eq::NearlyEq;
 use std::fmt::{self, Debug};
 
