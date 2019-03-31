@@ -14,4 +14,4 @@ license = "MIT"
 mockiato = { path = "../.." }
 
 [dev-dependencies]
-compiletest_rs = "0.3.14"
+compiletest_rs = "0.3"
