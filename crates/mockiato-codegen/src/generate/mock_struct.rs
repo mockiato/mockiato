@@ -248,7 +248,7 @@ fn generate_expect_method_calls_in_order_method(
 
     let visibility = &trait_decl.visibility;
 
-    let ident = expect_method_calls_in_order_ident(&method_decl);
+    let ident = expect_method_calls_in_order_ident(method_decl);
     let method_ident = &method_decl.ident;
 
     quote! {
