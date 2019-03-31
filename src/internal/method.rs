@@ -305,7 +305,7 @@ mod test {
         method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
         method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
 
-        let result = method.call(ArgumentsMock { });
+        let result = method.call(ArgumentsMock {});
 
         assert!(result.is_ok())
     }
@@ -318,7 +318,7 @@ mod test {
         method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
         method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
 
-        let result = method.call(ArgumentsMock { });
+        let result = method.call(ArgumentsMock {});
 
         assert!(result.is_err())
     }
@@ -331,7 +331,7 @@ mod test {
         method.add_expected_call(ArgumentsMatcherMock::new(None));
         method.expect_method_calls_in_order();
 
-        let result = method.call(ArgumentsMock { });
+        let result = method.call(ArgumentsMock {});
 
         assert!(result.is_err())
     }
@@ -344,7 +344,7 @@ mod test {
         method.add_expected_call(ArgumentsMatcherMock::new(None));
         method.expect_method_calls_in_order();
 
-        let result = method.call(ArgumentsMock { });
+        let result = method.call(ArgumentsMock {});
 
         assert!(result.is_ok())
     }
