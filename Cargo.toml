@@ -17,7 +17,7 @@ keywords = [ "test", "mock" ]
 [dependencies]
 mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.4.0" }
 nearly_eq = "0.2"
-nameof = "1.0"
+nameof = "1.0.2"
 
 [workspace]
 members = [
