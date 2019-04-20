@@ -1,3 +1,4 @@
+use super::check_option_is_none;
 use crate::parse::method_inputs::MethodInputs;
 use crate::spanned::SpannedUnstable;
 use crate::{merge_results, Error, Result};
@@ -93,15 +94,4 @@ fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
         });
 
     merge_results(results).map(|_| ())
-}
-
-fn check_option_is_none<T>(value: &Option<T>, span: Span, error_message: &str) -> Result<()> {
-    match value {
-        None => Ok(()),
-        Some(_) => Err(Error::Diagnostic(Diagnostic::spanned(
-            span,
-            Level::Error,
-            error_message,
-        ))),
-    }
 }

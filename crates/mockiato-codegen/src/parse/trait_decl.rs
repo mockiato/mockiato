@@ -1,9 +1,8 @@
-use crate::constant::ATTR_NAME;
+use super::check_option_is_none;
 use crate::parse::method_decl::MethodDecl;
 use crate::spanned::SpannedUnstable;
-use crate::{merge_results, Error, Result};
+use crate::{merge_results, Result};
 use proc_macro::Span;
-use proc_macro::{Diagnostic, Level};
 use syn::punctuated::Punctuated;
 use syn::{Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
 
@@ -33,13 +32,7 @@ impl TraitDecl {
             ..
         } = item;
 
-        if auto_token.is_some() {
-            return Err(Error::Diagnostic(Diagnostic::spanned(
-                span,
-                Level::Error,
-                format!("#[{}] does not work with auto traits", ATTR_NAME),
-            )));
-        }
+        check_option_is_none(&auto_token, span, "Auto traits are not supported")?;
 
         let methods = items.into_iter().map(MethodDecl::parse);
 
