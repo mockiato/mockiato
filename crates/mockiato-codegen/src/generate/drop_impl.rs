@@ -2,17 +2,20 @@ use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::Ident;
+use super::GenerateMockParameters;
 
-pub(crate) fn generate_drop_impl(mock_ident: &Ident, trait_decl: &TraitDecl) -> TokenStream {
+pub(crate) fn generate_drop_impl(trait_decl: &TraitDecl, parameters: &'_ GenerateMockParameters) -> TokenStream {
     let verify_calls: TokenStream = trait_decl
         .methods
         .iter()
         .map(generate_verify_call)
         .collect();
 
+    let mock_ident = &parameters.mock_struct_ident;
+    let (impl_generics, ty_generics, where_clause) = parameters.generics.split_for_impl();
+
     quote! {
-        impl<'mock> Drop for #mock_ident<'mock> {
+        impl #impl_generics Drop for #mock_ident #ty_generics #where_clause {
             fn drop(&mut self) {
                 if !std::thread::panicking() {
                     #verify_calls

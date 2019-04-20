@@ -2,13 +2,13 @@ use self::arguments::generate_arguments;
 use self::arguments_matcher::generate_arguments_matcher;
 use self::constant::{mock_struct_ident, mod_ident};
 use self::drop_impl::generate_drop_impl;
-use self::mock_struct::{generate_mock_struct, GenerateMockStructOptions};
-use self::trait_impl::{generate_trait_impl, GenerateTraitImplOptions};
+use self::mock_struct::{generate_mock_struct};
+use self::trait_impl::{generate_trait_impl};
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::{parse_quote, WherePredicate};
+use syn::{parse_quote, Generics, WherePredicate};
 
 pub(crate) mod arguments;
 pub(crate) mod arguments_matcher;
@@ -26,12 +26,17 @@ pub(crate) struct GenerateMockOptions {
     pub(crate) force_static_lifetimes: bool,
 }
 
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
+pub(crate) struct GenerateMockParameters {
+    pub(crate) mock_struct_ident: Ident,
+    pub(crate) mod_ident: Ident,
+    pub(crate) generics: Generics,
+}
+
 pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions) -> TokenStream {
     let mock_struct_ident = options
         .custom_struct_ident
         .unwrap_or_else(|| mock_struct_ident(trait_decl));
-
-    let mod_ident = mod_ident(&mock_struct_ident);
 
     let static_lifetime_restriction = if options.force_static_lifetimes {
         Some(get_static_lifetime_restriction())
@@ -39,21 +44,20 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
         None
     };
 
+    let parameters = GenerateMockParameters {
+        mock_struct_ident: mock_struct_ident.clone(),
+        mod_ident: mod_ident(&mock_struct_ident),
+        generics: generics_for_trait_decl(trait_decl, static_lifetime_restriction),
+    };
+
     let mock_struct = generate_mock_struct(
-        trait_decl,
-        GenerateMockStructOptions {
-            mod_ident: &mod_ident,
-            mock_struct_ident: &mock_struct_ident,
-            static_lifetime_restriction: static_lifetime_restriction,
-        },
+        &trait_decl,
+        &parameters,
     );
 
     let trait_impl = generate_trait_impl(
-        trait_decl,
-        GenerateTraitImplOptions {
-            mod_ident: &mod_ident,
-            mock_struct_ident: &mock_struct_ident,
-        },
+        &trait_decl,
+        &parameters,
     );
 
     let arguments: TokenStream = trait_decl
@@ -62,7 +66,8 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
         .map(generate_argument_structs)
         .collect();
 
-    let drop_impl = generate_drop_impl(&mock_struct_ident, trait_decl);
+    let drop_impl = generate_drop_impl(&trait_decl, &parameters);
+    let mod_ident = &parameters.mod_ident;
 
     // The sub-mod is used to hide implementation details from the user
     // and to prevent cluttering of the namespace of the trait's mod.
@@ -79,6 +84,26 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
             #arguments
         }
     }
+}
+
+fn generics_for_trait_decl(
+    trait_decl: &TraitDecl,
+    static_lifetime_restriction: Option<WherePredicate>,
+) -> Generics {
+    let mut generics = trait_decl.generics.clone();
+    generics.params.push(parse_quote!('mock));
+
+    {
+        let where_clause = generics.make_where_clause();
+
+        if let Some(static_lifetime_restriction) = static_lifetime_restriction {
+            where_clause
+                .predicates
+                .push(static_lifetime_restriction.clone());
+        }
+    }
+
+    generics
 }
 
 fn get_static_lifetime_restriction() -> WherePredicate {

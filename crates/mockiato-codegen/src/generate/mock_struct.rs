@@ -4,6 +4,7 @@ use super::constant::{
     generic_parameter_ident, mock_lifetime,
 };
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
+use super::GenerateMockParameters;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
@@ -12,22 +13,17 @@ use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::token::Paren;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, LitStr, ReturnType, Token, Type, TypeTuple, WherePredicate};
+use syn::{Ident, LitStr, ReturnType, Token, Type, TypeTuple};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 
-#[cfg_attr(feature = "debug-impls", derive(Debug))]
-pub(crate) struct GenerateMockStructOptions<'a> {
-    pub(crate) mock_struct_ident: &'a Ident,
-    pub(crate) mod_ident: &'a Ident,
-    pub(crate) static_lifetime_restriction: Option<WherePredicate>,
-}
 
 pub(crate) fn generate_mock_struct(
     trait_decl: &TraitDecl,
-    options: GenerateMockStructOptions<'_>,
+    parameters: &'_ GenerateMockParameters,
 ) -> TokenStream {
-    let mock_struct_ident = &options.mock_struct_ident;
+    let mock_struct_ident = &parameters.mock_struct_ident;
+    let mod_ident = &parameters.mod_ident;
     let mut lifetime_rewriter =
         LifetimeRewriter::new(UniformLifetimeGenerator::new(mock_lifetime()));
 
@@ -35,7 +31,7 @@ pub(crate) fn generate_mock_struct(
         .methods
         .iter()
         .map(|method_decl| {
-            generate_method_field(method_decl, options.mod_ident, &mut lifetime_rewriter)
+            generate_method_field(method_decl, &mod_ident, &mut lifetime_rewriter)
         })
         .collect();
 
@@ -52,7 +48,7 @@ pub(crate) fn generate_mock_struct(
             generate_expect_method(
                 trait_decl,
                 method_decl,
-                options.mod_ident,
+                &mod_ident,
                 &mut lifetime_rewriter,
             )
         })
@@ -79,19 +75,7 @@ pub(crate) fn generate_mock_struct(
         Span::call_site(),
     );
 
-    let mut generics = trait_decl.generics.clone();
-
-    {
-        let where_clause = generics.make_where_clause();
-
-        if let Some(static_lifetime_restriction) = &options.static_lifetime_restriction {
-            where_clause
-                .predicates
-                .push(static_lifetime_restriction.clone());
-        }
-    }
-
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    let (impl_generics, ty_generics, where_clause) = parameters.generics.split_for_impl();
 
     quote! {
         #[derive(Debug, Clone)]

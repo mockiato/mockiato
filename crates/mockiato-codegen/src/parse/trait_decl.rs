@@ -1,10 +1,10 @@
 use super::check_option_is_none;
 use crate::parse::method_decl::MethodDecl;
 use crate::spanned::SpannedUnstable;
-use crate::{merge_results, Result, Error};
-use proc_macro::{Span, Level, Diagnostic};
+use crate::{merge_results, Error, Result};
+use proc_macro::{Diagnostic, Level, Span};
 use syn::punctuated::Punctuated;
-use syn::{Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility, GenericParam};
+use syn::{GenericParam, Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
 
 #[derive(Clone)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
