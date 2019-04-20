@@ -1,9 +1,10 @@
 use crate::parse::method_inputs::MethodInputs;
 use crate::spanned::SpannedUnstable;
-use crate::{Error, Result};
+use crate::{merge_results, Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
 use syn::{
-    Attribute, FnDecl, Generics, Ident, MethodSig, ReturnType, Token, TraitItem, TraitItemMethod,
+    Attribute, FnDecl, GenericParam, Generics, Ident, MethodSig, ReturnType, Token, TraitItem,
+    TraitItemMethod,
 };
 
 /// Holds everything required to generate a mock struct
@@ -64,6 +65,8 @@ impl MethodDecl {
         check_option_is_none(&constness, span, "`const` methods are not supported")?;
         check_option_is_none(&asyncness, span, "`async` methods are not supported")?;
 
+        validate_generic_type_parameters(&generics)?;
+
         Ok(Self {
             attrs,
             unsafety,
@@ -74,6 +77,22 @@ impl MethodDecl {
             output,
         })
     }
+}
+
+fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
+    let results = generics
+        .params
+        .iter()
+        .map(|generic_param| match generic_param {
+            GenericParam::Lifetime(_) => Ok(()),
+            generic_param => Err(Error::Diagnostic(Diagnostic::spanned(
+                generic_param.span_unstable(),
+                Level::Error,
+                "Only lifetimes are supported as generic parameters on methods",
+            ))),
+        });
+
+    merge_results(results).map(|_| ())
 }
 
 fn check_option_is_none<T>(value: &Option<T>, span: Span, error_message: &str) -> Result<()> {
