@@ -1,0 +1,14 @@
+error: Only generic types are supported on traits
+ --> $DIR/trait_decl_with_non_type_generics.rs:4:11
+  |
+4 | trait Foo<'a> {}
+  |           ^^
+  |
+note: Required for mockable traits
+ --> $DIR/trait_decl_with_non_type_generics.rs:3:1
+  |
+3 | #[mockable]
+  | ^^^^^^^^^^^
+
+error: aborting due to previous error
+
