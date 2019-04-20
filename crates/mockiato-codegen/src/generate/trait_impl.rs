@@ -4,7 +4,7 @@ use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::{Ident, Token};
+use syn::{parse_quote, Ident, Token};
 
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct GenerateTraitImplOptions<'a> {
@@ -26,8 +26,12 @@ pub(crate) fn generate_trait_impl(
         .map(|method_decl| generate_method_impl(method_decl, options.mod_ident))
         .collect();
 
+    let mut generic_params = trait_decl.generics.params.clone();
+    generic_params.insert(0, parse_quote!('mock));
+    let where_clause = &trait_decl.generics.where_clause;
+
     quote! {
-        #unsafety impl<'mock> #trait_ident for #mock_struct_ident<'mock> {
+        #unsafety impl<#generic_params> #trait_ident for #mock_struct_ident<#generic_params> #where_clause {
             #method_impls
         }
     }

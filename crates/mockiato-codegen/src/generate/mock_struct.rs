@@ -12,7 +12,7 @@ use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::token::Paren;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, LitStr, ReturnType, Token, Type, TypeTuple};
+use syn::{Ident, LitStr, ReturnType, Token, Type, TypeTuple, WherePredicate};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 
@@ -20,7 +20,7 @@ type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 pub(crate) struct GenerateMockStructOptions<'a> {
     pub(crate) mock_struct_ident: &'a Ident,
     pub(crate) mod_ident: &'a Ident,
-    pub(crate) static_lifetime_restriction: Option<&'a TokenStream>,
+    pub(crate) static_lifetime_restriction: Option<WherePredicate>,
 }
 
 pub(crate) fn generate_mock_struct(
@@ -28,7 +28,6 @@ pub(crate) fn generate_mock_struct(
     options: GenerateMockStructOptions<'_>,
 ) -> TokenStream {
     let mock_struct_ident = &options.mock_struct_ident;
-    let static_lifetime_restriction = &options.static_lifetime_restriction;
     let mut lifetime_rewriter =
         LifetimeRewriter::new(UniformLifetimeGenerator::new(mock_lifetime()));
 
@@ -80,15 +79,29 @@ pub(crate) fn generate_mock_struct(
         Span::call_site(),
     );
 
+    let mut generics = trait_decl.generics.clone();
+
+    {
+        let where_clause = generics.make_where_clause();
+
+        if let Some(static_lifetime_restriction) = &options.static_lifetime_restriction {
+            where_clause
+                .predicates
+                .push(static_lifetime_restriction.clone());
+        }
+    }
+
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
     quote! {
         #[derive(Debug, Clone)]
         #[doc = #documentation]
-        #visibility struct #mock_struct_ident<'mock> #static_lifetime_restriction {
+        #visibility struct #mock_struct_ident #ty_generics #where_clause {
             #method_fields
             phantom_data: std::marker::PhantomData<&'mock ()>,
         }
 
-        impl<'mock> #mock_struct_ident<'mock> #static_lifetime_restriction {
+        impl #impl_generics #mock_struct_ident #ty_generics #where_clause {
             /// Creates a new mock with no expectations.
             #visibility fn new() -> Self {
                 Self {
@@ -102,7 +115,7 @@ pub(crate) fn generate_mock_struct(
             #expect_method_call_in_order_methods
         }
 
-        impl<'mock> Default for #mock_struct_ident<'mock> #static_lifetime_restriction {
+        impl #impl_generics Default for #mock_struct_ident #ty_generics #where_clause {
             /// Creates a new mock with no expectations.
             fn default() -> Self {
                 Self::new()

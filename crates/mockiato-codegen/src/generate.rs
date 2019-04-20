@@ -8,6 +8,7 @@ use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
+use syn::{parse_quote, WherePredicate};
 
 pub(crate) mod arguments;
 pub(crate) mod arguments_matcher;
@@ -43,7 +44,7 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
         GenerateMockStructOptions {
             mod_ident: &mod_ident,
             mock_struct_ident: &mock_struct_ident,
-            static_lifetime_restriction: static_lifetime_restriction.as_ref(),
+            static_lifetime_restriction: static_lifetime_restriction,
         },
     );
 
@@ -80,8 +81,8 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
     }
 }
 
-fn get_static_lifetime_restriction() -> TokenStream {
-    quote! { where 'mock: 'static }
+fn get_static_lifetime_restriction() -> WherePredicate {
+    parse_quote!('mock: 'static)
 }
 
 fn generate_argument_structs(method_decl: &MethodDecl) -> proc_macro2::TokenStream {
