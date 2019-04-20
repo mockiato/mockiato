@@ -35,7 +35,7 @@ impl MethodDecl {
             _ => Err(Error::Diagnostic(Diagnostic::spanned(
                 trait_item.span_unstable(),
                 Level::Error,
-                "Traits are currently only allowed to contain traits",
+                "Traits are only allowed to contain methods",
             ))),
         }
     }
