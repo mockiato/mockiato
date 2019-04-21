@@ -2,7 +2,7 @@ use crate::parse::method_inputs::MethodInputs;
 use std::collections::HashSet;
 use syn::visit::{visit_path, Visit};
 use syn::{
-GenericParam, Generics, Ident, Path, PredicateType, Type, TypeParam, WhereClause,
+    GenericParam, Generics, Ident, Path, PredicateType, Type, TypeParam, WhereClause,
     WherePredicate,
 };
 
@@ -64,7 +64,10 @@ fn first_path_segment_ident_from_type<'a>(ty: &'a Type) -> Option<&'a Ident> {
     }
 }
 
-fn find_matching_generic_types<'a>(inputs: &'a MethodInputs, generics: &'a Generics) -> HashSet<&'a Ident> {
+fn find_matching_generic_types<'a>(
+    inputs: &'a MethodInputs,
+    generics: &'a Generics,
+) -> HashSet<&'a Ident> {
     let mut visitor = FindGenericTypeIdents {
         generic_types_filter: generics.type_params().map(|param| &param.ident).collect(),
         matching_generic_types: HashSet::new(),

@@ -6,9 +6,9 @@ use super::constant::{
 use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use super::GenerateMockParameters;
+use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
-use crate::parse::method_decl::MethodDecl;
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::punctuated::Punctuated;
