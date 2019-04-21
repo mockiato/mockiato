@@ -1,5 +1,5 @@
-use mockiato::mockable;
-use std::fmt::{self, Display, Debug};
+use mockiato::{mockable, partial_eq};
+use std::fmt::{self, Debug, Display};
 
 trait Foo {
     type Output;
@@ -20,8 +20,15 @@ where
     fn greet_foo(&self, name: V::Output) -> String;
 }
 
+#[derive(PartialEq, Eq)]
 struct Name {
     name: String,
+}
+
+impl Name {
+    fn new<S>(name: S)  -> Self  where S: Into<String>{
+        Self { name: name.into() }
+    }
 }
 
 impl Display for Name {
@@ -36,5 +43,13 @@ impl Foo for String {
 
 #[test]
 fn trait_with_generic_type_argument_can_be_mocked() {
-    let mock: GreeterMock<Name, (), String> = GreeterMock::new();
+    let mut mock: GreeterMock<Name, (), String> = GreeterMock::new();
+
+    mock.expect_greet(partial_eq(Name::new("Foo")))
+        .times(2)
+        .returns(String::from("Hello Foo"));
+
+    for _ in 0..2 {
+        assert_eq!("Hello Foo", mock.greet(Name::new("Foo")));
+    }
 }
