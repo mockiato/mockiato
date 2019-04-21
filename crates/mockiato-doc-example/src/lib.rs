@@ -17,7 +17,10 @@ use mockiato::mockable;
 
 /// A cute little animal 🐷
 #[mockable]
-pub trait Animal {
+pub trait Animal<D> where D: Clone {
     /// Makes a sound
     fn make_sound(&self);
+
+    /// Returns data associated with this animal 
+    fn associated_data(&self) -> D;
 }
