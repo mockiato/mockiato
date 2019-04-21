@@ -1,5 +1,5 @@
 use mockiato::mockable;
-use std::fmt::{self, Display};
+use std::fmt::{self, Display, Debug};
 
 trait Foo {
     type Output;
@@ -10,6 +10,7 @@ trait Greeter<T, U, V>
 where
     T: Display,
     U: Debug,
+    V: Foo,
     V::Output: Display,
 {
     fn greet(&self, name: T) -> String;
@@ -29,7 +30,11 @@ impl Display for Name {
     }
 }
 
+impl Foo for String {
+    type Output = String;
+}
+
 #[test]
 fn trait_with_generic_type_argument_can_be_mocked() {
-    let mock: GreeterMock<Name> = GreeterMock::new();
+    let mock: GreeterMock<Name, (), String> = GreeterMock::new();
 }

@@ -1,25 +1,37 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
-use super::constant::{arguments_lifetime, arguments_matcher_ident};
+use super::constant::{
+    arguments_lifetime, arguments_lifetime_as_generic_param, arguments_matcher_ident,
+};
+use super::generics::get_matching_generics_for_method_inputs;
 use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
+use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::{LitStr, Token};
+use syn::{parse_quote, Generics, LitStr, Token};
 
 pub(crate) fn generate_arguments_matcher(
     method_decl: &MethodDecl,
+    trait_decl: &TraitDecl,
     arguments: &GeneratedArguments,
 ) -> TokenStream {
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
+
+    let mut generics =
+        get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
+    generics.params.push(parse_quote!('mock));
+
     let arguments_matcher_fields = arguments_matcher_fields(&method_decl.inputs);
-    let debug_impl = generate_debug_impl(method_decl);
-    let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments);
+    let debug_impl = generate_debug_impl(method_decl, &generics);
+    let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments, &generics);
+
+    let (_, ty_generics, where_clause) = generics.split_for_impl();
 
     quote! {
         #[doc(hidden)]
-        pub struct #arguments_matcher_ident<'mock> {
+        pub struct #arguments_matcher_ident #ty_generics #where_clause {
             #arguments_matcher_fields
             pub(super) phantom_data: std::marker::PhantomData<&'mock ()>,
         }
@@ -30,9 +42,11 @@ pub(crate) fn generate_arguments_matcher(
 }
 
 /// Generates a `Debug` implementation for an argument matcher.
-fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
+fn generate_debug_impl(method_decl: &MethodDecl, generics: &Generics) -> TokenStream {
     let method_name_str = LitStr::new(&method_decl.ident.to_string(), method_decl.ident.span());
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
+
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     let debug_fields: TokenStream = method_decl
         .inputs
@@ -45,7 +59,7 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
         .collect();
 
     quote! {
-        impl<'mock> std::fmt::Debug for #arguments_matcher_ident<'mock> {
+        impl #impl_generics std::fmt::Debug for #arguments_matcher_ident #ty_generics #where_clause {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let arguments: Vec<String> = vec![
                     #debug_fields
@@ -60,17 +74,26 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
 fn generate_arguments_matcher_impl(
     method_decl: &MethodDecl,
     arguments: &GeneratedArguments,
+    generics: &Generics,
 ) -> TokenStream {
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
     let arguments_ident = &arguments.ident;
-    let arguments_generics = &arguments.generics;
+
+    let mut generics_with_arguments_lifetime = generics.clone();
+    generics_with_arguments_lifetime
+        .params
+        .push(arguments_lifetime_as_generic_param());
+
+    let (impl_generics, _, _) = generics_with_arguments_lifetime.split_for_impl();
+    let (_, ty_generics, where_clause) = generics.split_for_impl();
+    let (_, arguments_ty_generics, _) = arguments.generics.split_for_impl();
 
     let matches_argument_method = generate_matches_arguments_method_impl(method_decl);
     let arguments_lifetime = arguments_lifetime();
 
     quote! {
-        impl<'mock, #arguments_lifetime> mockiato::internal::ArgumentsMatcher<#arguments_lifetime> for #arguments_matcher_ident<'mock> {
-            type Arguments = #arguments_ident #arguments_generics;
+        impl #impl_generics mockiato::internal::ArgumentsMatcher<#arguments_lifetime> for #arguments_matcher_ident #ty_generics #where_clause {
+            type Arguments = #arguments_ident #arguments_ty_generics;
 
             #matches_argument_method
         }

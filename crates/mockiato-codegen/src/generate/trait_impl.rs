@@ -22,9 +22,10 @@ pub(crate) fn generate_trait_impl(
         .collect();
 
     let (impl_generics, ty_generics, where_clause) = parameters.generics.split_for_impl();
+    let (_, trait_ty_generics, _) = trait_decl.generics.split_for_impl();
 
     quote! {
-        #unsafety impl #impl_generics #trait_ident for #mock_struct_ident #ty_generics #where_clause {
+        #unsafety impl #impl_generics #trait_ident #trait_ty_generics for #mock_struct_ident #ty_generics #where_clause {
             #method_impls
         }
     }

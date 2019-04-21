@@ -33,7 +33,7 @@ pub(crate) fn generate_mock_struct(
     let method_fields: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_method_field(method_decl, &mod_ident, &mut lifetime_rewriter))
+        .map(|method_decl| generate_method_field(method_decl, trait_decl, &mod_ident, &mut lifetime_rewriter))
         .collect();
 
     let initializer_fields: TokenStream = trait_decl
@@ -106,17 +106,21 @@ pub(crate) fn generate_mock_struct(
 
 fn generate_method_field(
     method_decl: &MethodDecl,
+    trait_decl: &TraitDecl,
     mod_ident: &Ident,
     lifetime_rewriter: &mut LifetimeRewriter<UniformLifetimeGenerator>,
 ) -> TokenStream {
     let ident = &method_decl.ident;
     let arguments_matcher_ident = arguments_matcher_ident(ident);
     let mut return_type = return_type(method_decl);
+    let mut generics = get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
+    generics.params.push(parse_quote!('mock));
+    let (_, ty_generics, _) = generics.split_for_impl();
 
     visit_type_mut(lifetime_rewriter, &mut return_type);
 
     quote! {
-        #ident: mockiato::internal::Method<'mock, self::#mod_ident::#arguments_matcher_ident<'mock>, #return_type>,
+        #ident: mockiato::internal::Method<'mock, self::#mod_ident::#arguments_matcher_ident #ty_generics, #return_type>,
     }
 }
 

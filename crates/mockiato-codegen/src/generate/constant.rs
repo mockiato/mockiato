@@ -2,7 +2,7 @@ use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use heck::{CamelCase, SnakeCase};
 use proc_macro2::Span;
-use syn::{Ident, Lifetime};
+use syn::{Ident, Lifetime, GenericParam, LifetimeDef};
 
 /// Generates a lifetime for the given index
 pub(super) fn argument_lifetime(index: usize) -> Lifetime {
@@ -16,6 +16,10 @@ pub(super) fn arguments_lifetime() -> Lifetime {
     const LIFETIME_NAME: &str = "'__mockiato_args";
 
     Lifetime::new(LIFETIME_NAME, Span::call_site())
+}
+
+pub(super) fn arguments_lifetime_as_generic_param() -> GenericParam {
+    GenericParam::Lifetime(LifetimeDef::new(arguments_lifetime()))
 }
 
 /// Generates a mock lifetime

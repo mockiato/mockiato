@@ -58,7 +58,7 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
     let arguments: TokenStream = trait_decl
         .methods
         .iter()
-        .map(generate_argument_structs)
+        .map(|method_decl| generate_argument_structs(method_decl, &trait_decl))
         .collect();
 
     let drop_impl = generate_drop_impl(&trait_decl, &parameters);
@@ -105,9 +105,12 @@ fn get_static_lifetime_restriction() -> WherePredicate {
     parse_quote!('mock: 'static)
 }
 
-fn generate_argument_structs(method_decl: &MethodDecl) -> proc_macro2::TokenStream {
-    let arguments = generate_arguments(method_decl);
-    let arguments_matcher = generate_arguments_matcher(method_decl, &arguments);
+fn generate_argument_structs(
+    method_decl: &MethodDecl,
+    trait_decl: &TraitDecl,
+) -> proc_macro2::TokenStream {
+    let arguments = generate_arguments(method_decl, trait_decl);
+    let arguments_matcher = generate_arguments_matcher(method_decl, trait_decl, &arguments);
     let arguments_output = arguments.output;
 
     quote! {

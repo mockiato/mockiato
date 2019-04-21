@@ -1,10 +1,21 @@
 use crate::parse::method_inputs::MethodInputs;
 use std::collections::HashSet;
-use syn::visit::{visit_path, Visit};
+use syn::punctuated::Punctuated;
 use syn::{
-    GenericParam, Generics, Ident, Path, PredicateType, Type, TypeParam, WhereClause,
-    WherePredicate,
+    parse_quote, GenericArgument, GenericParam, Generics, Ident, Path, PathArguments,
+    PredicateType, Token, Type, TypeParam, WhereClause, WherePredicate,
 };
+use syn::visit::{Visit, visit_path};
+
+pub(super) fn arguments_struct_path_generics(inputs: &MethodInputs) -> PathArguments {
+    let arguments: Punctuated<_, Token![,]> = inputs
+        .args
+        .iter()
+        .map(|arg| GenericArgument::Type(arg.ty.clone()))
+        .collect();
+
+    PathArguments::AngleBracketed(parse_quote!(<#arguments>))
+}
 
 pub(super) fn get_matching_generics_for_method_inputs(
     inputs: &MethodInputs,
