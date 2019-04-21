@@ -26,7 +26,10 @@ struct Name {
 }
 
 impl Name {
-    fn new<S>(name: S)  -> Self  where S: Into<String>{
+    fn new<S>(name: S) -> Self
+    where
+        S: Into<String>,
+    {
         Self { name: name.into() }
     }
 }
