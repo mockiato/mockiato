@@ -34,7 +34,7 @@ pub(crate) fn generate_mock_struct(
         .methods
         .iter()
         .map(|method_decl| {
-            generate_method_field(method_decl, trait_decl, &mod_ident, &mut lifetime_rewriter)
+            generate_method_field(method_decl, trait_decl, mod_ident, &mut lifetime_rewriter)
         })
         .collect();
 
@@ -48,7 +48,7 @@ pub(crate) fn generate_mock_struct(
         .methods
         .iter()
         .map(|method_decl| {
-            generate_expect_method(trait_decl, method_decl, &mod_ident, &mut lifetime_rewriter)
+            generate_expect_method(trait_decl, method_decl, mod_ident, &mut lifetime_rewriter)
         })
         .collect();
 
@@ -276,7 +276,7 @@ fn is_empty_return_value(return_value: &ReturnType) -> bool {
     }
 }
 
-fn where_clause<'a>(arguments: ArgumentsWithGenerics<'a>) -> Punctuated<WherePredicate, Token![,]> {
+fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> Punctuated<WherePredicate, Token![,]> {
     arguments
         .iter()
         .map(|(generic_type_ident, method_argument)| {
@@ -297,9 +297,7 @@ fn where_clause_predicate(
     }
 }
 
-fn argument_generics<'a>(
-    arguments: ArgumentsWithGenerics<'a>,
-) -> Punctuated<GenericParam, Token![,]> {
+fn argument_generics(arguments: ArgumentsWithGenerics<'_>) -> Punctuated<GenericParam, Token![,]> {
     arguments
         .iter()
         .map(|(generic_type_ident, _)| {

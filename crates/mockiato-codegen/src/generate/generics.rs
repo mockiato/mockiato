@@ -1,21 +1,10 @@
 use crate::parse::method_inputs::MethodInputs;
 use std::collections::HashSet;
-use syn::punctuated::Punctuated;
 use syn::visit::{visit_path, Visit};
 use syn::{
-    parse_quote, GenericArgument, GenericParam, Generics, Ident, Path, PathArguments,
-    PredicateType, Token, Type, TypeParam, WhereClause, WherePredicate,
+    GenericParam, Generics, Ident, Path, PredicateType, Type, TypeParam, WhereClause,
+    WherePredicate,
 };
-
-pub(super) fn arguments_struct_path_generics(inputs: &MethodInputs) -> PathArguments {
-    let arguments: Punctuated<_, Token![,]> = inputs
-        .args
-        .iter()
-        .map(|arg| GenericArgument::Type(arg.ty.clone()))
-        .collect();
-
-    PathArguments::AngleBracketed(parse_quote!(<#arguments>))
-}
 
 pub(super) fn get_matching_generics_for_method_inputs(
     inputs: &MethodInputs,
@@ -34,9 +23,9 @@ pub(super) fn get_matching_generics_for_method_inputs(
         .collect();
 
     Generics {
-        lt_token: generics.lt_token.clone(),
-        gt_token: generics.gt_token.clone(),
-        params: params,
+        lt_token: generics.lt_token,
+        gt_token: generics.gt_token,
+        params,
         where_clause,
     }
 }
@@ -63,12 +52,12 @@ fn filter_where_clause(
         .collect();
 
     WhereClause {
-        where_token: where_token.clone(),
+        where_token: *where_token,
         predicates,
     }
 }
 
-fn first_path_segment_ident_from_type<'a>(ty: &'a Type) -> Option<&'a Ident> {
+fn first_path_segment_ident_from_type(ty: &Type) -> Option<&'_ Ident> {
     match ty {
         Type::Path(ty) if !ty.path.segments.is_empty() => Some(&ty.path.segments[0].ident),
         _ => None,

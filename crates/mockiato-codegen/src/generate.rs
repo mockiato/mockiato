@@ -52,17 +52,17 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
         generics: generics_for_trait_decl(trait_decl, static_lifetime_restriction),
     };
 
-    let mock_struct = generate_mock_struct(&trait_decl, &parameters);
+    let mock_struct = generate_mock_struct(trait_decl, &parameters);
 
-    let trait_impl = generate_trait_impl(&trait_decl, &parameters);
+    let trait_impl = generate_trait_impl(trait_decl, &parameters);
 
     let arguments: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_argument_structs(method_decl, &trait_decl))
+        .map(|method_decl| generate_argument_structs(method_decl, trait_decl))
         .collect();
 
-    let drop_impl = generate_drop_impl(&trait_decl, &parameters);
+    let drop_impl = generate_drop_impl(trait_decl, &parameters);
     let mod_ident = &parameters.mod_ident;
 
     // The sub-mod is used to hide implementation details from the user
