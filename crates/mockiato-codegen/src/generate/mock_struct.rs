@@ -33,7 +33,9 @@ pub(crate) fn generate_mock_struct(
     let method_fields: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| generate_method_field(method_decl, trait_decl, &mod_ident, &mut lifetime_rewriter))
+        .map(|method_decl| {
+            generate_method_field(method_decl, trait_decl, &mod_ident, &mut lifetime_rewriter)
+        })
         .collect();
 
     let initializer_fields: TokenStream = trait_decl
@@ -113,7 +115,8 @@ fn generate_method_field(
     let ident = &method_decl.ident;
     let arguments_matcher_ident = arguments_matcher_ident(ident);
     let mut return_type = return_type(method_decl);
-    let mut generics = get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
+    let mut generics =
+        get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
     generics.params.push(parse_quote!('mock));
     let (_, ty_generics, _) = generics.split_for_impl();
 

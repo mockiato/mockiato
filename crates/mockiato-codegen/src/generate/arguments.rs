@@ -1,13 +1,14 @@
 use super::constant::{arguments_ident, arguments_lifetime, arguments_lifetime_as_generic_param};
+use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
+use super::visibility::raise_visibility_by_one_level;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
+use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, Generics};
-use crate::parse::trait_decl::TraitDecl;
-use super::generics::get_matching_generics_for_method_inputs;
+use syn::{Generics, Ident};
 
 pub(crate) struct GeneratedArguments {
     pub(crate) output: TokenStream,
@@ -15,7 +16,10 @@ pub(crate) struct GeneratedArguments {
     pub(crate) ident: Ident,
 }
 
-pub(crate) fn generate_arguments(method_decl: &MethodDecl, trait_decl: &TraitDecl) -> GeneratedArguments {
+pub(crate) fn generate_arguments(
+    method_decl: &MethodDecl,
+    trait_decl: &TraitDecl,
+) -> GeneratedArguments {
     let arguments_ident = arguments_ident(&method_decl.ident);
 
     let mut lifetime_rewriter =
@@ -24,7 +28,7 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl, trait_decl: &TraitDec
 
     let mut arguments_struct_generics =
         get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
-    
+
     if lifetime_rewriter.generator.has_lifetimes() {
         arguments_struct_generics
             .params
@@ -33,14 +37,14 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl, trait_decl: &TraitDec
 
     let debug_impl = generate_debug_impl(method_decl, &arguments_struct_generics);
     let (impl_generics, ty_generics, where_clause) = arguments_struct_generics.split_for_impl();
-    
+    let visibility = raise_visibility_by_one_level(&trait_decl.visibility);
 
     GeneratedArguments {
         generics: arguments_struct_generics.clone(),
         ident: arguments_ident.clone(),
         output: quote! {
             #[doc(hidden)]
-            pub struct #arguments_ident #ty_generics #where_clause {
+            #visibility struct #arguments_ident #ty_generics #where_clause {
                 #arguments_fields
             }
 

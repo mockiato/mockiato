@@ -1,11 +1,11 @@
 use crate::parse::method_inputs::MethodInputs;
 use std::collections::HashSet;
 use syn::punctuated::Punctuated;
+use syn::visit::{visit_path, Visit};
 use syn::{
     parse_quote, GenericArgument, GenericParam, Generics, Ident, Path, PathArguments,
     PredicateType, Token, Type, TypeParam, WhereClause, WherePredicate,
 };
-use syn::visit::{Visit, visit_path};
 
 pub(super) fn arguments_struct_path_generics(inputs: &MethodInputs) -> PathArguments {
     let arguments: Punctuated<_, Token![,]> = inputs

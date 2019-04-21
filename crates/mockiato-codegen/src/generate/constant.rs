@@ -2,7 +2,7 @@ use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use heck::{CamelCase, SnakeCase};
 use proc_macro2::Span;
-use syn::{Ident, Lifetime, GenericParam, LifetimeDef};
+use syn::{GenericParam, Ident, Lifetime, LifetimeDef};
 
 /// Generates a lifetime for the given index
 pub(super) fn argument_lifetime(index: usize) -> Lifetime {

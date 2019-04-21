@@ -3,6 +3,7 @@ use super::constant::{
     arguments_lifetime, arguments_lifetime_as_generic_param, arguments_matcher_ident,
 };
 use super::generics::get_matching_generics_for_method_inputs;
+use super::visibility::raise_visibility_by_one_level;
 use crate::generate::arguments::GeneratedArguments;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
@@ -28,10 +29,11 @@ pub(crate) fn generate_arguments_matcher(
     let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments, &generics);
 
     let (_, ty_generics, where_clause) = generics.split_for_impl();
+    let visibility = raise_visibility_by_one_level(&trait_decl.visibility);
 
     quote! {
         #[doc(hidden)]
-        pub struct #arguments_matcher_ident #ty_generics #where_clause {
+        #visibility struct #arguments_matcher_ident #ty_generics #where_clause {
             #arguments_matcher_fields
             pub(super) phantom_data: std::marker::PhantomData<&'mock ()>,
         }
