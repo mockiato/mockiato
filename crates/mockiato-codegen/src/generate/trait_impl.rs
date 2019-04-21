@@ -1,11 +1,11 @@
 use super::constant::arguments_ident;
+use super::GenerateMockParameters;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::{Ident, Token};
-use super::GenerateMockParameters;
 
 pub(crate) fn generate_trait_impl(
     trait_decl: &TraitDecl,

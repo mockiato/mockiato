@@ -1,12 +1,22 @@
 use mockiato::mockable;
 use std::fmt::{self, Display};
 
+trait Foo {
+    type Output;
+}
+
 #[mockable]
-trait Greeter<T>
+trait Greeter<T, U, V>
 where
     T: Display,
+    U: Debug,
+    V::Output: Display,
 {
     fn greet(&self, name: T) -> String;
+
+    fn greet_debug(&self, name: U) -> String;
+
+    fn greet_foo(&self, name: V::Output) -> String;
 }
 
 struct Name {

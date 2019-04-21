@@ -1,10 +1,13 @@
+use super::GenerateMockParameters;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
-use super::GenerateMockParameters;
 
-pub(crate) fn generate_drop_impl(trait_decl: &TraitDecl, parameters: &'_ GenerateMockParameters) -> TokenStream {
+pub(crate) fn generate_drop_impl(
+    trait_decl: &TraitDecl,
+    parameters: &'_ GenerateMockParameters,
+) -> TokenStream {
     let verify_calls: TokenStream = trait_decl
         .methods
         .iter()

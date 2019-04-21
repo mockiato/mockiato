@@ -2,19 +2,20 @@ use self::arguments::generate_arguments;
 use self::arguments_matcher::generate_arguments_matcher;
 use self::constant::{mock_struct_ident, mod_ident};
 use self::drop_impl::generate_drop_impl;
-use self::mock_struct::{generate_mock_struct};
-use self::trait_impl::{generate_trait_impl};
+use self::mock_struct::generate_mock_struct;
+use self::trait_impl::generate_trait_impl;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{parse_quote, Generics, WherePredicate};
+use syn::{parse_quote, Generics, Ident, WherePredicate};
 
 pub(crate) mod arguments;
 pub(crate) mod arguments_matcher;
 mod bound_lifetimes;
 mod constant;
 mod drop_impl;
+mod generics;
 mod lifetime_rewriter;
 mod mock_struct;
 mod trait_impl;
@@ -50,15 +51,9 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
         generics: generics_for_trait_decl(trait_decl, static_lifetime_restriction),
     };
 
-    let mock_struct = generate_mock_struct(
-        &trait_decl,
-        &parameters,
-    );
+    let mock_struct = generate_mock_struct(&trait_decl, &parameters);
 
-    let trait_impl = generate_trait_impl(
-        &trait_decl,
-        &parameters,
-    );
+    let trait_impl = generate_trait_impl(&trait_decl, &parameters);
 
     let arguments: TokenStream = trait_decl
         .methods

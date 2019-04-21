@@ -3,20 +3,23 @@ use super::constant::{
     arguments_matcher_ident, expect_method_calls_in_order_ident, expect_method_ident,
     generic_parameter_ident, mock_lifetime,
 };
+use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use super::GenerateMockParameters;
-use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
+use crate::parse::method_decl::MethodDecl;
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::token::Paren;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, LitStr, ReturnType, Token, Type, TypeTuple};
+use syn::{
+    parse_quote, GenericParam, Ident, LitStr, ReturnType, Token, Type, TypeParam, TypeTuple,
+    WherePredicate,
+};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
-
 
 pub(crate) fn generate_mock_struct(
     trait_decl: &TraitDecl,
@@ -30,9 +33,7 @@ pub(crate) fn generate_mock_struct(
     let method_fields: TokenStream = trait_decl
         .methods
         .iter()
-        .map(|method_decl| {
-            generate_method_field(method_decl, &mod_ident, &mut lifetime_rewriter)
-        })
+        .map(|method_decl| generate_method_field(method_decl, &mod_ident, &mut lifetime_rewriter))
         .collect();
 
     let initializer_fields: TokenStream = trait_decl
@@ -45,12 +46,7 @@ pub(crate) fn generate_mock_struct(
         .methods
         .iter()
         .map(|method_decl| {
-            generate_expect_method(
-                trait_decl,
-                method_decl,
-                &mod_ident,
-                &mut lifetime_rewriter,
-            )
+            generate_expect_method(trait_decl, method_decl, &mod_ident, &mut lifetime_rewriter)
         })
         .collect();
 
@@ -169,7 +165,6 @@ fn generate_expect_method(
         .map(|(index, argument)| (generic_parameter_ident(index), argument))
         .collect();
 
-    let generics = generics(&arguments_with_generics);
     let arguments: TokenStream = arguments_with_generics
         .iter()
         .map(generate_argument)
@@ -178,8 +173,6 @@ fn generate_expect_method(
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
     let mut return_type = return_type(method_decl);
     visit_type_mut(lifetime_rewriter, &mut return_type);
-
-    let where_clause = where_clause(&arguments_with_generics);
 
     let expected_parameters: TokenStream = arguments_with_generics
         .iter()
@@ -206,18 +199,28 @@ panicking if the function was not called by the time the object goes out of scop
         Span::call_site(),
     );
 
+    let mut arguments_struct_generics =
+        get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
+    arguments_struct_generics
+        .params
+        .insert(0, parse_quote!('mock));
+    let generics = argument_generics(&arguments_with_generics);
+    let where_clause = where_clause(&arguments_with_generics);
+
+    let (_, ty_generics, _) = arguments_struct_generics.split_for_impl();
+
     quote! {
         #must_use_annotation
         #[doc = #documentation]
-        #visibility fn #expect_method_ident#generics(
+        #visibility fn #expect_method_ident <#generics> (
             &mut self,
             #arguments
         ) -> mockiato::internal::MethodCallBuilder<
             'mock,
             '_,
-            self::#mod_ident::#arguments_matcher_ident<'mock>,
+            self::#mod_ident::#arguments_matcher_ident #ty_generics,
             #return_type
-        > #where_clause
+        > where #where_clause
         {
             self.#method_ident.add_expected_call(
                 self::#mod_ident::#arguments_matcher_ident {
@@ -266,43 +269,36 @@ fn is_empty_return_value(return_value: &ReturnType) -> bool {
     }
 }
 
-fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
-    if arguments.is_empty() {
-        TokenStream::new()
-    } else {
-        let predicates: Punctuated<_, Token![,]> = arguments
-            .iter()
-            .map(|(generic_type_ident, method_argument)| {
-                where_clause_predicate(generic_type_ident, method_argument)
-            })
-            .collect();
-
-        quote! {
-            where #predicates
-        }
-    }
+fn where_clause<'a>(arguments: ArgumentsWithGenerics<'a>) -> Punctuated<WherePredicate, Token![,]> {
+    arguments
+        .iter()
+        .map(|(generic_type_ident, method_argument)| {
+            where_clause_predicate(generic_type_ident, method_argument)
+        })
+        .collect()
 }
 
-fn where_clause_predicate(generic_type_ident: &Ident, method_argument: &MethodArg) -> TokenStream {
+fn where_clause_predicate(
+    generic_type_ident: &Ident,
+    method_argument: &MethodArg,
+) -> WherePredicate {
     let mut ty = method_argument.ty.clone();
     let bound_lifetimes = rewrite_lifetimes_incrementally(&mut ty);
 
-    quote! {
+    parse_quote! {
         #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'mock
     }
 }
 
-fn generics(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
-    if arguments.is_empty() {
-        TokenStream::new()
-    } else {
-        let parameters: Punctuated<_, Token![,]> = arguments
-            .iter()
-            .map(|(generic_type_ident, _)| generic_type_ident)
-            .collect();
-
-        quote! { <#parameters> }
-    }
+fn argument_generics<'a>(
+    arguments: ArgumentsWithGenerics<'a>,
+) -> Punctuated<GenericParam, Token![,]> {
+    arguments
+        .iter()
+        .map(|(generic_type_ident, _)| {
+            GenericParam::Type(TypeParam::from(generic_type_ident.clone()))
+        })
+        .collect()
 }
 
 fn generate_argument((generic_type_ident, method_argument): &(Ident, &MethodArg)) -> TokenStream {
