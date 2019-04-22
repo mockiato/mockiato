@@ -33,7 +33,7 @@ pub(crate) fn generate_arguments(
     if lifetime_rewriter.generator.has_lifetimes() {
         arguments_struct_generics
             .params
-            .insert(0, arguments_lifetime_as_generic_param());
+            .push(arguments_lifetime_as_generic_param());
     }
 
     let debug_impl = generate_debug_impl(

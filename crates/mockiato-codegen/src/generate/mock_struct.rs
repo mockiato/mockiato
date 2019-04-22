@@ -207,7 +207,7 @@ panicking if the function was not called by the time the object goes out of scop
         get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
     arguments_struct_generics
         .params
-        .insert(0, mock_lifetime_as_generic_param());
+        .push(mock_lifetime_as_generic_param());
     let generics = argument_generics(&arguments_with_generics);
     let where_clause = where_clause(&arguments_with_generics);
 
