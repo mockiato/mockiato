@@ -1,6 +1,7 @@
 use super::ArgumentMatcher;
 use crate::internal::fmt::{MaybeDebug, MaybeDebugWrapper};
-use std::fmt::{self, Debug};
+use nameof::name_of;
+use std::fmt::{self, Debug, Display};
 
 /// Creates a new `ArgumentMatcher` that matches against values using [`PartialEq`]
 pub fn partial_eq<T>(value: T) -> PartialEqArgumentMatcher<T>
@@ -26,12 +27,23 @@ where
     value: T,
 }
 
+impl<T> Display for PartialEqArgumentMatcher<T>
+where
+    T: MaybeDebug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        MaybeDebug::fmt(&self.value, f)
+    }
+}
+
 impl<T> Debug for PartialEqArgumentMatcher<T>
 where
     T: MaybeDebug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Debug::fmt(&MaybeDebugWrapper(&self.value), f)
+        f.debug_struct(name_of!(type PartialEqArgumentMatcher<T>))
+            .field(name_of!(value in Self), &MaybeDebugWrapper(&self.value))
+            .finish()
     }
 }
 
@@ -51,12 +63,12 @@ where
     value: T,
 }
 
-impl<T> Debug for OwnedPartialEqArgumentMatcher<T>
+impl<T> Display for OwnedPartialEqArgumentMatcher<T>
 where
     T: MaybeDebug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Debug::fmt(&MaybeDebugWrapper(&self.value), f)
+        MaybeDebug::fmt(&self.value, f)
     }
 }
 
@@ -66,5 +78,13 @@ where
 {
     fn matches_argument(&self, input: &&U) -> bool {
         &self.value == *input
+    }
+}
+
+impl<T> Debug for OwnedPartialEqArgumentMatcher<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct(name_of!(type OwnedPartialEqArgumentMatcher<T>))
+            .field(name_of!(value in Self), &MaybeDebugWrapper(&self.value))
+            .finish()
     }
 }

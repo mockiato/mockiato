@@ -20,6 +20,7 @@ mod lifetime_rewriter;
 mod mock_struct;
 mod trait_impl;
 mod visibility;
+mod util;
 
 #[derive(Default)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]

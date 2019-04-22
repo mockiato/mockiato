@@ -2,6 +2,7 @@ use super::constant::{arguments_ident, arguments_lifetime, arguments_lifetime_as
 use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use super::visibility::raise_visibility_by_one_level;
+use crate::generate::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use crate::parse::trait_decl::TraitDecl;
@@ -36,6 +37,7 @@ pub(crate) fn generate_arguments(
     }
 
     let debug_impl = generate_debug_impl(method_decl, &arguments_struct_generics);
+    let display_impl = generate_display_impl(method_decl, &arguments_struct_generics);
     let (impl_generics, ty_generics, where_clause) = arguments_struct_generics.split_for_impl();
     let visibility = raise_visibility_by_one_level(&trait_decl.visibility);
 
@@ -48,6 +50,7 @@ pub(crate) fn generate_arguments(
                 #arguments_fields
             }
 
+            #display_impl
             #debug_impl
 
             impl #impl_generics mockiato::internal::Arguments for #arguments_ident #ty_generics #where_clause {}
@@ -55,12 +58,12 @@ pub(crate) fn generate_arguments(
     }
 }
 
-/// Generates a `Debug` implementation for an arguments struct.
-fn generate_debug_impl(method_decl: &MethodDecl, generics: &Generics) -> TokenStream {
+/// Generates a `Display` implementation for an arguments struct.
+fn generate_display_impl(method_decl: &MethodDecl, generics: &Generics) -> TokenStream {
     let arguments_ident = arguments_ident(&method_decl.ident);
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
-    let debug_fields: TokenStream = method_decl
+    let display_fields: TokenStream = method_decl
         .inputs
         .args
         .iter()
@@ -71,13 +74,43 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &Generics) -> TokenSt
         .collect();
 
     quote! {
-        impl #impl_generics std::fmt::Debug for #arguments_ident #ty_generics #where_clause {
+        impl #impl_generics std::fmt::Display for #arguments_ident #ty_generics #where_clause {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let arguments: Vec<String> = vec![
-                    #debug_fields
+                    #display_fields
                 ];
 
                 write!(f, "({})", arguments.join(", "))
+            }
+        }
+    }
+}
+
+/// Generates a `Debug` implementation for an arguments struct.
+fn generate_debug_impl(method_decl: &MethodDecl, generics: &Generics) -> TokenStream {
+    let arguments_ident = arguments_ident(&method_decl.ident);
+    let arguments_ident_str_literal = ident_to_string_literal(&arguments_ident);
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+    let debug_fields: TokenStream = method_decl
+        .inputs
+        .args
+        .iter()
+        .map(|input| {
+            let ident = &input.ident;
+            let ident_as_str = ident_to_string_literal(ident);
+            quote! {
+                .field(#ident_as_str, &mockiato::internal::MaybeDebugWrapper(&self.#ident))
+            }
+        })
+        .collect();
+
+    quote! {
+        impl #impl_generics std::fmt::Debug for #arguments_ident #ty_generics #where_clause {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.debug_struct(#arguments_ident_str_literal)
+                 #debug_fields
+                 .finish()
             }
         }
     }

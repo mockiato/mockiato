@@ -1,6 +1,7 @@
 use super::ArgumentMatcher;
-use crate::internal::fmt::MaybeDebugWrapper;
-use std::fmt::{self, Debug};
+use crate::internal::fmt::{MaybeDebug, MaybeDebugWrapper};
+use nameof::name_of;
+use std::fmt::{self, Debug, Display};
 
 /// Creates a new `ArgumentMatcher` that matches [`Vec`]s and [`slice`]s
 /// while disregarding the exact order of the elements.
@@ -12,9 +13,17 @@ pub fn unordered_vec_eq<T>(vec: Vec<T>) -> UnorderedVecArgumentMatcher<T> {
 
 pub struct UnorderedVecArgumentMatcher<T>(Vec<T>);
 
+impl<T> Display for UnorderedVecArgumentMatcher<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        MaybeDebug::fmt(&self.0, f)
+    }
+}
+
 impl<T> Debug for UnorderedVecArgumentMatcher<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Debug::fmt(&MaybeDebugWrapper(&self.0), f)
+        f.debug_tuple(name_of!(type UnorderedVecArgumentMatcher<T>))
+            .field(&MaybeDebugWrapper(&self.0))
+            .finish()
     }
 }
 

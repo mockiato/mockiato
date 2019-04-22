@@ -5,13 +5,14 @@ use super::constant::{
 use super::generics::get_matching_generics_for_method_inputs;
 use super::visibility::raise_visibility_by_one_level;
 use crate::generate::arguments::GeneratedArguments;
+use crate::generate::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::{parse_quote, Generics, LitStr, Token};
+use syn::{parse_quote, Generics, Token};
 
 pub(crate) fn generate_arguments_matcher(
     method_decl: &MethodDecl,
@@ -25,27 +26,28 @@ pub(crate) fn generate_arguments_matcher(
     generics.params.push(parse_quote!('mock));
 
     let arguments_matcher_fields = arguments_matcher_fields(&method_decl.inputs);
-    let debug_impl = generate_debug_impl(method_decl, &generics);
-    let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments, &generics);
-
     let (_, ty_generics, where_clause) = generics.split_for_impl();
     let visibility = raise_visibility_by_one_level(&trait_decl.visibility);
 
+    let display_impl = generate_display_impl(method_decl, &generics);
+    let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments, &generics);
+
     quote! {
         #[doc(hidden)]
+        #[derive(Debug)]
         #visibility struct #arguments_matcher_ident #ty_generics #where_clause {
             #arguments_matcher_fields
             pub(super) phantom_data: std::marker::PhantomData<&'mock ()>,
         }
 
-        #debug_impl
+        #display_impl
         #arguments_matcher_impl
     }
 }
 
-/// Generates a `Debug` implementation for an argument matcher.
-fn generate_debug_impl(method_decl: &MethodDecl, generics: &Generics) -> TokenStream {
-    let method_name_str = LitStr::new(&method_decl.ident.to_string(), method_decl.ident.span());
+/// Generates a `Display` implementation for an argument matcher.
+fn generate_display_impl(method_decl: &MethodDecl, generics: &Generics) -> TokenStream {
+    let method_name_str = ident_to_string_literal(&method_decl.ident);
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
 
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -56,12 +58,12 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &Generics) -> TokenSt
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            quote! { format!("{:?}", &mockiato::internal::MaybeDebugWrapper(&self.#ident)), }
+            quote! { format!("{}", &self.#ident), }
         })
         .collect();
 
     quote! {
-        impl #impl_generics std::fmt::Debug for #arguments_matcher_ident #ty_generics #where_clause {
+        impl #impl_generics std::fmt::Display for #arguments_matcher_ident #ty_generics #where_clause {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let arguments: Vec<String> = vec![
                     #debug_fields
