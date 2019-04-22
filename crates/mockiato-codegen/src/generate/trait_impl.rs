@@ -52,12 +52,25 @@ fn generate_method_impl(
 
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    let arguments_struct_fields: Punctuated<_, Token![,]> =
-        inputs.args.iter().map(|argument| &argument.ident).collect();
+    let arguments_struct_fields: TokenStream = inputs
+        .args
+        .iter()
+        .map(|argument| {
+            let ident = &argument.ident;
+            quote! { #ident, }
+        })
+        .collect();
 
-    quote! {
+    let output = quote! {
         #unsafety fn #ident#impl_generics(#self_arg, #arguments) #output #where_clause {
-            self.#ident.call_unwrap(self::#mod_ident::#arguments_struct_ident { #arguments_struct_fields })
+            self.#ident.call_unwrap(
+                self::#mod_ident::#arguments_struct_ident {
+                    #arguments_struct_fields
+                    phantom_data: std::marker::PhantomData,
+                }
+            )
         }
-    }
+    };
+
+    output
 }

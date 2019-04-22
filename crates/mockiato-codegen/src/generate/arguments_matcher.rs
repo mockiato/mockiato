@@ -4,7 +4,7 @@ use super::constant::{
     mock_lifetime, mock_lifetime_as_generic_param,
 };
 use super::debug_impl::{generate_debug_impl, DebugImplField};
-use crate::generate::arguments::GeneratedArguments;
+use super::MethodDeclMetadata;
 use crate::generate::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::{MethodArg, MethodInputs};
@@ -12,14 +12,16 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::{Generics, Token, Visibility};
-use super::MethodDeclMetadata;
 
 pub(crate) fn generate_arguments_matcher(
     method: &MethodDeclMetadata,
     visibility: &Visibility,
-    arguments: &GeneratedArguments,
 ) -> TokenStream {
-    let MethodDeclMetadata { method_decl, generics, .. } = method;
+    let MethodDeclMetadata {
+        method_decl,
+        generics,
+        ..
+    } = method;
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
 
     let mut generics = generics.clone();
@@ -29,7 +31,7 @@ pub(crate) fn generate_arguments_matcher(
     let (_, ty_generics, where_clause) = generics.split_for_impl();
 
     let display_impl = generate_display_impl(method_decl, &generics);
-    let arguments_matcher_impl = generate_arguments_matcher_impl(method, arguments, &generics);
+    let arguments_matcher_impl = generate_arguments_matcher_impl(method, &generics);
 
     let debug_impl = generate_debug_impl(
         debug_impl_fields(method_decl),
@@ -84,20 +86,29 @@ fn generate_display_impl(method_decl: &MethodDecl, generics: &Generics) -> Token
 
 fn generate_arguments_matcher_impl(
     method: &MethodDeclMetadata,
-    arguments: &GeneratedArguments,
-    generics: &Generics,
+    generics_with_mock_lifetime: &Generics,
 ) -> TokenStream {
-    let MethodDeclMetadata { method_decl, arguments_struct_ident, .. } = method;
+    let MethodDeclMetadata {
+        method_decl,
+        arguments_struct_ident,
+        generics,
+        ..
+    } = method;
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
 
-    let mut generics_with_arguments_lifetime = generics.clone();
+    let mut arguments_struct_generics = generics.clone();
+    arguments_struct_generics
+        .params
+        .push(arguments_lifetime_as_generic_param());
+
+    let mut generics_with_arguments_lifetime = generics_with_mock_lifetime.clone();
     generics_with_arguments_lifetime
         .params
         .push(arguments_lifetime_as_generic_param());
 
     let (impl_generics, _, _) = generics_with_arguments_lifetime.split_for_impl();
-    let (_, ty_generics, where_clause) = generics.split_for_impl();
-    let (_, arguments_ty_generics, _) = arguments.generics.split_for_impl();
+    let (_, ty_generics, where_clause) = generics_with_mock_lifetime.split_for_impl();
+    let (_, arguments_ty_generics, _) = arguments_struct_generics.split_for_impl();
 
     let matches_argument_method = generate_matches_arguments_method_impl(method_decl);
     let arguments_lifetime = arguments_lifetime();

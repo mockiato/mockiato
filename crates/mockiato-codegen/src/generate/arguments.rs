@@ -1,35 +1,31 @@
 use super::constant::{arguments_ident, arguments_lifetime, arguments_lifetime_as_generic_param};
 use super::debug_impl::{generate_debug_impl, DebugImplField};
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
+use super::MethodDeclMetadata;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::visit_mut::visit_type_mut;
 use syn::{Generics, Visibility};
-use super::MethodDeclMetadata;
-
-pub(crate) struct GeneratedArguments {
-    pub(crate) output: TokenStream,
-    pub(crate) generics: Generics,
-}
 
 pub(crate) fn generate_arguments(
     method: &MethodDeclMetadata,
     visibility: &Visibility,
-) -> GeneratedArguments {
-    let MethodDeclMetadata { method_decl, arguments_struct_ident, generics, .. } = method;
+) -> TokenStream {
+    let MethodDeclMetadata {
+        method_decl,
+        arguments_struct_ident,
+        generics,
+        ..
+    } = method;
 
     let mut lifetime_rewriter =
         LifetimeRewriter::new(UniformLifetimeGenerator::new(arguments_lifetime()));
     let arguments_fields = generate_arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
 
     let mut generics = generics.clone();
-    if lifetime_rewriter.generator.has_lifetimes() {
-        generics
-            .params
-            .push(arguments_lifetime_as_generic_param());
-    }
+    generics.params.push(arguments_lifetime_as_generic_param());
 
     let debug_impl = generate_debug_impl(
         debug_impl_fields(method_decl),
@@ -38,20 +34,19 @@ pub(crate) fn generate_arguments(
     );
     let display_impl = generate_display_impl(method_decl, &generics);
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    let arguments_lifetime = arguments_lifetime();
 
-    GeneratedArguments {
-        generics: generics.clone(),
-        output: quote! {
-            #[doc(hidden)]
-            #visibility struct #arguments_struct_ident #ty_generics #where_clause {
-                #arguments_fields
-            }
+    quote! {
+        #[doc(hidden)]
+        #visibility struct #arguments_struct_ident #ty_generics #where_clause {
+            #arguments_fields
+            pub(super) phantom_data: std::marker::PhantomData<&#arguments_lifetime ()>,
+        }
 
-            #display_impl
-            #debug_impl
+        #display_impl
+        #debug_impl
 
-            impl #impl_generics mockiato::internal::Arguments for #arguments_struct_ident #ty_generics #where_clause {}
-        },
+        impl #impl_generics mockiato::internal::Arguments for #arguments_struct_ident #ty_generics #where_clause {}
     }
 }
 
@@ -108,9 +103,7 @@ fn generate_arguments_fields(
 
             visit_type_mut(lifetime_rewriter, &mut ty);
 
-            quote! {
-                pub(super) #ident: #ty,
-            }
+            quote! { pub(super) #ident: #ty, }
         })
         .collect()
 }

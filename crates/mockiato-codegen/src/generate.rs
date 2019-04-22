@@ -6,12 +6,12 @@ use self::drop_impl::generate_drop_impl;
 use self::generics::get_matching_generics_for_method_inputs;
 use self::mock_struct::generate_mock_struct;
 use self::trait_impl::generate_trait_impl;
+use self::visibility::raise_visibility_by_one_level;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{parse_quote, Generics, Ident, ReturnType, Type, WherePredicate};
-use self::visibility::raise_visibility_by_one_level;
 
 pub(crate) mod arguments;
 pub(crate) mod arguments_matcher;
@@ -82,7 +82,7 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
     let arguments: TokenStream = parameters
         .methods
         .iter()
-        .map(|method| generate_argument_structs(method , trait_decl))
+        .map(|method| generate_argument_structs(method, trait_decl))
         .collect();
 
     let drop_impl = generate_drop_impl(trait_decl, &parameters);
@@ -155,11 +155,10 @@ fn generate_argument_structs(
 ) -> proc_macro2::TokenStream {
     let visibility = raise_visibility_by_one_level(&trait_decl.visibility);
     let arguments = generate_arguments(method, &visibility);
-    let arguments_matcher = generate_arguments_matcher(method, &visibility, &arguments);
-    let arguments_output = arguments.output;
+    let arguments_matcher = generate_arguments_matcher(method, &visibility);
 
     quote! {
-        #arguments_output
+        #arguments
         #arguments_matcher
     }
 }
