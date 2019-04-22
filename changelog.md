@@ -17,3 +17,6 @@
 - The `Debug` implementation of an argument's type is now correctly used when printing the expected calls for a method.
 - Internal types now have separate `Debug` and `Display` implementations.
 - Some unused exports have been removed from `mockiato::internal`. This is treated as a non-breaking change as no consumer should directly depend on these types.
+
+## 0.4.2
+- Fix error with `parse_quote!` macro when patch version of syn is too low in consumers `Cargo.lock`. 
