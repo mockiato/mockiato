@@ -40,7 +40,7 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            quote! { format!("{:?}", &mockiato::internal::MaybeDebugWrapper(&self.#ident)), }
+            quote! { format!("{:?}", &self.#ident), }
         })
         .collect();
 

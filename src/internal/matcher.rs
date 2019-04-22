@@ -1,5 +1,4 @@
 use crate::internal::arguments::Arguments;
-use crate::internal::fmt::MaybeDebug;
 use std::fmt::Debug;
 
 pub(crate) mod any;
@@ -7,7 +6,7 @@ pub(crate) mod nearly_eq;
 pub(crate) mod partial_eq;
 pub(crate) mod unordered_vec_eq;
 
-pub trait ArgumentMatcher<T>: MaybeDebug {
+pub trait ArgumentMatcher<T>: Debug {
     fn matches_argument(&self, input: &T) -> bool;
 }
 
