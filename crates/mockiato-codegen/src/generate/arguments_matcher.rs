@@ -8,7 +8,7 @@ use super::visibility::raise_visibility_by_one_level;
 use crate::generate::arguments::GeneratedArguments;
 use crate::generate::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
-use crate::parse::method_inputs::MethodInputs;
+use crate::parse::method_inputs::{MethodArg, MethodInputs};
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -114,12 +114,20 @@ fn generate_arguments_matcher_impl(
 fn generate_matches_arguments_method_impl(method_decl: &MethodDecl) -> TokenStream {
     let args = &method_decl.inputs.args;
 
-    // Since argument matchers for methods without any arguments should always match, we can
-    // fall back to the default impl on the trait `ArgumentsMatcher`.
-    if args.is_empty() {
-        return TokenStream::new();
-    }
+    let matches_argument_calls = if args.is_empty() {
+        quote!(true)
+    } else {
+        generate_matches_argument_calls(args)
+    };
 
+    quote! {
+        fn matches_arguments(&self, args: &Self::Arguments) -> bool {
+            #matches_argument_calls
+        }
+    }
+}
+
+fn generate_matches_argument_calls(args: &[MethodArg]) -> TokenStream {
     let matches_argument_calls: Punctuated<_, Token![&&]> = args
         .iter()
         .map(|arg| {
@@ -127,12 +135,7 @@ fn generate_matches_arguments_method_impl(method_decl: &MethodDecl) -> TokenStre
             quote! { self.#ident.matches_argument(&args.#ident) }
         })
         .collect();
-
-    quote! {
-        fn matches_arguments(&self, args: &Self::Arguments) -> bool {
-            #matches_argument_calls
-        }
-    }
+    quote!(#matches_argument_calls)
 }
 
 fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {

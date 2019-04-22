@@ -13,11 +13,7 @@ pub trait ArgumentMatcher<T>: Display + Debug {
 pub trait ArgumentsMatcher<'args>: Display + Debug {
     type Arguments: Arguments;
 
-    fn matches_arguments(&self, _input: &Self::Arguments) -> bool {
-        // Since argument matchers for methods without any arguments should always match, we can
-        // fall back to the default impl on the trait `ArgumentsMatcher`.
-        true
-    }
+    fn matches_arguments(&self, _input: &Self::Arguments) -> bool;
 }
 
 #[cfg(test)]
