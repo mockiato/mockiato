@@ -13,7 +13,7 @@ pub trait ArgumentMatcher<T>: Display + Debug {
 pub trait ArgumentsMatcher<'args>: Display + Debug {
     type Arguments: Arguments;
 
-    fn matches_arguments(&self, _input: &Self::Arguments) -> bool;
+    fn matches_arguments(&self, input: &Self::Arguments) -> bool;
 }
 
 #[cfg(test)]
