@@ -96,7 +96,7 @@ impl<'a> Visit<'a> for FindOverlappingGenericTypeIdents<'a> {
             if self.generic_type_idents_filter.get(first_segment_ident).is_some()
                 && first_segment.arguments.is_empty()
             {
-                self.generic_type_idents_filter.insert(first_segment_ident);
+                self.overlapping_generic_type_idents.insert(first_segment_ident);
             }
         }
     }
