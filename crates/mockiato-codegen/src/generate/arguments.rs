@@ -1,11 +1,12 @@
 use super::constant::{arguments_ident, arguments_lifetime};
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
+use crate::generate::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, LitStr};
+use syn::Ident;
 
 pub(crate) struct GeneratedArguments {
     pub(crate) output: TokenStream,
@@ -85,6 +86,7 @@ fn generate_display_impl(method_decl: &MethodDecl, generics: &TokenStream) -> To
 /// Generates a `Debug` implementation for an arguments struct.
 fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> TokenStream {
     let arguments_ident = arguments_ident(&method_decl.ident);
+    let arguments_ident_str_literal = ident_to_string_literal(&arguments_ident);
 
     let debug_fields: TokenStream = method_decl
         .inputs
@@ -92,15 +94,12 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> Toke
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            let ident_as_str = LitStr::new(&format!("{}", ident), ident.span());
+            let ident_as_str = ident_to_string_literal(ident);
             quote! {
                 .field(#ident_as_str, &mockiato::internal::MaybeDebugWrapper(&self.#ident))
             }
         })
         .collect();
-
-    let arguments_ident_str_literal =
-        LitStr::new(&format!("{}", arguments_ident), arguments_ident.span());
 
     quote! {
         impl #generics std::fmt::Debug for #arguments_ident #generics {

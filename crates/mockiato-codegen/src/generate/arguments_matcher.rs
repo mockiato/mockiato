@@ -1,12 +1,13 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{arguments_lifetime, arguments_matcher_ident};
 use crate::generate::arguments::GeneratedArguments;
+use crate::generate::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::{LitStr, Token};
+use syn::Token;
 
 pub(crate) fn generate_arguments_matcher(
     method_decl: &MethodDecl,
@@ -33,7 +34,7 @@ pub(crate) fn generate_arguments_matcher(
 
 /// Generates a `Display` implementation for an argument matcher.
 fn generate_display_impl(method_decl: &MethodDecl) -> TokenStream {
-    let method_name_str = LitStr::new(&method_decl.ident.to_string(), method_decl.ident.span());
+    let method_name_str = ident_to_string_literal(&method_decl.ident);
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
 
     let debug_fields: TokenStream = method_decl
@@ -62,10 +63,7 @@ fn generate_display_impl(method_decl: &MethodDecl) -> TokenStream {
 /// Generates a `Debug` implementation for an argument matcher.
 fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
-    let arguments_matcher_ident_as_str = LitStr::new(
-        &format!("{}", arguments_matcher_ident),
-        arguments_matcher_ident.span(),
-    );
+    let arguments_matcher_ident_as_str = ident_to_string_literal(&arguments_matcher_ident);
 
     let debug_fields: TokenStream = method_decl
         .inputs
@@ -73,7 +71,7 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            let ident_as_str = LitStr::new(&format!("{}", ident), ident.span());
+            let ident_as_str = ident_to_string_literal(ident);
 
             quote! {
                 .field(#ident_as_str, &self.#ident)
