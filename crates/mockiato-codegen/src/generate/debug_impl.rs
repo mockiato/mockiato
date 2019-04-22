@@ -5,7 +5,6 @@ use syn::{Generics, Ident};
 
 pub(crate) type DebugImplField<'a> = (&'a Ident, TokenStream);
 
-/// Generates a `Debug` implementation for an arguments struct.
 pub(crate) fn generate_debug_impl<'a>(
     fields: impl Iterator<Item = DebugImplField<'a>>,
     struct_ident: &'a Ident,
