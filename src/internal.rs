@@ -5,7 +5,6 @@
 
 pub use self::arguments::Arguments;
 pub use self::expected_calls::ExpectedCalls;
-pub(crate) use self::fmt::DisplayOption;
 pub use self::fmt::{MaybeDebugExtWrapper, MaybeDebugWrapper};
 pub use self::matcher::{ArgumentMatcher, ArgumentsMatcher};
 pub use self::method::Method;

@@ -2,7 +2,7 @@ use crate::internal::expected_calls::ExpectedCalls;
 use crate::internal::fmt::DisplayTimes;
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
-use crate::internal::DisplayOption;
+use crate::internal::fmt::DisplayOption;
 use std::cell::RefCell;
 use std::fmt::{self, Display};
 use std::rc::Rc;
