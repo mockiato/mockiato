@@ -16,18 +16,17 @@ pub(crate) fn generate_arguments_matcher(
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
     let arguments_matcher_fields = arguments_matcher_fields(&method_decl.inputs);
     let display_impl = generate_display_impl(method_decl);
-    let debug_impl = generate_debug_impl(method_decl);
     let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments);
 
     quote! {
         #[doc(hidden)]
+        #[derive(Debug)]
         pub struct #arguments_matcher_ident<'mock> {
             #arguments_matcher_fields
             pub(super) phantom_data: std::marker::PhantomData<&'mock ()>,
         }
 
         #display_impl
-        #debug_impl
         #arguments_matcher_impl
     }
 }
@@ -55,36 +54,6 @@ fn generate_display_impl(method_decl: &MethodDecl) -> TokenStream {
                 ];
 
                 write!(f, "{}({})", #method_name_str, arguments.join(", "))
-            }
-        }
-    }
-}
-
-/// Generates a `Debug` implementation for an argument matcher.
-fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
-    let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
-    let arguments_matcher_ident_as_str = ident_to_string_literal(&arguments_matcher_ident);
-
-    let debug_fields: TokenStream = method_decl
-        .inputs
-        .args
-        .iter()
-        .map(|input| {
-            let ident = &input.ident;
-            let ident_as_str = ident_to_string_literal(ident);
-
-            quote! {
-                .field(#ident_as_str, &self.#ident)
-            }
-        })
-        .collect();
-
-    quote! {
-        impl<'mock> std::fmt::Debug for #arguments_matcher_ident<'mock> {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                f.debug_struct(#arguments_matcher_ident_as_str)
-                  #debug_fields
-                 .finish()
             }
         }
     }
