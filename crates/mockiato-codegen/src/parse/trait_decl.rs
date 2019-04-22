@@ -55,8 +55,14 @@ fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
         .iter()
         .map(|generic_param| match generic_param {
             GenericParam::Type(_) => Ok(()),
-            GenericParam::Lifetime(_) => Err(create_spanned_error(generic_param.span_unstable(), "Lifetimes are not supported on mockable traits")),
-            GenericParam::Const(_) => Err(create_spanned_error(generic_param.span_unstable(), "Const generics are not supported on mockable traits")),
+            GenericParam::Lifetime(_) => Err(create_spanned_error(
+                generic_param.span_unstable(),
+                "Lifetimes are not supported on mockable traits",
+            )),
+            GenericParam::Const(_) => Err(create_spanned_error(
+                generic_param.span_unstable(),
+                "Const generics are not supported on mockable traits",
+            )),
         });
 
     merge_results(results).map(|_| ())

@@ -1,5 +1,5 @@
-use super::constant::arguments_ident;
 use super::GenerateMockParameters;
+use super::MethodDeclMetadata;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
@@ -15,10 +15,10 @@ pub(crate) fn generate_trait_impl(
     let unsafety = &trait_decl.unsafety;
     let mock_struct_ident = &parameters.mock_struct_ident;
 
-    let method_impls: TokenStream = trait_decl
+    let method_impls: TokenStream = parameters
         .methods
         .iter()
-        .map(|method_decl| generate_method_impl(method_decl, &parameters.mod_ident))
+        .map(|method| generate_method_impl(method, &parameters.mod_ident))
         .collect();
 
     let (impl_generics, ty_generics, where_clause) = parameters.generics.split_for_impl();
@@ -31,28 +31,29 @@ pub(crate) fn generate_trait_impl(
     }
 }
 
-fn generate_method_impl(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStream {
-    let MethodDecl {
-        ident,
-        unsafety,
-        generics,
-        inputs,
-        output,
+fn generate_method_impl(
+    MethodDeclMetadata {
+        arguments_struct_ident,
+        method_decl:
+            MethodDecl {
+                ident,
+                unsafety,
+                generics,
+                inputs,
+                output,
+                ..
+            },
         ..
-    } = method_decl;
-
+    }: &MethodDeclMetadata,
+    mod_ident: &Ident,
+) -> TokenStream {
     let self_arg = &inputs.self_arg;
-    let arguments: Punctuated<_, Token![,]> = method_decl.inputs.args.iter().collect();
+    let arguments: Punctuated<_, Token![,]> = inputs.args.iter().collect();
 
     let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    let arguments_struct_ident = arguments_ident(ident);
-    let arguments_struct_fields: Punctuated<_, Token![,]> = method_decl
-        .inputs
-        .args
-        .iter()
-        .map(|argument| &argument.ident)
-        .collect();
+    let arguments_struct_fields: Punctuated<_, Token![,]> =
+        inputs.args.iter().map(|argument| &argument.ident).collect();
 
     quote! {
         #unsafety fn #ident#impl_generics(#self_arg, #arguments) #output #where_clause {

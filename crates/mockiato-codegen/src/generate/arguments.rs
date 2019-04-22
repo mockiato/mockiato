@@ -1,63 +1,56 @@
 use super::constant::{arguments_ident, arguments_lifetime, arguments_lifetime_as_generic_param};
 use super::debug_impl::{generate_debug_impl, DebugImplField};
-use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
-use super::visibility::raise_visibility_by_one_level;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
-use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::visit_mut::visit_type_mut;
-use syn::{Generics, Ident};
+use syn::{Generics, Visibility};
+use super::MethodDeclMetadata;
 
 pub(crate) struct GeneratedArguments {
     pub(crate) output: TokenStream,
     pub(crate) generics: Generics,
-    pub(crate) ident: Ident,
 }
 
 pub(crate) fn generate_arguments(
-    method_decl: &MethodDecl,
-    trait_decl: &TraitDecl,
+    method: &MethodDeclMetadata,
+    visibility: &Visibility,
 ) -> GeneratedArguments {
-    let arguments_ident = arguments_ident(&method_decl.ident);
+    let MethodDeclMetadata { method_decl, arguments_struct_ident, generics, .. } = method;
 
     let mut lifetime_rewriter =
         LifetimeRewriter::new(UniformLifetimeGenerator::new(arguments_lifetime()));
     let arguments_fields = generate_arguments_fields(&mut lifetime_rewriter, &method_decl.inputs);
 
-    let mut arguments_struct_generics =
-        get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
-
+    let mut generics = generics.clone();
     if lifetime_rewriter.generator.has_lifetimes() {
-        arguments_struct_generics
+        generics
             .params
             .push(arguments_lifetime_as_generic_param());
     }
 
     let debug_impl = generate_debug_impl(
         debug_impl_fields(method_decl),
-        &arguments_ident,
-        &arguments_struct_generics,
+        arguments_struct_ident,
+        &generics,
     );
-    let display_impl = generate_display_impl(method_decl, &arguments_struct_generics);
-    let (impl_generics, ty_generics, where_clause) = arguments_struct_generics.split_for_impl();
-    let visibility = raise_visibility_by_one_level(&trait_decl.visibility);
+    let display_impl = generate_display_impl(method_decl, &generics);
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     GeneratedArguments {
-        generics: arguments_struct_generics.clone(),
-        ident: arguments_ident.clone(),
+        generics: generics.clone(),
         output: quote! {
             #[doc(hidden)]
-            #visibility struct #arguments_ident #ty_generics #where_clause {
+            #visibility struct #arguments_struct_ident #ty_generics #where_clause {
                 #arguments_fields
             }
 
             #display_impl
             #debug_impl
 
-            impl #impl_generics mockiato::internal::Arguments for #arguments_ident #ty_generics #where_clause {}
+            impl #impl_generics mockiato::internal::Arguments for #arguments_struct_ident #ty_generics #where_clause {}
         },
     }
 }

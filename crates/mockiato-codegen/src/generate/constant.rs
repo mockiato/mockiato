@@ -56,12 +56,12 @@ pub(super) fn mod_ident(mock_ident: &Ident) -> Ident {
 }
 
 /// Generates the identifier for an expect method
-pub(super) fn expect_method_ident(method_decl: &MethodDecl) -> Ident {
+pub(super) fn expect_method_ident(method_decl_ident: &Ident) -> Ident {
     const IDENTIFIER_PREFIX: &str = "expect_";
 
     Ident::new(
-        &format!("{}{}", IDENTIFIER_PREFIX, method_decl.ident.to_string()),
-        method_decl.ident.span(),
+        &format!("{}{}", IDENTIFIER_PREFIX, method_decl_ident.to_string()),
+        method_decl_ident.span(),
     )
 }
 
