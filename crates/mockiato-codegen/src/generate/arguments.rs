@@ -5,7 +5,7 @@ use crate::parse::method_inputs::MethodInputs;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::visit_mut::visit_type_mut;
-use syn::Ident;
+use syn::{Ident, LitStr};
 
 pub(crate) struct GeneratedArguments {
     pub(crate) output: TokenStream,
@@ -26,6 +26,7 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> GeneratedArguments
         TokenStream::new()
     };
 
+    let display_impl = generate_display_impl(method_decl, &generics);
     let debug_impl = generate_debug_impl(method_decl, &generics);
 
     GeneratedArguments {
@@ -37,6 +38,7 @@ pub(crate) fn generate_arguments(method_decl: &MethodDecl) -> GeneratedArguments
                 #arguments_fields
             }
 
+            #display_impl
             #debug_impl
 
             impl #generics mockiato::internal::Arguments for #arguments_ident #generics {}
@@ -53,11 +55,11 @@ fn generics() -> TokenStream {
     }
 }
 
-/// Generates a `Debug` implementation for an arguments struct.
-fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> TokenStream {
+/// Generates a `Display` implementation for an arguments struct.
+fn generate_display_impl(method_decl: &MethodDecl, generics: &TokenStream) -> TokenStream {
     let arguments_ident = arguments_ident(&method_decl.ident);
 
-    let debug_fields: TokenStream = method_decl
+    let display_fields: TokenStream = method_decl
         .inputs
         .args
         .iter()
@@ -68,13 +70,44 @@ fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> Toke
         .collect();
 
     quote! {
-        impl #generics std::fmt::Debug for #arguments_ident #generics {
+        impl #generics std::fmt::Display for #arguments_ident #generics {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let arguments: Vec<String> = vec![
-                    #debug_fields
+                    #display_fields
                 ];
 
                 write!(f, "({})", arguments.join(", "))
+            }
+        }
+    }
+}
+
+/// Generates a `Debug` implementation for an arguments struct.
+fn generate_debug_impl(method_decl: &MethodDecl, generics: &TokenStream) -> TokenStream {
+    let arguments_ident = arguments_ident(&method_decl.ident);
+
+    let debug_fields: TokenStream = method_decl
+        .inputs
+        .args
+        .iter()
+        .map(|input| {
+            let ident = &input.ident;
+            let ident_as_str = LitStr::new(&format!("{}", ident), ident.span());
+            quote! {
+                .field(#ident_as_str, &mockiato::internal::MaybeDebugWrapper(&self.#ident))
+            }
+        })
+        .collect();
+
+    let arguments_ident_str_literal =
+        LitStr::new(&format!("{}", arguments_ident), arguments_ident.span());
+
+    quote! {
+        impl #generics std::fmt::Debug for #arguments_ident #generics {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.debug_struct(#arguments_ident_str_literal)
+                 #debug_fields
+                 .finish()
             }
         }
     }

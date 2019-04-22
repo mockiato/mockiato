@@ -150,11 +150,7 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CallError::NoMatching(arguments, method) => {
-                writeln!(
-                    f,
-                    "The call {}{:?} was not expected.",
-                    method.name, arguments
-                )?;
+                writeln!(f, "The call {}{} was not expected.", method.name, arguments)?;
 
                 if method.calls.is_empty() {
                     writeln!(f, "No calls to {} were expected.", method.name)
@@ -168,7 +164,7 @@ where
             }
             CallError::MoreThanOneMatching(arguments, calls) => writeln!(
                 f,
-                "\nThe call {:?} matches more than one expected call:\n{}",
+                "\nThe call {} matches more than one expected call:\n{}",
                 arguments,
                 DisplayCalls(calls)
             ),

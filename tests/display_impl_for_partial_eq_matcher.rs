@@ -22,7 +22,7 @@ fn partial_eq_matcher_has_debug_output() {
 
     assert_eq!(
         r#"Person { name: "Name", age: 30 }"#,
-        format!("{:?}", matcher)
+        format!("{}", matcher)
     );
 }
 
@@ -58,4 +58,3 @@ fn partial_eq_matcher_has_debug_output_for_reference_when_printed_as_expected_ca
         .times(2)
         .returns(String::from("Hello Name"));
 }
-
