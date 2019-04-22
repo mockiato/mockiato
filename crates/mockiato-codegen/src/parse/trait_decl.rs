@@ -55,12 +55,13 @@ fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
         .iter()
         .map(|generic_param| match generic_param {
             GenericParam::Type(_) => Ok(()),
-            generic_param => Err(Error::Diagnostic(Diagnostic::spanned(
-                generic_param.span_unstable(),
-                Level::Error,
-                "Only generic types are supported on traits",
-            ))),
+            GenericParam::Lifetime(_) => Err(create_spanned_error(generic_param.span_unstable(), "Lifetimes are not supported on mockable traits")),
+            GenericParam::Const(_) => Err(create_spanned_error(generic_param.span_unstable(), "Const generics are not supported on mockable traits")),
         });
 
     merge_results(results).map(|_| ())
+}
+
+fn create_spanned_error(span: Span, message: &str) -> Error {
+    Error::Diagnostic(Diagnostic::spanned(span, Level::Error, message))
 }

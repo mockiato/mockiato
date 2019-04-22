@@ -1,6 +1,9 @@
 use mockiato::mockable;
 
 #[mockable]
-trait Foo<'a> {}
+trait TraitWithLifetime<'a> {}
+
+#[mockable]
+trait TraitWithLifetimeAndGenericParam<'a, B> {}
 
 fn main() {}
