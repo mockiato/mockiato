@@ -1,6 +1,6 @@
 use self::arguments::generate_arguments;
 use self::arguments_matcher::generate_arguments_matcher;
-use self::constant::{mock_struct_ident, mod_ident};
+use self::constant::{mock_lifetime, mock_lifetime_as_generic_param, mock_struct_ident, mod_ident};
 use self::drop_impl::generate_drop_impl;
 use self::mock_struct::generate_mock_struct;
 use self::trait_impl::generate_trait_impl;
@@ -89,7 +89,7 @@ fn generics_for_trait_decl(
     static_lifetime_restriction: Option<WherePredicate>,
 ) -> Generics {
     let mut generics = trait_decl.generics.clone();
-    generics.params.push(parse_quote!('mock));
+    generics.params.push(mock_lifetime_as_generic_param());
 
     {
         let where_clause = generics.make_where_clause();
@@ -105,7 +105,8 @@ fn generics_for_trait_decl(
 }
 
 fn get_static_lifetime_restriction() -> WherePredicate {
-    parse_quote!('mock: 'static)
+    let mock_lifetime = mock_lifetime();
+    parse_quote!(#mock_lifetime: 'static)
 }
 
 fn generate_argument_structs(

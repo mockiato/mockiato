@@ -1,7 +1,7 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{
     arguments_matcher_ident, expect_method_calls_in_order_ident, expect_method_ident,
-    generic_parameter_ident, mock_lifetime,
+    generic_parameter_ident, mock_lifetime, mock_lifetime_as_generic_param,
 };
 use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
@@ -72,13 +72,14 @@ pub(crate) fn generate_mock_struct(
     ));
 
     let (impl_generics, ty_generics, where_clause) = parameters.generics.split_for_impl();
+    let mock_lifetime = mock_lifetime();
 
     quote! {
         #[derive(Debug, Clone)]
         #documentation
         #visibility struct #mock_struct_ident #ty_generics #where_clause {
             #method_fields
-            phantom_data: std::marker::PhantomData<&'mock ()>,
+            phantom_data: std::marker::PhantomData<&#mock_lifetime ()>,
         }
 
         impl #impl_generics #mock_struct_ident #ty_generics #where_clause {
@@ -115,13 +116,14 @@ fn generate_method_field(
     let mut return_type = return_type(method_decl);
     let mut generics =
         get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
-    generics.params.push(parse_quote!('mock));
+    generics.params.push(mock_lifetime_as_generic_param());
     let (_, ty_generics, _) = generics.split_for_impl();
+    let mock_lifetime = mock_lifetime();
 
     visit_type_mut(lifetime_rewriter, &mut return_type);
 
     quote! {
-        #ident: mockiato::internal::Method<'mock, self::#mod_ident::#arguments_matcher_ident #ty_generics, #return_type>,
+        #ident: mockiato::internal::Method<#mock_lifetime, self::#mod_ident::#arguments_matcher_ident #ty_generics, #return_type>,
     }
 }
 
@@ -205,11 +207,12 @@ panicking if the function was not called by the time the object goes out of scop
         get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
     arguments_struct_generics
         .params
-        .insert(0, parse_quote!('mock));
+        .insert(0, mock_lifetime_as_generic_param());
     let generics = argument_generics(&arguments_with_generics);
     let where_clause = where_clause(&arguments_with_generics);
 
     let (_, ty_generics, _) = arguments_struct_generics.split_for_impl();
+    let mock_lifetime = mock_lifetime();
 
     quote! {
         #must_use_annotation
@@ -218,7 +221,7 @@ panicking if the function was not called by the time the object goes out of scop
             &mut self,
             #arguments
         ) -> mockiato::internal::MethodCallBuilder<
-            'mock,
+            #mock_lifetime,
             '_,
             self::#mod_ident::#arguments_matcher_ident #ty_generics,
             #return_type
@@ -283,9 +286,10 @@ fn where_clause_predicate(
 ) -> WherePredicate {
     let mut ty = method_argument.ty.clone();
     let bound_lifetimes = rewrite_lifetimes_incrementally(&mut ty);
+    let mock_lifetime = mock_lifetime();
 
     parse_quote! {
-        #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'mock
+        #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + #mock_lifetime
     }
 }
 

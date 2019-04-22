@@ -1,8 +1,9 @@
+use super::util::lifetime_to_generic_param;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use heck::{CamelCase, SnakeCase};
 use proc_macro2::Span;
-use syn::{GenericParam, Ident, Lifetime, LifetimeDef, parse_quote};
+use syn::{parse_quote, GenericParam, Ident, Lifetime};
 
 /// Generates a lifetime for the given index
 pub(super) fn argument_lifetime(index: usize) -> Lifetime {
@@ -17,12 +18,16 @@ pub(super) fn arguments_lifetime() -> Lifetime {
 }
 
 pub(super) fn arguments_lifetime_as_generic_param() -> GenericParam {
-    GenericParam::Lifetime(LifetimeDef::new(arguments_lifetime()))
+    lifetime_to_generic_param(arguments_lifetime())
 }
 
 /// Generates a mock lifetime
 pub(super) fn mock_lifetime() -> Lifetime {
     parse_quote!('mock)
+}
+
+pub(super) fn mock_lifetime_as_generic_param() -> GenericParam {
+    lifetime_to_generic_param(mock_lifetime())
 }
 
 /// Generates the mock identifier

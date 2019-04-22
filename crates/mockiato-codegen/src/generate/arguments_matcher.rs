@@ -1,6 +1,7 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{
     arguments_lifetime, arguments_lifetime_as_generic_param, arguments_matcher_ident,
+    mock_lifetime, mock_lifetime_as_generic_param,
 };
 use super::debug_impl::{generate_debug_impl, DebugImplField};
 use super::generics::get_matching_generics_for_method_inputs;
@@ -13,7 +14,7 @@ use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::{parse_quote, Generics, Token};
+use syn::{Generics, Token};
 
 pub(crate) fn generate_arguments_matcher(
     method_decl: &MethodDecl,
@@ -24,7 +25,7 @@ pub(crate) fn generate_arguments_matcher(
 
     let mut generics =
         get_matching_generics_for_method_inputs(&method_decl.inputs, &trait_decl.generics);
-    generics.params.push(parse_quote!('mock));
+    generics.params.push(mock_lifetime_as_generic_param());
 
     let arguments_matcher_fields = arguments_matcher_fields(&method_decl.inputs);
     let (_, ty_generics, where_clause) = generics.split_for_impl();
@@ -39,11 +40,13 @@ pub(crate) fn generate_arguments_matcher(
         &generics,
     );
 
+    let mock_lifetime = mock_lifetime();
+
     quote! {
         #[doc(hidden)]
         #visibility struct #arguments_matcher_ident #ty_generics #where_clause {
             #arguments_matcher_fields
-            pub(super) phantom_data: std::marker::PhantomData<&'mock ()>,
+            pub(super) phantom_data: std::marker::PhantomData<&#mock_lifetime ()>,
         }
 
         #display_impl
@@ -139,6 +142,7 @@ fn generate_matches_argument_calls(args: &[MethodArg]) -> TokenStream {
 }
 
 fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
+    let mock_lifetime = mock_lifetime();
     method_inputs
         .args
         .iter()
@@ -148,7 +152,7 @@ fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
             let bound_lifetimes = rewrite_lifetimes_incrementally(&mut ty);
 
             quote! {
-                pub(super) #ident: std::boxed::Box<dyn #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'mock>,
+                pub(super) #ident: std::boxed::Box<dyn #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + #mock_lifetime>,
             }
         })
         .collect()
