@@ -2,6 +2,7 @@ use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{
     arguments_lifetime, arguments_lifetime_as_generic_param, arguments_matcher_ident,
 };
+use super::debug_impl::{generate_debug_impl, DebugImplField};
 use super::generics::get_matching_generics_for_method_inputs;
 use super::visibility::raise_visibility_by_one_level;
 use crate::generate::arguments::GeneratedArguments;
@@ -32,15 +33,21 @@ pub(crate) fn generate_arguments_matcher(
     let display_impl = generate_display_impl(method_decl, &generics);
     let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments, &generics);
 
+    let debug_impl = generate_debug_impl(
+        debug_impl_fields(method_decl),
+        &arguments_matcher_ident,
+        &generics,
+    );
+
     quote! {
         #[doc(hidden)]
-        #[derive(Debug)]
         #visibility struct #arguments_matcher_ident #ty_generics #where_clause {
             #arguments_matcher_fields
             pub(super) phantom_data: std::marker::PhantomData<&'mock ()>,
         }
 
         #display_impl
+        #debug_impl
         #arguments_matcher_impl
     }
 }
@@ -142,4 +149,13 @@ fn arguments_matcher_fields(method_inputs: &MethodInputs) -> TokenStream {
             }
         })
         .collect()
+}
+
+fn debug_impl_fields<'a>(
+    method_decl: &'a MethodDecl,
+) -> impl Iterator<Item = DebugImplField<'a>> + 'a {
+    method_decl.inputs.args.iter().map(|input| {
+        let ident = &input.ident;
+        (ident, quote! { self.#ident })
+    })
 }

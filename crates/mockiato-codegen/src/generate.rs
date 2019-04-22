@@ -14,6 +14,7 @@ pub(crate) mod arguments;
 pub(crate) mod arguments_matcher;
 mod bound_lifetimes;
 mod constant;
+mod debug_impl;
 mod drop_impl;
 mod generics;
 mod lifetime_rewriter;
