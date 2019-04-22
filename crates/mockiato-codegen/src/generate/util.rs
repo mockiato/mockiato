@@ -1,5 +1,5 @@
-use syn::{Ident, LitStr, parse_quote, Attribute};
 use proc_macro2::Span;
+use syn::{parse_quote, Attribute, Ident, LitStr};
 
 pub(super) fn doc_attribute(content: String) -> Attribute {
     let string_literal = LitStr::new(&content, Span::call_site());
