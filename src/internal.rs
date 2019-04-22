@@ -4,14 +4,13 @@
 //!
 
 pub use self::arguments::Arguments;
-pub use self::expected_calls::ExpectedCalls;
-pub use self::fmt::{MaybeDebugExtWrapper, MaybeDebugWrapper};
+pub use self::fmt::MaybeDebugWrapper;
 pub use self::matcher::{ArgumentMatcher, ArgumentsMatcher};
 pub use self::method::Method;
 pub use self::method_call::MethodCallBuilder;
 
 mod arguments;
-mod expected_calls;
+pub(crate) mod expected_calls;
 mod fmt;
 pub(crate) mod matcher;
 mod method;
