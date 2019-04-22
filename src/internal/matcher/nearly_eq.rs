@@ -1,8 +1,9 @@
 use crate::internal::fmt::MaybeDebug;
-use crate::internal::{ArgumentMatcher, MaybeDebugWrapper};
+use crate::internal::fmt::MaybeDebugWrapper;
+use crate::internal::ArgumentMatcher;
 use nameof::name_of;
 use nearly_eq::NearlyEq;
-use std::fmt::{self, Debug};
+use std::fmt::{self, Debug, Display};
 
 /// Creates a new `ArgumentMatcher` that matches against values using [`NearlyEq`]
 pub fn nearly_eq<T, U>(value: T) -> NearlyEqArgumentMatcher<T, U>
@@ -34,6 +35,21 @@ where
     accuracy: U,
 }
 
+impl<T, U> Display for NearlyEqArgumentMatcher<T, U>
+where
+    T: NearlyEq<T, U> + MaybeDebug,
+    U: MaybeDebug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{:?}, accuracy = {:?}",
+            MaybeDebugWrapper(&self.value),
+            MaybeDebugWrapper(&self.accuracy)
+        )
+    }
+}
+
 impl<T, U> Debug for NearlyEqArgumentMatcher<T, U>
 where
     T: NearlyEq<T, U> + MaybeDebug,
@@ -41,12 +57,9 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct(name_of!(type NearlyEqArgumentMatcher<T, U>))
+            .field(name_of!(value in Self), &MaybeDebugWrapper(&self.value))
             .field(
-                name_of!(value in NearlyEqArgumentMatcher<T, U>),
-                &MaybeDebugWrapper(&self.value),
-            )
-            .field(
-                name_of!(accuracy in NearlyEqArgumentMatcher<T, U>),
+                name_of!(accuracy in Self),
                 &MaybeDebugWrapper(&self.accuracy),
             )
             .finish()

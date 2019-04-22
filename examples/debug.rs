@@ -1,25 +1,38 @@
-use mockiato::mockable;
+use mockiato::{mockable, partial_eq};
 use std::fmt::Debug;
 
 #[mockable]
-trait Animal: Debug {
-    fn make_sound(&self);
+trait Greeter: Debug {
+    fn greet_person(&self, person: &Person) -> String;
+}
+
+#[derive(Debug, PartialEq)]
+struct Person {
+    name: String,
+    age: u8,
 }
 
 fn main() {
-    let mut animal = AnimalMock::new();
+    let person = Person {
+        name: String::from("Name"),
+        age: 30,
+    };
+    let mut greeter = GreeterMock::new();
 
-    animal.expect_make_sound().times(1);
-    animal.make_sound();
+    greeter
+        .expect_greet_person(partial_eq(&person))
+        .times(1)
+        .returns(String::from("Hello Name"));
+    greeter.greet_person(&person);
 
     // Prints something along the lines of:
-    // AnimalMock {
-    //     make_sound: Method {
-    //         name: "AnimalMock::make_sound",
+    // GreeterMock {
+    //     greet_person: Method {
+    //         name: "GreeterMock::greet_person",
     //         calls: [
     //             ...
     //         ]
     //     }
     // }
-    println!("{:#?}", animal);
+    println!("{:#?}", greeter);
 }

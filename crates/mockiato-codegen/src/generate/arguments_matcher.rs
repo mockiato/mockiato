@@ -1,12 +1,13 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{arguments_lifetime, arguments_matcher_ident};
 use crate::generate::arguments::GeneratedArguments;
+use crate::generate::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodInputs;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::{LitStr, Token};
+use syn::Token;
 
 pub(crate) fn generate_arguments_matcher(
     method_decl: &MethodDecl,
@@ -14,24 +15,25 @@ pub(crate) fn generate_arguments_matcher(
 ) -> TokenStream {
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
     let arguments_matcher_fields = arguments_matcher_fields(&method_decl.inputs);
-    let debug_impl = generate_debug_impl(method_decl);
+    let display_impl = generate_display_impl(method_decl);
     let arguments_matcher_impl = generate_arguments_matcher_impl(method_decl, arguments);
 
     quote! {
         #[doc(hidden)]
+        #[derive(Debug)]
         pub struct #arguments_matcher_ident<'mock> {
             #arguments_matcher_fields
             pub(super) phantom_data: std::marker::PhantomData<&'mock ()>,
         }
 
-        #debug_impl
+        #display_impl
         #arguments_matcher_impl
     }
 }
 
-/// Generates a `Debug` implementation for an argument matcher.
-fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
-    let method_name_str = LitStr::new(&method_decl.ident.to_string(), method_decl.ident.span());
+/// Generates a `Display` implementation for an argument matcher.
+fn generate_display_impl(method_decl: &MethodDecl) -> TokenStream {
+    let method_name_str = ident_to_string_literal(&method_decl.ident);
     let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
 
     let debug_fields: TokenStream = method_decl
@@ -40,12 +42,12 @@ fn generate_debug_impl(method_decl: &MethodDecl) -> TokenStream {
         .iter()
         .map(|input| {
             let ident = &input.ident;
-            quote! { format!("{:?}", &mockiato::internal::MaybeDebugWrapper(&self.#ident)), }
+            quote! { format!("{}", &self.#ident), }
         })
         .collect();
 
     quote! {
-        impl<'mock> std::fmt::Debug for #arguments_matcher_ident<'mock> {
+        impl<'mock> std::fmt::Display for #arguments_matcher_ident<'mock> {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let arguments: Vec<String> = vec![
                     #debug_fields
