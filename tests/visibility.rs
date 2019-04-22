@@ -1,4 +1,10 @@
+use mockiato::mockable;
 use mockiato::partial_eq;
+
+#[mockable]
+pub trait PubGreeter {
+    fn greet(&self);
+}
 
 mod greeter {
     use mockiato::mockable;
@@ -12,6 +18,15 @@ mod greeter {
     pub(super) trait Greeter {
         fn greet(&self, name: Name) -> String;
     }
+
+    pub(crate) mod submod {
+        use mockiato::mockable;
+
+        #[mockable]
+        pub(crate) trait PubCrateGreeter {
+            fn greet(&self);
+        }
+    }
 }
 
 fn main() {
@@ -19,4 +34,6 @@ fn main() {
 
     mock.expect_greet(partial_eq(greeter::Name { name: "Peter" }))
         .returns(String::from("Hello Peter"));
+
+    let _pub_crate_greeter = greeter::submod::PubCrateGreeterMock::new();
 }
