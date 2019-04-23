@@ -1,23 +1,24 @@
 use mockiato::{mockable, partial_eq};
-use std::fmt::{self, Debug, Display};
+use std::fmt::{self, Display};
 
 trait Foo {
     type Output;
 }
 
 #[mockable]
-trait Greeter<T, U, V>
+trait Greeter<T, V>
 where
     T: Display,
-    U: Debug,
     V: Foo,
     V::Output: Display,
 {
-    fn greet(&self, name: T) -> String;
+    fn generic_param_as_argument(&self, name: T) -> String;
 
-    fn greet_debug(&self, name: U) -> String;
+    fn associated_type(&self, name: V::Output) -> String;
 
-    fn greet_foo(&self, name: V::Output) -> String;
+    fn generic_param_wrapped_in_container(&self, names: Vec<T>) -> String;
+
+    fn generic_param_as_return_value(&self, name: String) -> T;
 }
 
 #[derive(PartialEq, Eq)]
@@ -46,13 +47,16 @@ impl Foo for String {
 
 #[test]
 fn trait_with_generic_type_argument_can_be_mocked() {
-    let mut mock: GreeterMock<Name, (), String> = GreeterMock::new();
+    let mut mock: GreeterMock<Name, String> = GreeterMock::new();
 
-    mock.expect_greet(partial_eq(Name::new("Foo")))
+    mock.expect_generic_param_as_argument(partial_eq(Name::new("Foo")))
         .times(2)
         .returns(String::from("Hello Foo"));
 
     for _ in 0..2 {
-        assert_eq!("Hello Foo", mock.greet(Name::new("Foo")));
+        assert_eq!(
+            "Hello Foo",
+            mock.generic_param_as_argument(Name::new("Foo"))
+        );
     }
 }
