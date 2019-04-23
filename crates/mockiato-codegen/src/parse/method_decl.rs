@@ -7,8 +7,8 @@ use proc_macro::{Diagnostic, Level, Span};
 use std::collections::HashSet;
 use syn::visit::{visit_type, Visit};
 use syn::{
-    Attribute, FnDecl, GenericParam, Generics, Ident, MethodSig, ReturnType, Token, TraitItem,
-    TraitItemMethod, Type, TypePath,
+    Attribute, FnDecl, GenericParam, Generics, Ident, MethodSig, Path, ReturnType, Token,
+    TraitItem, TraitItemMethod, Type, TypePath,
 };
 
 /// Holds everything required to generate a mock struct
@@ -67,7 +67,7 @@ impl MethodDecl {
             ..
         } = signature;
 
-        validate_usage_of_generic_types(&decl, &generic_types_on_trait)?;
+        validate_usage_of_generic_types(&decl, generic_types_on_trait)?;
 
         let FnDecl {
             generics,
@@ -119,16 +119,20 @@ fn validate_usage_of_generic_types(
     if references_to_generic_types.is_empty() {
         Ok(())
     } else {
-        Err(Error::merge(references_to_generic_types.into_iter().map(
-            |ty| {
-                Error::Diagnostic(Diagnostic::spanned(
-                    ty.span_unstable(),
-                    Level::Error,
-                    "References to generic types are not supported",
-                ))
-            },
-        )))
+        Err(Error::merge(
+            references_to_generic_types
+                .into_iter()
+                .map(error_for_reference_to_generic_type),
+        ))
     }
+}
+
+fn error_for_reference_to_generic_type(ty: &Type) -> Error {
+    Error::Diagnostic(Diagnostic::spanned(
+        ty.span_unstable(),
+        Level::Error,
+        "References to generic types are not supported",
+    ))
 }
 
 fn find_references_to_generic_types<'a>(
@@ -161,26 +165,36 @@ impl<'a> Visit<'a> for TypeVisitor<'a> {
     fn visit_type(&mut self, ty: &'a Type) {
         match (self.state, ty) {
             (TypeVisitorState::Initial, Type::Reference(_)) => {
-                self.state = TypeVisitorState::CheckingReferenceInner;
-
-                visit_type(self, ty);
-                if let TypeVisitorState::FoundReferenceToGenericType = self.state {
-                    self.references_to_generic_types.push(ty);
-                }
-
-                self.state = TypeVisitorState::Initial;
+                self.visit_reference_in_initial_state(ty);
             }
             (TypeVisitorState::CheckingReferenceInner, Type::Path(TypePath { path, .. })) => {
-                if self
-                    .generic_types_on_trait
-                    .contains(path.first_segment_as_ident().unwrap())
-                {
-                    self.state = TypeVisitorState::FoundReferenceToGenericType;
-                } else {
-                    visit_type(self, ty)
-                }
+                self.visit_path_when_checking_reference_inner(ty, path)
             }
             _ => visit_type(self, ty),
+        }
+    }
+}
+
+impl<'a> TypeVisitor<'a> {
+    fn visit_reference_in_initial_state(&mut self, ty: &'a Type) {
+        self.state = TypeVisitorState::CheckingReferenceInner;
+
+        visit_type(self, ty);
+        if let TypeVisitorState::FoundReferenceToGenericType = self.state {
+            self.references_to_generic_types.push(ty);
+        }
+
+        self.state = TypeVisitorState::Initial;
+    }
+
+    fn visit_path_when_checking_reference_inner(&mut self, ty: &'a Type, path: &Path) {
+        if self
+            .generic_types_on_trait
+            .contains(path.first_segment_as_ident().unwrap())
+        {
+            self.state = TypeVisitorState::FoundReferenceToGenericType;
+        } else {
+            visit_type(self, ty)
         }
     }
 }
