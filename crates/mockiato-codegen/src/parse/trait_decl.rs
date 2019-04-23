@@ -3,6 +3,7 @@ use crate::parse::method_decl::MethodDecl;
 use crate::spanned::SpannedUnstable;
 use crate::{merge_results, Error, Result};
 use proc_macro::{Diagnostic, Level, Span};
+use std::collections::HashSet;
 use syn::punctuated::Punctuated;
 use syn::{GenericParam, Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
 
@@ -35,7 +36,10 @@ impl TraitDecl {
         check_option_is_none(&auto_token, span, "Auto traits are not supported")?;
         validate_generic_type_parameters(&generics)?;
 
-        let methods = items.into_iter().map(MethodDecl::parse);
+        let generic_types = collect_generic_type_idents(&generics);
+        let methods = items
+            .into_iter()
+            .map(move |method| MethodDecl::parse(method, &generic_types));
 
         Ok(TraitDecl {
             visibility,
@@ -66,6 +70,17 @@ fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
         });
 
     merge_results(results).map(|_| ())
+}
+
+fn collect_generic_type_idents(generics: &Generics) -> HashSet<Ident> {
+    generics
+        .params
+        .iter()
+        .filter_map(|param| match param {
+            GenericParam::Type(param_ty) => Some(param_ty.ident.clone()),
+            _ => None,
+        })
+        .collect()
 }
 
 fn create_spanned_error(span: Span, message: &str) -> Error {

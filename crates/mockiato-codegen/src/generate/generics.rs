@@ -1,4 +1,5 @@
 use crate::parse::method_inputs::MethodInputs;
+use crate::syn_ext::PathExt;
 use std::collections::HashSet;
 use syn::visit::{visit_path, Visit};
 use syn::{
@@ -59,7 +60,7 @@ fn filter_where_clause(
 
 fn first_path_segment_ident_from_type(ty: &Type) -> Option<&'_ Ident> {
     match ty {
-        Type::Path(ty) if !ty.path.segments.is_empty() => Some(&ty.path.segments[0].ident),
+        Type::Path(ty) => ty.path.first_segment_as_ident(),
         _ => None,
     }
 }

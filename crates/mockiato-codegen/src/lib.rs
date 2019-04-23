@@ -30,6 +30,7 @@ mod mockable;
 mod parse;
 mod result;
 mod spanned;
+mod syn_ext;
 
 use self::mockable::Mockable;
 pub(crate) use self::result::*;
