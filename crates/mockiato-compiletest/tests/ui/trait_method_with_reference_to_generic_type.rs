@@ -17,6 +17,8 @@ where
     fn container_type_with_reference_to_u(&self, name: Vec<&U>) -> String;
 
     fn reference_to_associated_type(&self, name: &V::Output) -> String;
+
+    fn reference_in_return_type(&self) -> &V;
 }
 
 fn main() {}
