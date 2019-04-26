@@ -40,14 +40,11 @@ fn filter_where_clause(
 ) -> WhereClause {
     let predicates = predicates
         .iter()
-        .filter(|predicate| match predicate {
-            WherePredicate::Type(PredicateType { bounded_ty, .. }) => {
-                match first_path_segment_ident_from_type(bounded_ty) {
-                    Some(ident) => generic_type_params.contains(ident),
-                    None => false,
-                }
-            }
-            _ => true,
+        .filter(|predicate| {
+            filter_where_predicate_that_matches_generic_type_parameters(
+                predicate,
+                generic_type_params,
+            )
         })
         .cloned()
         .collect();
@@ -55,6 +52,21 @@ fn filter_where_clause(
     WhereClause {
         where_token: *where_token,
         predicates,
+    }
+}
+
+fn filter_where_predicate_that_matches_generic_type_parameters(
+    predicate: &WherePredicate,
+    generic_type_params: &HashSet<&Ident>,
+) -> bool {
+    match predicate {
+        WherePredicate::Type(PredicateType { bounded_ty, .. }) => {
+            match first_path_segment_ident_from_type(bounded_ty) {
+                Some(ident) => generic_type_params.contains(ident),
+                None => false,
+            }
+        }
+        _ => true,
     }
 }
 
