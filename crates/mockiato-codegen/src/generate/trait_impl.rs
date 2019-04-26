@@ -61,7 +61,7 @@ fn generate_method_impl(
         })
         .collect();
 
-    let output = quote! {
+    quote! {
         #unsafety fn #ident#impl_generics(#self_arg, #arguments) #output #where_clause {
             self.#ident.call_unwrap(
                 self::#mod_ident::#arguments_struct_ident {
@@ -70,7 +70,5 @@ fn generate_method_impl(
                 }
             )
         }
-    };
-
-    output
+    }
 }
