@@ -5,9 +5,12 @@ pub(super) fn raise_visibility_by_one_level(visibility: &Visibility) -> Visibili
     match visibility {
         Visibility::Inherited => parse_quote!(pub(super)),
         Visibility::Public(_) | Visibility::Crate(_) => visibility.clone(),
-        Visibility::Restricted(restricted) if has_leading_colon(restricted) => visibility.clone(),
         Visibility::Restricted(restricted) => {
-            Visibility::Restricted(raise_restricted_visibility_by_one_level(restricted))
+            Visibility::Restricted(if has_leading_colon(restricted) {
+                restricted.clone()
+            } else {
+                raise_restricted_visibility_by_one_level(restricted)
+            })
         }
     }
 }
