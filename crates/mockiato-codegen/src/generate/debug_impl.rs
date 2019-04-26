@@ -3,7 +3,10 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Generics, Ident};
 
-pub(crate) type DebugImplField<'a> = (&'a Ident, TokenStream);
+pub(crate) struct DebugImplField<'a> {
+    pub(crate) ident: &'a Ident,
+    pub(crate) expression: TokenStream,
+}
 
 pub(crate) fn generate_debug_impl<'a>(
     fields: impl Iterator<Item = DebugImplField<'a>>,
@@ -14,9 +17,9 @@ pub(crate) fn generate_debug_impl<'a>(
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     let debug_fields: TokenStream = fields
-        .map(|(ident, debug_expr)| {
+        .map(|DebugImplField { ident, expression }| {
             let ident_as_str = ident_to_string_literal(ident);
-            quote! { .field(#ident_as_str, &#debug_expr) }
+            quote! { .field(#ident_as_str, &#expression) }
         })
         .collect();
 

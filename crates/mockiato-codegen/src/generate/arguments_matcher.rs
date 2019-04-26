@@ -171,6 +171,9 @@ fn debug_impl_fields<'a>(
 ) -> impl Iterator<Item = DebugImplField<'a>> + 'a {
     method_decl.inputs.args.iter().map(|input| {
         let ident = &input.ident;
-        (ident, quote! { self.#ident })
+        DebugImplField {
+            ident,
+            expression: quote! { self.#ident },
+        }
     })
 }

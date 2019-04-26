@@ -83,10 +83,10 @@ fn debug_impl_fields<'a>(
 ) -> impl Iterator<Item = DebugImplField<'a>> + 'a {
     method_decl.inputs.args.iter().map(|input| {
         let ident = &input.ident;
-        (
+        DebugImplField {
             ident,
-            quote! { mockiato::internal::MaybeDebugWrapper(&self.#ident) },
-        )
+            expression: quote! { mockiato::internal::MaybeDebugWrapper(&self.#ident) }
+        }
     })
 }
 
