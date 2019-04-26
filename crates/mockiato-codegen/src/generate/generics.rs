@@ -94,12 +94,14 @@ impl<'a> Visit<'a> for FindOverlappingGenericTypeIdents<'a> {
             let first_segment = &path.segments[0];
             let first_segment_ident = &first_segment.ident;
 
-            if self
+            let first_segment_is_generic_type = self
                 .generic_type_idents_filter
                 .get(first_segment_ident)
-                .is_some()
-                && first_segment.arguments.is_empty()
-            {
+                .is_some();
+
+            let first_segment_has_no_arguments = first_segment.arguments.is_empty();
+
+            if first_segment_is_generic_type && first_segment_has_no_arguments {
                 self.overlapping_generic_type_idents
                     .insert(first_segment_ident);
             }
