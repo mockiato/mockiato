@@ -85,7 +85,7 @@ fn debug_impl_fields<'a>(
         let ident = &input.ident;
         DebugImplField {
             ident,
-            expression: quote! { mockiato::internal::MaybeDebugWrapper(&self.#ident) }
+            expression: quote! { mockiato::internal::MaybeDebugWrapper(&self.#ident) },
         }
     })
 }
