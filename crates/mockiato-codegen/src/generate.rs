@@ -131,14 +131,11 @@ fn generics_for_trait_decl(
     let mut generics = trait_decl.generics.clone();
     generics.params.push(mock_lifetime_as_generic_param());
 
-    {
-        let where_clause = generics.make_where_clause();
-
-        if let Some(static_lifetime_restriction) = static_lifetime_restriction {
-            where_clause
-                .predicates
-                .push(static_lifetime_restriction.clone());
-        }
+    if let Some(static_lifetime_restriction) = static_lifetime_restriction {
+        generics
+            .make_where_clause()
+            .predicates
+            .push(static_lifetime_restriction);
     }
 
     generics
