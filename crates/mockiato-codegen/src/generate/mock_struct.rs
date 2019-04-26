@@ -1,9 +1,12 @@
 use super::bound_lifetimes::rewrite_lifetimes_incrementally;
 use super::constant::{
     arguments_matcher_ident, expect_method_calls_in_order_ident, expect_method_ident,
-    generic_parameter_ident, mock_lifetime,
+    generic_parameter_ident, mock_lifetime, mock_lifetime_as_generic_param,
 };
+use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
+use super::GenerateMockParameters;
+use super::MethodDeclMetadata;
 use crate::generate::util::doc_attribute;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
@@ -11,53 +14,34 @@ use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::token::Paren;
 use syn::visit_mut::visit_type_mut;
-use syn::{Ident, LitStr, ReturnType, Token, Type, TypeTuple};
+use syn::{parse_quote, GenericParam, Ident, LitStr, Token, Type, TypeParam, WherePredicate};
 
 type ArgumentsWithGenerics<'a> = &'a [(Ident, &'a MethodArg)];
 
-#[cfg_attr(feature = "debug-impls", derive(Debug))]
-pub(crate) struct GenerateMockStructOptions<'a> {
-    pub(crate) mock_struct_ident: &'a Ident,
-    pub(crate) mod_ident: &'a Ident,
-    pub(crate) static_lifetime_restriction: Option<&'a TokenStream>,
-}
-
 pub(crate) fn generate_mock_struct(
     trait_decl: &TraitDecl,
-    options: GenerateMockStructOptions<'_>,
+    parameters: &'_ GenerateMockParameters,
 ) -> TokenStream {
-    let mock_struct_ident = &options.mock_struct_ident;
-    let static_lifetime_restriction = &options.static_lifetime_restriction;
-    let mut lifetime_rewriter =
-        LifetimeRewriter::new(UniformLifetimeGenerator::new(mock_lifetime()));
+    let mock_struct_ident = &parameters.mock_struct_ident;
+    let mod_ident = &parameters.mod_ident;
 
-    let method_fields: TokenStream = trait_decl
+    let method_fields: TokenStream = parameters
         .methods
         .iter()
-        .map(|method_decl| {
-            generate_method_field(method_decl, options.mod_ident, &mut lifetime_rewriter)
-        })
+        .map(|method| generate_method_field(method, mod_ident))
         .collect();
 
-    let initializer_fields: TokenStream = trait_decl
+    let initializer_fields: TokenStream = parameters
         .methods
         .iter()
-        .map(|method_decl| generate_initializer_field(&method_decl.ident, mock_struct_ident))
+        .map(|method| generate_initializer_field(method, mock_struct_ident))
         .collect();
 
-    let expect_methods: TokenStream = trait_decl
+    let expect_methods: TokenStream = parameters
         .methods
         .iter()
-        .map(|method_decl| {
-            generate_expect_method(
-                trait_decl,
-                method_decl,
-                options.mod_ident,
-                &mut lifetime_rewriter,
-            )
-        })
+        .map(|method| generate_expect_method(method, trait_decl, mod_ident))
         .collect();
 
     let expect_method_call_in_order_methods: TokenStream = trait_decl
@@ -78,15 +62,18 @@ pub(crate) fn generate_mock_struct(
         trait_decl.ident, GITHUB_REPOSITORY
     ));
 
+    let (impl_generics, ty_generics, where_clause) = parameters.generics.split_for_impl();
+    let mock_lifetime = mock_lifetime();
+
     quote! {
         #[derive(Debug, Clone)]
         #documentation
-        #visibility struct #mock_struct_ident<'mock> #static_lifetime_restriction {
+        #visibility struct #mock_struct_ident #ty_generics #where_clause {
             #method_fields
-            phantom_data: std::marker::PhantomData<&'mock ()>,
+            phantom_data: std::marker::PhantomData<&#mock_lifetime ()>,
         }
 
-        impl<'mock> #mock_struct_ident<'mock> #static_lifetime_restriction {
+        impl #impl_generics #mock_struct_ident #ty_generics #where_clause {
             /// Creates a new mock with no expectations.
             #visibility fn new() -> Self {
                 Self {
@@ -100,7 +87,7 @@ pub(crate) fn generate_mock_struct(
             #expect_method_call_in_order_methods
         }
 
-        impl<'mock> Default for #mock_struct_ident<'mock> #static_lifetime_restriction {
+        impl #impl_generics Default for #mock_struct_ident #ty_generics #where_clause {
             /// Creates a new mock with no expectations.
             fn default() -> Self {
                 Self::new()
@@ -110,34 +97,33 @@ pub(crate) fn generate_mock_struct(
 }
 
 fn generate_method_field(
-    method_decl: &MethodDecl,
+    MethodDeclMetadata {
+        method_decl: MethodDecl { ident, .. },
+        arguments_matcher_struct_ident,
+        generics,
+        return_type,
+        ..
+    }: &MethodDeclMetadata,
     mod_ident: &Ident,
-    lifetime_rewriter: &mut LifetimeRewriter<UniformLifetimeGenerator>,
 ) -> TokenStream {
-    let ident = &method_decl.ident;
-    let arguments_matcher_ident = arguments_matcher_ident(ident);
-    let mut return_type = return_type(method_decl);
+    let return_type = rewrite_lifetimes_to_mock_lifetime(return_type);
 
-    visit_type_mut(lifetime_rewriter, &mut return_type);
+    let mut generics = generics.clone();
+    generics.params.push(mock_lifetime_as_generic_param());
+    let (_, ty_generics, _) = generics.split_for_impl();
+
+    let mock_lifetime = mock_lifetime();
 
     quote! {
-        #ident: mockiato::internal::Method<'mock, self::#mod_ident::#arguments_matcher_ident<'mock>, #return_type>,
+        #ident: mockiato::internal::Method<#mock_lifetime, self::#mod_ident::#arguments_matcher_struct_ident #ty_generics, #return_type>,
     }
 }
 
-fn return_type(method_decl: &MethodDecl) -> Type {
-    match &method_decl.output {
-        ReturnType::Default => Type::Tuple(TypeTuple {
-            paren_token: Paren {
-                span: Span::call_site(),
-            },
-            elems: Punctuated::new(),
-        }),
-        ReturnType::Type(_, ty) => ty.as_ref().clone(),
-    }
-}
-
-fn generate_initializer_field(method_ident: &Ident, mock_struct_ident: &Ident) -> TokenStream {
+fn generate_initializer_field(
+    method: &MethodDeclMetadata,
+    mock_struct_ident: &Ident,
+) -> TokenStream {
+    let method_ident = &method.method_decl.ident;
     let name = LitStr::new(
         &format!(
             "{}::{}",
@@ -153,34 +139,40 @@ fn generate_initializer_field(method_ident: &Ident, mock_struct_ident: &Ident) -
 }
 
 fn generate_expect_method(
-    trait_decl: &TraitDecl,
-    method_decl: &MethodDecl,
+    MethodDeclMetadata {
+        return_type,
+        method_decl:
+            MethodDecl {
+                ident: method_ident,
+                inputs,
+                ..
+            },
+        ..
+    }: &MethodDeclMetadata,
+    TraitDecl {
+        visibility,
+        generics,
+        ident: trait_ident,
+        ..
+    }: &TraitDecl,
     mod_ident: &Ident,
-    lifetime_rewriter: &mut LifetimeRewriter<UniformLifetimeGenerator>,
 ) -> TokenStream {
-    let method_ident = &method_decl.ident;
-    let visibility = &trait_decl.visibility;
-    let expect_method_ident = expect_method_ident(method_decl);
+    let expect_method_ident = expect_method_ident(method_ident);
 
-    let arguments_with_generics: Vec<_> = method_decl
-        .inputs
+    let arguments_with_generics: Vec<_> = inputs
         .args
         .iter()
         .enumerate()
         .map(|(index, argument)| (generic_parameter_ident(index), argument))
         .collect();
 
-    let generics = generics(&arguments_with_generics);
     let arguments: TokenStream = arguments_with_generics
         .iter()
         .map(generate_argument)
         .collect();
 
-    let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
-    let mut return_type = return_type(method_decl);
-    visit_type_mut(lifetime_rewriter, &mut return_type);
-
-    let where_clause = where_clause(&arguments_with_generics);
+    let arguments_matcher_ident = arguments_matcher_ident(method_ident);
+    let return_type = rewrite_lifetimes_to_mock_lifetime(return_type);
 
     let expected_parameters: TokenStream = arguments_with_generics
         .iter()
@@ -188,7 +180,7 @@ fn generate_expect_method(
         .map(|argument_ident| quote! { #argument_ident: Box::new(#argument_ident), })
         .collect();
 
-    let requires_must_use_annotation = !is_empty_return_value(&method_decl.output);
+    let requires_must_use_annotation = !is_empty_return_value(&return_type);
 
     let must_use_annotation = if requires_must_use_annotation {
         quote! { #[must_use] }
@@ -201,21 +193,31 @@ fn generate_expect_method(
 panicking if the function was not called by the time the object goes out of scope.
 
 [`{0}::{1}`]: ./trait.{0}.html#tymethod.{1}",
-        trait_decl.ident, method_decl.ident,
+        trait_ident, method_ident,
     ));
+
+    let mut arguments_struct_generics = get_matching_generics_for_method_inputs(inputs, generics);
+    arguments_struct_generics
+        .params
+        .push(mock_lifetime_as_generic_param());
+    let generics = argument_generics(&arguments_with_generics);
+    let where_clause = where_clause(&arguments_with_generics);
+
+    let (_, ty_generics, _) = arguments_struct_generics.split_for_impl();
+    let mock_lifetime = mock_lifetime();
 
     quote! {
         #must_use_annotation
         #documentation
-        #visibility fn #expect_method_ident#generics(
+        #visibility fn #expect_method_ident <#generics> (
             &mut self,
             #arguments
         ) -> mockiato::internal::MethodCallBuilder<
-            'mock,
+            #mock_lifetime,
             '_,
-            self::#mod_ident::#arguments_matcher_ident<'mock>,
+            self::#mod_ident::#arguments_matcher_ident #ty_generics,
             #return_type
-        > #where_clause
+        > where #where_clause
         {
             self.#method_ident.add_expected_call(
                 self::#mod_ident::#arguments_matcher_ident {
@@ -251,53 +253,42 @@ fn generate_expect_method_calls_in_order_method(
     }
 }
 
-fn is_empty_return_value(return_value: &ReturnType) -> bool {
-    match return_value {
-        ReturnType::Default => true,
-        ReturnType::Type(_, ty) => match ty {
-            box Type::Tuple(tuple) => tuple.elems.is_empty(),
-            _ => false,
-        },
+fn is_empty_return_value(return_type: &Type) -> bool {
+    match return_type {
+        Type::Tuple(tuple) => tuple.elems.is_empty(),
+        _ => false,
     }
 }
 
-fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
-    if arguments.is_empty() {
-        TokenStream::new()
-    } else {
-        let predicates: Punctuated<_, Token![,]> = arguments
-            .iter()
-            .map(|(generic_type_ident, method_argument)| {
-                where_clause_predicate(generic_type_ident, method_argument)
-            })
-            .collect();
-
-        quote! {
-            where #predicates
-        }
-    }
+fn where_clause(arguments: ArgumentsWithGenerics<'_>) -> Punctuated<WherePredicate, Token![,]> {
+    arguments
+        .iter()
+        .map(|(generic_type_ident, method_argument)| {
+            where_clause_predicate(generic_type_ident, method_argument)
+        })
+        .collect()
 }
 
-fn where_clause_predicate(generic_type_ident: &Ident, method_argument: &MethodArg) -> TokenStream {
+fn where_clause_predicate(
+    generic_type_ident: &Ident,
+    method_argument: &MethodArg,
+) -> WherePredicate {
     let mut ty = method_argument.ty.clone();
     let bound_lifetimes = rewrite_lifetimes_incrementally(&mut ty);
+    let mock_lifetime = mock_lifetime();
 
-    quote! {
-        #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + 'mock
+    parse_quote! {
+        #generic_type_ident: #bound_lifetimes mockiato::internal::ArgumentMatcher<#ty> + #mock_lifetime
     }
 }
 
-fn generics(arguments: ArgumentsWithGenerics<'_>) -> TokenStream {
-    if arguments.is_empty() {
-        TokenStream::new()
-    } else {
-        let parameters: Punctuated<_, Token![,]> = arguments
-            .iter()
-            .map(|(generic_type_ident, _)| generic_type_ident)
-            .collect();
-
-        quote! { <#parameters> }
-    }
+fn argument_generics(arguments: ArgumentsWithGenerics<'_>) -> Punctuated<GenericParam, Token![,]> {
+    arguments
+        .iter()
+        .map(|(generic_type_ident, _)| {
+            GenericParam::Type(TypeParam::from(generic_type_ident.clone()))
+        })
+        .collect()
 }
 
 fn generate_argument((generic_type_ident, method_argument): &(Ident, &MethodArg)) -> TokenStream {
@@ -306,4 +297,12 @@ fn generate_argument((generic_type_ident, method_argument): &(Ident, &MethodArg)
     quote! {
         #argument_ident: #generic_type_ident,
     }
+}
+
+fn rewrite_lifetimes_to_mock_lifetime(ty: &Type) -> Type {
+    let mut ty = ty.clone();
+    let mut lifetime_rewriter =
+        LifetimeRewriter::new(UniformLifetimeGenerator::new(mock_lifetime()));
+    visit_type_mut(&mut lifetime_rewriter, &mut ty);
+    ty
 }

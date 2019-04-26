@@ -55,10 +55,6 @@ impl UniformLifetimeGenerator {
             has_lifetimes: false,
         }
     }
-
-    pub(crate) fn has_lifetimes(&self) -> bool {
-        self.has_lifetimes
-    }
 }
 
 impl LifetimeGenerator for UniformLifetimeGenerator {

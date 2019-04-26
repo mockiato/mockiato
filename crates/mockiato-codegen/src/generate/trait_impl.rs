@@ -1,4 +1,5 @@
-use super::constant::arguments_ident;
+use super::GenerateMockParameters;
+use super::MethodDeclMetadata;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
@@ -6,59 +7,68 @@ use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::{Ident, Token};
 
-#[cfg_attr(feature = "debug-impls", derive(Debug))]
-pub(crate) struct GenerateTraitImplOptions<'a> {
-    pub(crate) mock_struct_ident: &'a Ident,
-    pub(crate) mod_ident: &'a Ident,
-}
-
 pub(crate) fn generate_trait_impl(
     trait_decl: &TraitDecl,
-    options: GenerateTraitImplOptions<'_>,
+    parameters: &'_ GenerateMockParameters,
 ) -> TokenStream {
     let trait_ident = &trait_decl.ident;
     let unsafety = &trait_decl.unsafety;
-    let mock_struct_ident = &options.mock_struct_ident;
+    let mock_struct_ident = &parameters.mock_struct_ident;
 
-    let method_impls: TokenStream = trait_decl
+    let method_impls: TokenStream = parameters
         .methods
         .iter()
-        .map(|method_decl| generate_method_impl(method_decl, options.mod_ident))
+        .map(|method| generate_method_impl(method, &parameters.mod_ident))
         .collect();
 
+    let (impl_generics, ty_generics, where_clause) = parameters.generics.split_for_impl();
+    let (_, trait_ty_generics, _) = trait_decl.generics.split_for_impl();
+
     quote! {
-        #unsafety impl<'mock> #trait_ident for #mock_struct_ident<'mock> {
+        #unsafety impl #impl_generics #trait_ident #trait_ty_generics for #mock_struct_ident #ty_generics #where_clause {
             #method_impls
         }
     }
 }
 
-fn generate_method_impl(method_decl: &MethodDecl, mod_ident: &Ident) -> TokenStream {
-    let MethodDecl {
-        ident,
-        unsafety,
-        generics,
-        inputs,
-        output,
+fn generate_method_impl(
+    MethodDeclMetadata {
+        arguments_struct_ident,
+        method_decl:
+            MethodDecl {
+                ident,
+                unsafety,
+                generics,
+                inputs,
+                output,
+                ..
+            },
         ..
-    } = method_decl;
-
+    }: &MethodDeclMetadata,
+    mod_ident: &Ident,
+) -> TokenStream {
     let self_arg = &inputs.self_arg;
-    let arguments: Punctuated<_, Token![,]> = method_decl.inputs.args.iter().collect();
+    let arguments: Punctuated<_, Token![,]> = inputs.args.iter().collect();
 
-    let where_clause = &generics.where_clause;
+    let (impl_generics, _, where_clause) = generics.split_for_impl();
 
-    let arguments_struct_ident = arguments_ident(ident);
-    let arguments_struct_fields: Punctuated<_, Token![,]> = method_decl
-        .inputs
+    let arguments_struct_fields: TokenStream = inputs
         .args
         .iter()
-        .map(|argument| &argument.ident)
+        .map(|argument| {
+            let ident = &argument.ident;
+            quote! { #ident, }
+        })
         .collect();
 
     quote! {
-        #unsafety fn #ident#generics(#self_arg, #arguments) #output #where_clause {
-            self.#ident.call_unwrap(self::#mod_ident::#arguments_struct_ident { #arguments_struct_fields })
+        #unsafety fn #ident#impl_generics(#self_arg, #arguments) #output #where_clause {
+            self.#ident.call_unwrap(
+                self::#mod_ident::#arguments_struct_ident {
+                    #arguments_struct_fields
+                    phantom_data: std::marker::PhantomData,
+                }
+            )
         }
     }
 }

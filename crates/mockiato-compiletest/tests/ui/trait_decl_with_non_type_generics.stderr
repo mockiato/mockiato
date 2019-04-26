@@ -1,0 +1,26 @@
+error: Lifetimes are not supported on mockable traits
+ --> $DIR/trait_decl_with_non_type_generics.rs:4:25
+  |
+4 | trait TraitWithLifetime<'a> {}
+  |                         ^^
+  |
+note: Required for mockable traits
+ --> $DIR/trait_decl_with_non_type_generics.rs:3:1
+  |
+3 | #[mockable]
+  | ^^^^^^^^^^^
+
+error: Lifetimes are not supported on mockable traits
+ --> $DIR/trait_decl_with_non_type_generics.rs:7:40
+  |
+7 | trait TraitWithLifetimeAndGenericParam<'a, B> {}
+  |                                        ^^
+  |
+note: Required for mockable traits
+ --> $DIR/trait_decl_with_non_type_generics.rs:6:1
+  |
+6 | #[mockable]
+  | ^^^^^^^^^^^
+
+error: aborting due to 2 previous errors
+

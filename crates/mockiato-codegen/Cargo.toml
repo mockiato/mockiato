@@ -22,7 +22,7 @@ heck = "0.3"
 
 [dependencies.syn]
 version = "0.15.32"
-features = ["full", "visit-mut"]
+features = ["full", "visit", "visit-mut"]
 
 [dependencies.proc-macro2]
 version = "0.4.27"

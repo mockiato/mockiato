@@ -1,8 +1,9 @@
+use super::util::lifetime_to_generic_param;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use heck::{CamelCase, SnakeCase};
 use proc_macro2::Span;
-use syn::{Ident, Lifetime};
+use syn::{parse_quote, GenericParam, Ident, Lifetime};
 
 /// Generates a lifetime for the given index
 pub(super) fn argument_lifetime(index: usize) -> Lifetime {
@@ -13,16 +14,20 @@ pub(super) fn argument_lifetime(index: usize) -> Lifetime {
 
 /// Generates a generic lifetime
 pub(super) fn arguments_lifetime() -> Lifetime {
-    const LIFETIME_NAME: &str = "'__mockiato_args";
+    parse_quote!('__mockiato_args)
+}
 
-    Lifetime::new(LIFETIME_NAME, Span::call_site())
+pub(super) fn arguments_lifetime_as_generic_param() -> GenericParam {
+    lifetime_to_generic_param(arguments_lifetime())
 }
 
 /// Generates a mock lifetime
 pub(super) fn mock_lifetime() -> Lifetime {
-    const LIFETIME_NAME: &str = "'mock";
+    parse_quote!('mock)
+}
 
-    Lifetime::new(LIFETIME_NAME, Span::call_site())
+pub(super) fn mock_lifetime_as_generic_param() -> GenericParam {
+    lifetime_to_generic_param(mock_lifetime())
 }
 
 /// Generates the mock identifier
@@ -51,12 +56,12 @@ pub(super) fn mod_ident(mock_ident: &Ident) -> Ident {
 }
 
 /// Generates the identifier for an expect method
-pub(super) fn expect_method_ident(method_decl: &MethodDecl) -> Ident {
+pub(super) fn expect_method_ident(method_decl_ident: &Ident) -> Ident {
     const IDENTIFIER_PREFIX: &str = "expect_";
 
     Ident::new(
-        &format!("{}{}", IDENTIFIER_PREFIX, method_decl.ident.to_string()),
-        method_decl.ident.span(),
+        &format!("{}{}", IDENTIFIER_PREFIX, method_decl_ident.to_string()),
+        method_decl_ident.span(),
     )
 }
 
