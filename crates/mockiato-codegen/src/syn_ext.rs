@@ -6,10 +6,6 @@ pub(crate) trait PathExt {
 
 impl PathExt for Path {
     fn first_segment_as_ident(&self) -> Option<&Ident> {
-        if self.segments.is_empty() {
-            None
-        } else {
-            Some(&self.segments[0].ident)
-        }
+        Some(&self.segments.iter().nth(0)?.ident)
     }
 }
