@@ -48,12 +48,13 @@ impl Foo for String {
 #[test]
 fn trait_with_generic_type_argument_can_be_mocked() {
     let mut mock: GreeterMock<Name, String> = GreeterMock::new();
+    let expected_number_of_calls = 2;
 
     mock.expect_generic_param_as_argument(partial_eq(Name::new("Foo")))
-        .times(2)
+        .times(expected_number_of_calls)
         .returns(String::from("Hello Foo"));
 
-    for _ in 0..2 {
+    for _ in 0..expected_number_of_calls {
         assert_eq!(
             "Hello Foo",
             mock.generic_param_as_argument(Name::new("Foo"))
