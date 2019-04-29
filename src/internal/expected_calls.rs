@@ -1,6 +1,6 @@
 use crate::internal::fmt::DisplayTimes;
 use std::fmt::{self, Display};
-use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive, RangeFull};
+use std::ops::{Range, RangeFrom, RangeFull, RangeInclusive, RangeToInclusive};
 
 /// Defines how often a method call is expected
 /// to be called.
