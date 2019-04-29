@@ -43,6 +43,25 @@ where
     }
 
     /// Defines how often this method should be called.
+    ///
+    /// # Accepted values
+    /// | Description           | Type                 | Example |
+    /// | --------------------- | -------------------- | ------- |
+    /// | Exact amount of times | [`u64`]              | `3`     |
+    /// | Any amount of times   | [`RangeFull`]        | `..`    |
+    /// | At least              | [`RangeFrom`]        | `3..`   |
+    /// | At most (exclusive)   | [`RangeTo`]          | `..3`   |
+    /// | At most (inclusive)   | [`RangeToInclusive`] | `..3`   |
+    /// | Between (exclusive)   | [`Range`]            | `3..4`  |
+    /// | Between (inclusive)   | [`RangeInclusive`]   | `3..=4` |
+    ///
+    /// [`u64`]: u64
+    /// [`RangeFull`]: std::ops::RangeFull
+    /// [`RangeFrom`]: std::ops::RangeFrom
+    /// [`RangeTo`]: std::ops::RangeTo
+    /// [`RangeToInclusive`]: std::ops::RangeToInclusive
+    /// [`Range`]: std::ops::Range
+    /// [`RangeInclusive`]: std::ops::RangeInclusive
     pub fn times<E>(&mut self, expected_calls: E) -> &mut Self
     where
         E: Into<ExpectedCalls>,
