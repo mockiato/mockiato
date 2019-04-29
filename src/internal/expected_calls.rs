@@ -1,6 +1,6 @@
 use crate::internal::fmt::DisplayTimes;
 use std::fmt::{self, Display};
-use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive};
+use std::ops::{Range, RangeFrom, RangeInclusive, RangeToInclusive, RangeFull};
 
 /// Defines how often a method call is expected
 /// to be called.
@@ -14,6 +14,7 @@ enum ExpectedCallsKind {
     AtMost(u64),
     Between { start: u64, end: u64 },
     BetweenInclusive { start: u64, end: u64 },
+    Any,
 }
 
 impl ExpectedCalls {
@@ -24,6 +25,7 @@ impl ExpectedCalls {
             ExpectedCallsKind::AtMost(max) => value <= max,
             ExpectedCallsKind::Between { start, end } => value >= start && value < end,
             ExpectedCallsKind::BetweenInclusive { start, end } => value >= start && value <= end,
+            ExpectedCallsKind::Any => true,
         }
     }
 }
@@ -69,6 +71,12 @@ impl From<RangeToInclusive<u64>> for ExpectedCalls {
     }
 }
 
+impl From<RangeFull> for ExpectedCalls {
+    fn from(_: RangeFull) -> ExpectedCalls {
+        ExpectedCalls(ExpectedCallsKind::Any)
+    }
+}
+
 impl Display for ExpectedCalls {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
@@ -84,6 +92,7 @@ impl Display for ExpectedCalls {
                 write!(f, "between {} and {} times (inclusive)", start, end)
             }
             ExpectedCallsKind::Exact(value) => write!(f, "exactly {}", DisplayTimes(value)),
+            ExpectedCallsKind::Any => write!(f, "any amount of times"),
         }
     }
 }
@@ -299,6 +308,14 @@ mod test {
     }
 
     #[test]
+    fn can_be_converted_from_full_range() {
+        assert_eq!(
+            ExpectedCalls(ExpectedCallsKind::Any),
+            ExpectedCalls::from(..)
+        )
+    }
+
+    #[test]
     fn at_least_is_displayed_correctly() {
         let formatted = format!("{}", ExpectedCalls::from(5..));
 
@@ -308,6 +325,13 @@ mod test {
     #[test]
     fn at_least_zero_is_displayed_correctly() {
         let formatted = format!("{}", ExpectedCalls::from(0..));
+
+        assert_eq!("any amount of times", formatted);
+    }
+
+    #[test]
+    fn any_is_displayed_correctly() {
+        let formatted = format!("{}", ExpectedCalls::from(..));
 
         assert_eq!("any amount of times", formatted);
     }
