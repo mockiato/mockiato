@@ -21,5 +21,6 @@
 ## 0.4.2
 - Fix error with `parse_quote!` macro when patch version of syn is too low in consumers `Cargo.lock`. 
 
-## Unreleased
+## 0.5.0
+- Generic type parameters on traits are now supported. Parameters with references that contain generic type parameters are explicitly disallowed.
 - Full ranges (`..`) can be passed to `.times()`
