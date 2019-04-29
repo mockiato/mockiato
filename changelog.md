@@ -20,3 +20,6 @@
 
 ## 0.4.2
 - Fix error with `parse_quote!` macro when patch version of syn is too low in consumers `Cargo.lock`. 
+
+## Unreleased
+- Full ranges (`..`) can be passed to `.times()`
