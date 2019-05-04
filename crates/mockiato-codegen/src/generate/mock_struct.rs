@@ -57,7 +57,7 @@ pub(crate) fn generate_mock_struct(
         .map(|method| debug_impl_field(&method.method_decl));
 
     let debug_impl =
-        generate_debug_impl(debug_impl_fields, &mock_struct_ident, &parameters.generics);
+        generate_debug_impl(debug_impl_fields, mock_struct_ident, &parameters.generics);
 
     let visibility = &trait_decl.visibility;
 
@@ -264,7 +264,7 @@ fn generate_expect_method_calls_in_order_method(
     }
 }
 
-fn debug_impl_field<'a>(method_decl: &'a MethodDecl) -> DebugImplField<'a> {
+fn debug_impl_field(method_decl: &MethodDecl) -> DebugImplField<'_> {
     let ident = &method_decl.ident;
     DebugImplField {
         ident,
