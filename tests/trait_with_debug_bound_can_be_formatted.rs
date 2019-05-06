@@ -13,7 +13,7 @@ struct Name;
 struct Greeting;
 
 #[test]
-fn debug_bound_with_generic_type_works() {
+fn trait_with_debug_bound_can_be_formatted() {
     let mut greeter: GreeterMock<'_, Name, Greeting> = GreeterMock::new();
 
     let mut builder = greeter.expect_greet(partial_eq(Name));
