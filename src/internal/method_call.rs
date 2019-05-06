@@ -2,18 +2,29 @@ use crate::internal::expected_calls::ExpectedCalls;
 use crate::internal::fmt::{DisplayOption, DisplayTimes};
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
+use nameof::name_of;
 use std::cell::RefCell;
-use std::fmt::{self, Display};
+use std::fmt::{self, Debug, Display};
 use std::rc::Rc;
 
 /// Configures an expected method call.
 /// This builder is returned from the `expect_*` methods on a generated mock.
-#[derive(Debug)]
 pub struct MethodCallBuilder<'mock, 'a, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {
     call: &'a mut MethodCall<'mock, A, R>,
+}
+
+impl<'mock, 'a, A, R> Debug for MethodCallBuilder<'mock, 'a, A, R>
+where
+    A: for<'args> ArgumentsMatcher<'args>,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct(name_of!(type MethodCallBuilder<'mock, 'a, A, R>))
+            .field(name_of!(call in Self), &self.call)
+            .finish()
+    }
 }
 
 impl<'mock, 'a, A, R> MethodCallBuilder<'mock, 'a, A, R>
@@ -75,12 +86,28 @@ where
     }
 }
 
-#[derive(Debug)]
 pub struct MethodCall<'mock, A, R> {
     expected_calls: ExpectedCalls,
     actual_number_of_calls: RefCell<u64>,
     matcher: Rc<A>,
     return_value: Option<Rc<dyn ReturnValueGenerator<A, R> + 'mock>>,
+}
+
+impl<'mock, A, R> Debug for MethodCall<'mock, A, R>
+where
+    A: Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct(name_of!(type MethodCall<'mock, A, R>))
+            .field(name_of!(expected_calls in Self), &self.expected_calls)
+            .field(
+                name_of!(actual_number_of_calls in Self),
+                &self.actual_number_of_calls,
+            )
+            .field(name_of!(matcher in Self), &self.matcher)
+            .field(name_of!(return_value in Self), &self.return_value)
+            .finish()
+    }
 }
 
 impl<'mock, A, R> Clone for MethodCall<'mock, A, R>

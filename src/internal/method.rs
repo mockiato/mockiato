@@ -1,6 +1,7 @@
 use crate::internal::matcher::ArgumentsMatcher;
 use crate::internal::method_call::{MethodCall, MethodCallBuilder};
-use std::fmt::{self, Display};
+use nameof::name_of;
+use std::fmt::{self, Debug, Display};
 
 #[derive(Clone, Debug)]
 enum ExpectedCallOrder {
@@ -8,7 +9,6 @@ enum ExpectedCallOrder {
     Unordered,
 }
 
-#[derive(Debug)]
 pub struct Method<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
@@ -16,6 +16,19 @@ where
     name: &'static str,
     calls: Vec<MethodCall<'mock, A, R>>,
     call_order: ExpectedCallOrder,
+}
+
+impl<'mock, A, R> Debug for Method<'mock, A, R>
+where
+    A: for<'args> ArgumentsMatcher<'args>,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct(name_of!(type Method<'mock, A, R>))
+            .field(name_of!(name in Self), &self.name)
+            .field(name_of!(calls in Self), &self.calls)
+            .field(name_of!(call_order in Self), &self.call_order)
+            .finish()
+    }
 }
 
 impl<'mock, A, R> Clone for Method<'mock, A, R>

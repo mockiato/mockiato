@@ -3,6 +3,7 @@ use super::constant::{
     arguments_matcher_ident, expect_method_calls_in_order_ident, expect_method_ident,
     generic_parameter_ident, mock_lifetime, mock_lifetime_as_generic_param,
 };
+use super::debug_impl::{generate_debug_impl, DebugImplField};
 use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use super::GenerateMockParameters;
@@ -50,6 +51,14 @@ pub(crate) fn generate_mock_struct(
         .map(|method_decl| generate_expect_method_calls_in_order_method(trait_decl, method_decl))
         .collect();
 
+    let debug_impl_fields = parameters
+        .methods
+        .iter()
+        .map(|method| debug_impl_field(&method.method_decl));
+
+    let debug_impl =
+        generate_debug_impl(debug_impl_fields, mock_struct_ident, &parameters.generics);
+
     let visibility = &trait_decl.visibility;
 
     const GITHUB_REPOSITORY: &str = "https://github.com/myelin-ai/mockiato";
@@ -66,7 +75,7 @@ pub(crate) fn generate_mock_struct(
     let mock_lifetime = mock_lifetime();
 
     quote! {
-        #[derive(Debug, Clone)]
+        #[derive(Clone)]
         #documentation
         #visibility struct #mock_struct_ident #ty_generics #where_clause {
             #method_fields
@@ -86,6 +95,8 @@ pub(crate) fn generate_mock_struct(
 
             #expect_method_call_in_order_methods
         }
+
+        #debug_impl
 
         impl #impl_generics Default for #mock_struct_ident #ty_generics #where_clause {
             /// Creates a new mock with no expectations.
@@ -250,6 +261,14 @@ fn generate_expect_method_calls_in_order_method(
         #visibility fn #ident(&mut self) {
             self.#method_ident.expect_method_calls_in_order()
         }
+    }
+}
+
+fn debug_impl_field(method_decl: &MethodDecl) -> DebugImplField<'_> {
+    let ident = &method_decl.ident;
+    DebugImplField {
+        ident,
+        expression: quote! { self.#ident },
     }
 }
 
