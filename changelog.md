@@ -24,3 +24,6 @@
 ## 0.5.0
 - Generic type parameters on traits are now supported. Parameters with references that contain generic type parameters are explicitly disallowed.
 - Full ranges (`..`) can be passed to `.times()`
+
+## 0.5.1
+- The `Debug` impl for mocks of traits with generic type params no longer require that the generic types implements `Debug`.
