@@ -26,4 +26,4 @@
 - Full ranges (`..`) can be passed to `.times()`
 
 ## 0.5.1
-- The `Debug` impl for mocks of traits with generic type params no longer require that `T` implements `Debug`.
+- The `Debug` impl for mocks of traits with generic type params no longer require that the generic types implements `Debug`.
