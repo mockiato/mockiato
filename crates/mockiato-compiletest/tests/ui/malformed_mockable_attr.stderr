@@ -5,6 +5,3 @@ error: Unsupported syntax for #[mockable]
   |            ^^^^^
   |
   = help: Example usage: #[mockable(name = "FooMock")]
-
-error: aborting due to previous error
-

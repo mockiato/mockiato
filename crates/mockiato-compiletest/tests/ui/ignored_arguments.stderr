@@ -9,6 +9,3 @@ note: Required for mockable traits
   |
 3 | #[mockable]
   | ^^^^^^^^^^^
-
-error: aborting due to previous error
-

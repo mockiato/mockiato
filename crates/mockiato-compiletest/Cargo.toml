@@ -10,8 +10,6 @@ authors = [
 edition = "2018"
 license = "MIT"
 
-[dependencies]
-mockiato = { path = "../.." }
-
 [dev-dependencies]
-compiletest_rs = "0.3"
+trybuild = "1.0"
+mockiato = { path = "../.." }

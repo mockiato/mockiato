@@ -1,5 +1,5 @@
-use mockiato::{mockable, partial_eq};
-use std::fmt::{self, Debug, Display};
+use mockiato::mockable;
+use std::fmt::{Debug, Display};
 
 trait Foo {
     type Output: Display;

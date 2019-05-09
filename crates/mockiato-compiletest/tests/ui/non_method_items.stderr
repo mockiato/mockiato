@@ -1,38 +1,35 @@
 error: Traits are only allowed to contain methods
- --> $DIR/non_method_items.rs:9:5
-  |
-9 |     const BAR: usize;
-  |     ^^^^^
-  |
+  --> $DIR/non_method_items.rs:10:5
+   |
+10 |     const BAR: usize;
+   |     ^^^^^
+   |
 note: Required for mockable traits
- --> $DIR/non_method_items.rs:7:1
-  |
-7 | #[mockable]
-  | ^^^^^^^^^^^
+  --> $DIR/non_method_items.rs:8:1
+   |
+8  | #[mockable]
+   | ^^^^^^^^^^^
 
 error: Traits are only allowed to contain methods
-  --> $DIR/non_method_items.rs:11:5
+  --> $DIR/non_method_items.rs:12:5
    |
-11 |     type Baz;
+12 |     type Baz;
    |     ^^^^
    |
 note: Required for mockable traits
-  --> $DIR/non_method_items.rs:7:1
+  --> $DIR/non_method_items.rs:8:1
    |
-7  | #[mockable]
+8  | #[mockable]
    | ^^^^^^^^^^^
 
 error: Traits are only allowed to contain methods
-  --> $DIR/non_method_items.rs:13:5
+  --> $DIR/non_method_items.rs:14:5
    |
-13 |     macro_in_trait!();
+14 |     macro_in_trait!();
    |     ^^^^^^^^^^^^^^
    |
 note: Required for mockable traits
-  --> $DIR/non_method_items.rs:7:1
+  --> $DIR/non_method_items.rs:8:1
    |
-7  | #[mockable]
+8  | #[mockable]
    | ^^^^^^^^^^^
-
-error: aborting due to 3 previous errors
-

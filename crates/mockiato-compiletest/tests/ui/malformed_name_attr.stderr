@@ -21,6 +21,3 @@ error: #[mockable(name = "...") expects a string literal
   |            ^^^^
   |
   = help: Example usage: #[mockable(name = "FooMock")]
-
-error: aborting due to 3 previous errors
-

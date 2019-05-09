@@ -1,5 +1,6 @@
 use mockiato::mockable;
 
+#[allow(dead_code)]
 macro_rules! macro_in_trait {
     () => {};
 }

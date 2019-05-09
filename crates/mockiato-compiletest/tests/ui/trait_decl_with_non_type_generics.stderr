@@ -21,6 +21,3 @@ note: Required for mockable traits
   |
 6 | #[mockable]
   | ^^^^^^^^^^^
-
-error: aborting due to 2 previous errors
-
