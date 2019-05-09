@@ -45,6 +45,3 @@ note: Required for mockable traits
    |
 8  | #[mockable]
    | ^^^^^^^^^^^
-
-error: aborting due to 4 previous errors
-

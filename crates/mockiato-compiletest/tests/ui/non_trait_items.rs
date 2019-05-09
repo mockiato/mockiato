@@ -1,15 +1,15 @@
 use mockiato::mockable;
 
 #[mockable]
-struct Foo {}
+struct Struct {}
 
 #[mockable]
-enum Foo {}
+enum Enum {}
 
 #[mockable]
-fn foo() {}
+fn function() {}
 
 #[mockable]
-type Foo = usize;
+type TypeAlias = usize;
 
 fn main() {}

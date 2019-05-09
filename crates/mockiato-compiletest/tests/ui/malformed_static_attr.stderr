@@ -19,6 +19,3 @@ warning: `static_references` is specified more than once.
   |
 9 | #[mockable(static_references, static_references)]
   |                               ^^^^^^^^^^^^^^^^^
-
-error: aborting due to 2 previous errors
-

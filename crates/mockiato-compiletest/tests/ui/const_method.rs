@@ -1,3 +1,5 @@
+#![feature(const_fn)]
+
 use mockiato::mockable;
 
 #[mockable]
