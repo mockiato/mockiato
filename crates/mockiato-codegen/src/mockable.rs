@@ -16,13 +16,13 @@ impl Mockable {
     }
 
     pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> TokenStream {
-        let item_backup = item.clone();
+        let original_item = item.clone();
 
         #[doc(hidden)]
         macro try_or_return($expr: expr) {
             match $expr {
                 Ok(value) => value,
-                Err(_) => return TokenStream::from(quote! { #item_backup }),
+                Err(_) => return TokenStream::from(quote! { #original_item }),
             }
         }
 
