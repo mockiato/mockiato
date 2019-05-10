@@ -1,31 +1,26 @@
-use crate::internal::fmt::MaybeDebug;
-use crate::internal::matcher::ArgumentsMatcher;
+use crate::internal::fmt::{DisplayOption, MaybeDebug};
+use crate::internal::ArgumentsMatcher;
 use std::fmt::{self, Debug, Display};
 use std::rc::Rc;
 
-pub trait DefaultReturnValue {
-    fn default_return_value<A>() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>>
-    where
-        Self: Sized,
-        A: for<'args> ArgumentsMatcher<'args>;
+pub trait DefaultReturnValue<A>: Sized {
+    fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>>;
 }
 
-impl<T> DefaultReturnValue for T {
-    default fn default_return_value<A>() -> Option<Rc<dyn ReturnValueGenerator<A, T>>>
-    where
-        Self: Sized,
-        A: for<'args> ArgumentsMatcher<'args>,
-    {
+impl<A, T> DefaultReturnValue<A> for T
+where
+    A: for<'args> ArgumentsMatcher<'args>,
+{
+    default fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, T>>> {
         None
     }
 }
 
-impl DefaultReturnValue for () {
-    fn default_return_value<A>() -> Option<Rc<dyn ReturnValueGenerator<A, ()>>>
-    where
-        Self: Sized,
-        A: for<'args> ArgumentsMatcher<'args>,
-    {
+impl<A> DefaultReturnValue<A> for ()
+where
+    A: for<'args> ArgumentsMatcher<'args>,
+{
+    fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, ()>>> {
         Some(Rc::new(Cloned(())))
     }
 }
@@ -37,13 +32,11 @@ where
     fn generate_return_value(&self, input: <A as ArgumentsMatcher<'_>>::Arguments) -> R;
 }
 
-pub struct Cloned<T>(pub(crate) T)
-where
-    T: Clone + MaybeDebug;
+pub struct Cloned<T>(pub(crate) T);
 
 impl<R> Display for Cloned<R>
 where
-    R: Clone,
+    R: MaybeDebug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         MaybeDebug::fmt(&self.0, f)
@@ -52,7 +45,7 @@ where
 
 impl<R> Debug for Cloned<R>
 where
-    R: Clone,
+    R: MaybeDebug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         MaybeDebug::fmt(&self.0, f)
@@ -61,8 +54,8 @@ where
 
 impl<A, R> ReturnValueGenerator<A, R> for Cloned<R>
 where
-    A: for<'args> ArgumentsMatcher<'args>,
     R: Clone,
+    A: for<'args> ArgumentsMatcher<'args>,
 {
     fn generate_return_value(&self, _: <A as ArgumentsMatcher<'_>>::Arguments) -> R {
         self.0.clone()
@@ -74,13 +67,7 @@ pub struct Panic(pub(crate) Option<&'static str>);
 
 impl Display for Panic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "panic!(")?;
-
-        if let Some(message) = self.0 {
-            write!(f, "{:?}", message)?;
-        }
-
-        write!(f, ")")
+        write!(f, "panic!({})", DisplayOption(self.0.as_ref()))
     }
 }
 
