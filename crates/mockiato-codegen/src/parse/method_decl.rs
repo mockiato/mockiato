@@ -1,10 +1,10 @@
 use super::check_option_is_none;
 use crate::parse::method_inputs::MethodInputs;
-use crate::spanned::SpannedUnstable;
 use crate::syn_ext::PathExt;
-use crate::{merge_results, Error, Result};
-use proc_macro::{Diagnostic, Level, Span};
+use crate::{merge_results, DiagnosticBuilder, Error, Result};
+use proc_macro2::Span;
 use std::collections::HashSet;
+use syn::spanned::Spanned;
 use syn::visit::{visit_type, Visit};
 use syn::{
     Attribute, FnDecl, GenericParam, Generics, Ident, MethodSig, Path, ReturnType, Token,
@@ -39,11 +39,12 @@ impl MethodDecl {
     ) -> Result<Self> {
         match trait_item {
             TraitItem::Method(method) => Self::parse_method(method, generic_types_on_trait),
-            _ => Err(Error::Diagnostic(Diagnostic::spanned(
-                trait_item.span_unstable(),
-                Level::Error,
+            _ => Err(DiagnosticBuilder::error(
+                trait_item.span(),
                 "Traits are only allowed to contain methods",
-            ))),
+            )
+            .build()
+            .into()),
         }
     }
 
@@ -51,7 +52,7 @@ impl MethodDecl {
         method: TraitItemMethod,
         generic_types_on_trait: &HashSet<Ident>,
     ) -> Result<Self> {
-        let span = method.span_unstable();
+        let span = method.span();
 
         let TraitItemMethod {
             attrs,
@@ -99,11 +100,12 @@ fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
         .iter()
         .map(|generic_param| match generic_param {
             GenericParam::Lifetime(_) => Ok(()),
-            generic_param => Err(Error::Diagnostic(Diagnostic::spanned(
-                generic_param.span_unstable(),
-                Level::Error,
+            generic_param => Err(DiagnosticBuilder::error(
+                generic_param.span(),
                 "Only lifetimes are supported as generic parameters on methods",
-            ))),
+            )
+            .build()
+            .into()),
         });
 
     merge_results(results).map(|_| ())
@@ -119,20 +121,17 @@ fn validate_usage_of_generic_types(
     if references_to_generic_types.is_empty() {
         Ok(())
     } else {
-        Err(Error::merge(
-            references_to_generic_types
-                .into_iter()
-                .map(error_for_reference_to_generic_type),
-        ))
+        Err(references_to_generic_types
+            .into_iter()
+            .map(error_for_reference_to_generic_type)
+            .collect())
     }
 }
 
 fn error_for_reference_to_generic_type(ty: &Type) -> Error {
-    Error::Diagnostic(Diagnostic::spanned(
-        ty.span_unstable(),
-        Level::Error,
-        "References to generic types are not supported",
-    ))
+    DiagnosticBuilder::error(ty.span(), "References to generic types are not supported")
+        .build()
+        .into()
 }
 
 fn find_references_to_generic_types<'a>(

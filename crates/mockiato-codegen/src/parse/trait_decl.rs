@@ -1,10 +1,10 @@
 use super::check_option_is_none;
 use crate::parse::method_decl::MethodDecl;
-use crate::spanned::SpannedUnstable;
-use crate::{merge_results, Error, Result};
-use proc_macro::{Diagnostic, Level, Span};
+use crate::{merge_results, DiagnosticBuilder, Error, Result};
+use proc_macro2::Span;
 use std::collections::HashSet;
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::{GenericParam, Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
 
 #[derive(Clone)]
@@ -21,7 +21,7 @@ pub(crate) struct TraitDecl {
 
 impl TraitDecl {
     pub(crate) fn parse(item: ItemTrait) -> Result<Self> {
-        let span = item.span_unstable();
+        let span = item.span();
         let ItemTrait {
             auto_token,
             unsafety,
@@ -60,11 +60,11 @@ fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
         .map(|generic_param| match generic_param {
             GenericParam::Type(_) => Ok(()),
             GenericParam::Lifetime(_) => Err(create_spanned_error(
-                generic_param.span_unstable(),
+                generic_param.span(),
                 "Lifetimes are not supported on mockable traits",
             )),
             GenericParam::Const(_) => Err(create_spanned_error(
-                generic_param.span_unstable(),
+                generic_param.span(),
                 "Const generics are not supported on mockable traits",
             )),
         });
@@ -84,5 +84,5 @@ fn collect_generic_type_idents(generics: &Generics) -> HashSet<Ident> {
 }
 
 fn create_spanned_error(span: Span, message: &str) -> Error {
-    Error::Diagnostic(Diagnostic::spanned(span, Level::Error, message))
+    DiagnosticBuilder::error(span, message).build().into()
 }

@@ -1,52 +1,133 @@
-use proc_macro::Diagnostic;
+use proc_macro2::Span;
+use std::iter::FromIterator;
 
 pub(crate) type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
-pub(crate) enum Error {
-    Diagnostic(Diagnostic),
-    MultipleDiagnostics(Vec<Diagnostic>),
+pub(crate) enum DiagnosticLevel {
+    Error,
 }
 
-impl Error {
-    /// Emits all [`Diagnostic`] messages stored in this error.
-    pub(crate) fn emit(self) {
-        self.emit_with(|d| d);
+#[derive(Debug)]
+pub(crate) struct Diagnostic {
+    pub(crate) span: Span,
+    pub(crate) message: String,
+    pub(crate) level: DiagnosticLevel,
+    pub(crate) notes: Vec<DiagnosticMessage>,
+    pub(crate) help: Vec<DiagnosticMessage>,
+}
+
+#[derive(Debug)]
+pub(crate) struct DiagnosticMessage {
+    pub(crate) span: Option<Span>,
+    pub(crate) message: String,
+}
+
+#[derive(Debug)]
+pub(crate) struct DiagnosticBuilder {
+    span: Span,
+    message: String,
+    level: DiagnosticLevel,
+    notes: Vec<DiagnosticMessage>,
+    help: Vec<DiagnosticMessage>,
+}
+
+impl DiagnosticBuilder {
+    pub(crate) fn error(span: Span, message: impl Into<String>) -> Self {
+        Self::new(span, message.into(), DiagnosticLevel::Error)
     }
 
-    /// Emits all [`Diagnostic`] messages stored in this error.
-    /// The passed [`Fn`] acts as a transformation function and is called for every
-    /// [`Diagnostic`] in this error.
-    pub(crate) fn emit_with<F>(self, map_fn: F)
-    where
-        F: Fn(Diagnostic) -> Diagnostic,
-    {
-        match self {
-            Error::Diagnostic(diagnostic) => map_fn(diagnostic).emit(),
-            Error::MultipleDiagnostics(diagnostics) => {
-                diagnostics.into_iter().for_each(|d| map_fn(d).emit());
-            }
-        };
-    }
-
-    /// Creates a new [`Error`] by merging an Iterator and collecting
-    /// all [`Diagnostic`] messages.
-    pub(crate) fn merge<I>(errors: I) -> Self
-    where
-        I: Iterator<Item = Error>,
-    {
-        let mut collected = Vec::new();
-
-        if let (_, Some(max)) = errors.size_hint() {
-            collected.reserve(max);
-        }
-
-        errors.for_each(|err| match err {
-            Error::Diagnostic(diagnostic) => collected.push(diagnostic),
-            Error::MultipleDiagnostics(mut diagnostics) => collected.append(&mut diagnostics),
+    pub(crate) fn note_with_span(mut self, span: Span, message: impl Into<String>) -> Self {
+        self.notes.push(DiagnosticMessage {
+            span: Some(span),
+            message: message.into(),
         });
+        self
+    }
 
-        Error::MultipleDiagnostics(collected)
+    pub(crate) fn note(mut self, message: impl Into<String>) -> Self {
+        self.notes.push(DiagnosticMessage {
+            span: None,
+            message: message.into(),
+        });
+        self
+    }
+
+    pub(crate) fn help(mut self, message: impl Into<String>) -> Self {
+        self.help.push(DiagnosticMessage {
+            span: None,
+            message: message.into(),
+        });
+        self
+    }
+
+    pub(crate) fn build(self) -> Diagnostic {
+        Diagnostic {
+            span: self.span,
+            message: self.message,
+            level: self.level,
+            notes: self.notes,
+            help: self.help,
+        }
+    }
+
+    fn new(span: Span, message: String, level: DiagnosticLevel) -> Self {
+        Self {
+            span,
+            message,
+            level,
+            notes: Vec::new(),
+            help: Vec::new(),
+        }
+    }
+}
+
+impl From<Diagnostic> for DiagnosticBuilder {
+    fn from(diagnostic: Diagnostic) -> Self {
+        DiagnosticBuilder {
+            span: diagnostic.span,
+            message: diagnostic.message,
+            level: diagnostic.level,
+            notes: diagnostic.notes,
+            help: diagnostic.help,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct Error {
+    pub(crate) diagnostics: Vec<Diagnostic>,
+}
+
+impl FromIterator<Error> for Error {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = Error>,
+    {
+        let diagnostics = iter
+            .into_iter()
+            .map(|error| error.diagnostics.into_iter())
+            .flatten()
+            .collect();
+        Self { diagnostics }
+    }
+}
+
+impl FromIterator<Diagnostic> for Error {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = Diagnostic>,
+    {
+        let diagnostics = iter.into_iter().collect();
+        Self { diagnostics }
+    }
+}
+
+impl From<Diagnostic> for Error {
+    fn from(diagnostic: Diagnostic) -> Error {
+        Error {
+            diagnostics: vec![diagnostic],
+        }
     }
 }
 
@@ -56,7 +137,7 @@ where
 {
     let results: Vec<_> = results.collect();
     if results.iter().any(Result::is_err) {
-        Err(Error::merge(results.into_iter().filter_map(Result::err)))
+        Err(results.into_iter().filter_map(Result::err).collect())
     } else {
         Ok(results.into_iter().map(Result::unwrap))
     }

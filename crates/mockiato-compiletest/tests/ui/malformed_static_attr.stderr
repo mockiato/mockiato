@@ -14,7 +14,7 @@ error: #[mockable(static_references) does not take any parameters
   |
   = help: Example usage: #[mockable(static_references)]
 
-warning: `static_references` is specified more than once.
+error: `static_references` is specified more than once.
  --> $DIR/malformed_static_attr.rs:9:31
   |
 9 | #[mockable(static_references, static_references)]
