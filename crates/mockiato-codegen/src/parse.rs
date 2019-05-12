@@ -1,4 +1,5 @@
-use crate::result::{DiagnosticBuilder, Result};
+use crate::diagnostic::DiagnosticBuilder;
+use crate::result::Result;
 use proc_macro2::Span;
 pub(crate) mod method_decl;
 pub(crate) mod method_inputs;

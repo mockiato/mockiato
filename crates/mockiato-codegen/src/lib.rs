@@ -25,6 +25,7 @@
 extern crate proc_macro;
 
 mod constant;
+mod diagnostic;
 mod generate;
 mod mockable;
 mod parse;
@@ -32,7 +33,8 @@ mod result;
 mod syn_ext;
 
 use self::mockable::Mockable;
-pub(crate) use self::result::*;
+use crate::diagnostic::{Diagnostic, DiagnosticLevel, DiagnosticMessage};
+use crate::result::Error;
 use proc_macro::{
     Diagnostic as ProcMacroDiagnostic, Level as ProcMacroLevel, Span as ProcMacroSpan,
     TokenStream as ProcMacroTokenStream,

@@ -1,7 +1,8 @@
+use crate::diagnostic::DiagnosticBuilder;
 use crate::generate::{generate_mock, GenerateMockOptions};
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::trait_decl::TraitDecl;
-use crate::result::{DiagnosticBuilder, Error};
+use crate::result::Error;
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::spanned::Spanned;

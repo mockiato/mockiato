@@ -1,4 +1,5 @@
-use crate::{merge_results, DiagnosticBuilder, Error, Result};
+use crate::diagnostic::DiagnosticBuilder;
+use crate::result::{merge_results, Error, Result};
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::punctuated::Punctuated;

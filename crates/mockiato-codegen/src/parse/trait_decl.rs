@@ -1,6 +1,7 @@
 use super::check_option_is_none;
+use crate::diagnostic::DiagnosticBuilder;
 use crate::parse::method_decl::MethodDecl;
-use crate::{merge_results, DiagnosticBuilder, Error, Result};
+use crate::result::{merge_results, Error, Result};
 use proc_macro2::Span;
 use std::collections::HashSet;
 use syn::punctuated::Punctuated;

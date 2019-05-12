@@ -1,7 +1,8 @@
 use super::name_attr::NameAttr;
 use super::static_attr::StaticAttr;
 use crate::constant::ATTR_NAME;
-use crate::{DiagnosticBuilder, Error, Result};
+use crate::diagnostic::DiagnosticBuilder;
+use crate::result::{Error, Result};
 use syn::spanned::Spanned;
 use syn::{AttributeArgs, Lit, Meta, NestedMeta};
 

@@ -1,5 +1,6 @@
 use crate::constant::ATTR_NAME;
-use crate::{DiagnosticBuilder, Result};
+use crate::diagnostic::DiagnosticBuilder;
+use crate::result::Result;
 use syn::spanned::Spanned;
 use syn::Meta;
 
