@@ -1,4 +1,4 @@
-use mockiato::{mockable, partial_eq};
+use mockiato::mockable;
 use std::fmt::Debug;
 
 #[mockable]
@@ -20,7 +20,7 @@ fn main() {
     let mut greeter = GreeterMock::new();
 
     greeter
-        .expect_greet_person(partial_eq(&person))
+        .expect_greet_person(|f| f.partial_eq(&person))
         .times(1)
         .returns(String::from("Hello Name"));
     greeter.greet_person(&person);

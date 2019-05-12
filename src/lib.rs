@@ -3,7 +3,7 @@
 //! # Examples
 //!
 //! ```
-//! use mockiato::{mockable, partial_eq};
+//! use mockiato::mockable;
 //!
 //! #[cfg_attr(test, mockable)]
 //! trait Greeter {
@@ -13,7 +13,7 @@
 //! let mut greeter = GreeterMock::new();
 //!
 //! greeter
-//!     .expect_greet(partial_eq("Jane"))
+//!     .expect_greet(|f| f.partial_eq("Jane"))
 //!     .times(1..)
 //!     .returns(String::from("Hello Jane"));
 //!
@@ -24,7 +24,7 @@
 //! Mockiato automatically verifies that all expected calls were made when the mock goes out of scope.
 //! The mock panics when a method is called that was not configured, or if the parameters did not match.
 //! ```no_run
-//! use mockiato::{mockable, partial_eq};
+//! use mockiato::mockable;
 //!
 //! #[cfg_attr(test, mockable)]
 //! trait Greeter {
@@ -35,7 +35,7 @@
 //!     let mut greeter = GreeterMock::new();
 //!
 //!     greeter
-//!         .expect_greet(partial_eq("Doe"))
+//!         .expect_greet(|f| f.partial_eq("Doe"))
 //!         .times(1..)
 //!         .returns(String::from("Hello Doe"));
 //!
@@ -100,11 +100,8 @@ macro_rules! mockable {
     () => {};
 }
 
+pub use crate::internal::argument_matcher_factory::ArgumentMatcherFactory;
 pub use crate::internal::expected_calls::ExpectedCalls;
-pub use crate::internal::matcher::any::any;
-pub use crate::internal::matcher::nearly_eq::{nearly_eq, nearly_eq_with_accuracy};
-pub use crate::internal::matcher::partial_eq::{partial_eq, partial_eq_owned};
-pub use crate::internal::matcher::unordered_vec_eq::unordered_vec_eq;
 pub use crate::internal::MethodCallBuilder;
 
 #[doc(hidden)]

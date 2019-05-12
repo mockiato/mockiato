@@ -1,25 +1,28 @@
 use super::ArgumentMatcher;
+use crate::internal::argument_matcher_factory::ArgumentMatcherFactory;
 use std::fmt::Write;
 use std::fmt::{self, Display};
 
-/// Crates an argument matcher that matches any value.
-///
-/// # Examples
-/// ```
-/// use mockiato::{any, mockable};
-///
-/// #[cfg_attr(test, mockable)]
-/// trait MessageSender {
-///     fn send_message(&self, message: &str);
-/// }
-///
-/// let mut sender = MessageSenderMock::new();
-/// let message = "Don't make lemonade";
-/// sender.expect_send_message(any());
-/// sender.send_message(message);
-/// ```
-pub fn any() -> AnyArgumentMatcher {
-    AnyArgumentMatcher
+impl ArgumentMatcherFactory {
+    /// Crates an argument matcher that matches any value.
+    ///
+    /// # Examples
+    /// ```
+    /// use mockiato::mockable;
+    ///
+    /// #[cfg_attr(test, mockable)]
+    /// trait MessageSender {
+    ///     fn send_message(&self, message: &str);
+    /// }
+    ///
+    /// let mut sender = MessageSenderMock::new();
+    /// let message = "Don't make lemonade";
+    /// sender.expect_send_message(|f| f.any());
+    /// sender.send_message(message);
+    /// ```
+    pub fn any(&self) -> AnyArgumentMatcher {
+        AnyArgumentMatcher
+    }
 }
 
 #[derive(Debug)]

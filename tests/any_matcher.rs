@@ -1,4 +1,4 @@
-use mockiato::{any, mockable};
+use mockiato::mockable;
 
 #[mockable]
 trait Greeter {
@@ -10,7 +10,7 @@ fn cloneable_mocks_work() {
     let mut greeter = GreeterMock::new();
 
     greeter
-        .expect_greet(any())
+        .expect_greet(|f| f.any())
         .times(2)
         .returns(String::from("Hello Tom"));
 

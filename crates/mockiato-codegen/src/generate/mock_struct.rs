@@ -188,7 +188,7 @@ fn generate_expect_method(
     let expected_parameters: TokenStream = arguments_with_generics
         .iter()
         .map(|(_, argument)| &argument.ident)
-        .map(|argument_ident| quote! { #argument_ident: Box::new(#argument_ident), })
+        .map(|argument_ident| quote! { #argument_ident: Box::new(#argument_ident(&argument_matcher_factory)), })
         .collect();
 
     let requires_must_use_annotation = !is_empty_return_value(&return_type);
@@ -230,6 +230,8 @@ panicking if the function was not called by the time the object goes out of scop
             #return_type
         > where #where_clause
         {
+            #[allow(dead_code)]
+            let argument_matcher_factory = mockiato::ArgumentMatcherFactory::internal_new();
             self.#method_ident.add_expected_call(
                 #mod_ident::#arguments_matcher_ident {
                     #expected_parameters
@@ -314,7 +316,7 @@ fn generate_argument((generic_type_ident, method_argument): &(Ident, &MethodArg)
     let argument_ident = &method_argument.ident;
 
     quote! {
-        #argument_ident: #generic_type_ident,
+        #argument_ident: impl Fn(&mockiato::ArgumentMatcherFactory) -> #generic_type_ident,
     }
 }
 
