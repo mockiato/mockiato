@@ -37,19 +37,7 @@ pub(crate) use self::result::*;
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, AttributeArgs, Item};
 
-/// Generates a mock struct from a trait.
-///
-/// # Examples
-///
-/// ```ignore
-/// use mockiato::mockable;
-/// use std::fmt::Display;
-///
-/// #[mockable]
-/// trait Greeter {
-///     fn greet(&self, name: &Display) -> String;
-/// }
-/// ```
+#[doc(hidden)]
 #[proc_macro_attribute]
 pub fn mockable(args: TokenStream, input: TokenStream) -> TokenStream {
     let attr = parse_macro_input!(args as AttributeArgs);
