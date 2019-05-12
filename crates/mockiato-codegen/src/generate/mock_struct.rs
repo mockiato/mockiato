@@ -316,7 +316,7 @@ fn generate_argument((generic_type_ident, method_argument): &(Ident, &MethodArg)
     let argument_ident = &method_argument.ident;
 
     quote! {
-        #argument_ident: impl Fn(&mockiato::ArgumentMatcherFactory) -> #generic_type_ident,
+        #argument_ident: impl FnOnce(&mockiato::ArgumentMatcherFactory) -> #generic_type_ident,
     }
 }
 
