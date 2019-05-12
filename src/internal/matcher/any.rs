@@ -8,7 +8,7 @@ impl ArgumentMatcherFactory {
     ///
     /// # Examples
     /// ```
-    /// use mockiato::mockable;
+    /// use mockiato::{mockable, ArgumentMatcherFactory};
     ///
     /// #[cfg_attr(test, mockable)]
     /// trait MessageSender {
@@ -17,7 +17,7 @@ impl ArgumentMatcherFactory {
     ///
     /// let mut sender = MessageSenderMock::new();
     /// let message = "Don't make lemonade";
-    /// sender.expect_send_message(|f| f.any());
+    /// sender.expect_send_message(ArgumentMatcherFactory::any);
     /// sender.send_message(message);
     /// ```
     pub fn any(&self) -> AnyArgumentMatcher {
