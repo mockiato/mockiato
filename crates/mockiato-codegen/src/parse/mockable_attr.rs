@@ -4,7 +4,7 @@ use crate::constant::{
     ATTR_NAME, MOCK_STRUCT_NAME_ATTR_PARAM_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME,
 };
 use crate::diagnostic::DiagnosticBuilder;
-use crate::result::{Error, Result};
+use crate::result::{merge_results, Error, Result};
 use syn::spanned::Spanned;
 use syn::{AttributeArgs, Lit, Meta, NestedMeta};
 
@@ -21,19 +21,12 @@ pub(crate) struct MockableAttr {
 
 impl MockableAttr {
     pub(crate) fn parse(args: AttributeArgs) -> Result<Self> {
+        let meta_items = get_meta_items(args)?;
+
         let mut name_attr = None;
         let mut static_attr = None;
 
-        let meta_items: Vec<_> = args
-            .into_iter()
-            .map(|nested| match nested {
-                NestedMeta::Meta(meta) => Ok(meta),
-                NestedMeta::Literal(literal) => Err(unsupported_syntax_error(&literal)),
-            })
-            .collect();
-
         for item in meta_items {
-            let item = item?;
             let item_name = item.name();
 
             if item_name == MOCK_STRUCT_NAME_ATTR_PARAM_NAME {
@@ -56,6 +49,14 @@ impl MockableAttr {
             static_attr,
         })
     }
+}
+
+fn get_meta_items(args: AttributeArgs) -> Result<impl Iterator<Item = Meta>> {
+    let meta_items = args.into_iter().map(|nested| match nested {
+        NestedMeta::Meta(meta) => Ok(meta),
+        NestedMeta::Literal(literal) => Err(unsupported_syntax_error(&literal)),
+    });
+    merge_results(meta_items)
 }
 
 fn attribute_property_not_supported_error(meta_item: &Meta) -> Error {
