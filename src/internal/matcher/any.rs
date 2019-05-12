@@ -2,7 +2,22 @@ use super::ArgumentMatcher;
 use std::fmt::Write;
 use std::fmt::{self, Display};
 
-/// Creates a new `ArgumentMatcher` that matches any value.
+/// Crates an argument matcher that matches any value.
+///
+/// # Examples
+/// ```
+/// use mockiato::{any, mockable};
+///
+/// #[cfg_attr(test, mockable)]
+/// trait MessageSender {
+///     fn send_message(&self, message: &str);
+/// }
+///
+/// let mut sender = MessageSenderMock::new();
+/// let message = "Don't make lemonade";
+/// sender.expect_send_message(any());
+/// sender.send_message(message);
+/// ```
 pub fn any() -> AnyArgumentMatcher {
     AnyArgumentMatcher
 }

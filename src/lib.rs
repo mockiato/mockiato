@@ -12,11 +12,37 @@
 //!
 //! let mut greeter = GreeterMock::new();
 //!
-//! greeter.expect_greet(partial_eq("Jane"))
-//!        .times(1..)
-//!        .returns(String::from("Hello Jane"));
+//! greeter
+//!     .expect_greet(partial_eq("Jane"))
+//!     .times(1..)
+//!     .returns(String::from("Hello Jane"));
 //!
 //! assert_eq!("Hello Jane", greeter.greet("Jane"));
+//! ```
+//!
+//! # Call Verification
+//! Mockiato automatically verifies that all expected calls were made when a mock goes out of scope.
+//! The mock panics when a method is called that was not configured, or if the parameters did not match.
+//! ```
+//! #[cfg_attr(test, mockable)]
+//! trait Greeter {
+//!     fn greet(&self, name: &str) -> String;
+//! }
+//!
+//! {
+//!     let mut greeter = GreeterMock::new();
+//!
+//!     greeter.expect_greet(partial_eq("Doe"))
+//!            .times(1..)
+//!            .returns(String::from("Hello Doe"));
+//!
+//!     assert_eq!("Hello Jane", greeter.greet("Jane"));
+//!     ///                              ^^^^^^^^^^^^^
+//!     ///                              This call was not configured which results in a panic
+//!
+//!     ///      The mock verifies that all expected calls have been made
+//!     /// <--  and panics otherwise
+//! }
 //! ```
 
 #![feature(specialization)]
@@ -48,8 +74,8 @@ pub use mockiato_codegen::mockable;
 /// `'static` e.g. when downcasting the mocked trait to a concrete implementation using the `Any` trait.
 ///
 /// ```
-/// use std::any::Any;
 /// use mockiato::mockable;
+/// use std::any::Any;
 ///
 /// #[cfg_attr(test, mockable(static_references))]
 /// pub trait Animal: Any {
@@ -64,7 +90,7 @@ pub use mockiato_codegen::mockable;
 ///
 /// #[cfg_attr(test, mockable(name = "CuteAnimalMock"))]
 /// trait Animal {
-///    fn make_sound(&self);
+///     fn make_sound(&self);
 /// }
 /// ```
 macro_rules! mockable {

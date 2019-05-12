@@ -5,7 +5,26 @@ use nameof::name_of;
 use nearly_eq::NearlyEq;
 use std::fmt::{self, Debug, Display};
 
-/// Creates a new `ArgumentMatcher` that matches against values using [`NearlyEq`]
+/// Creates an argument matcher that matches values using [`NearlyEq`].
+/// Uses the default epsilon value defined by [`NearlyEq`].
+///
+/// # Examples
+/// ```
+/// use mockiato::{mockable, nearly_eq};
+///
+/// #[cfg_attr(test, mockable)]
+/// trait FloatFormatter {
+///     fn format_float(&self, value: f64) -> String;
+/// }
+///
+/// let expected_result = String::from("0.3");
+/// let mut formatter = FloatFormatterMock::new();
+/// formatter
+///     .expect_format_float(nearly_eq(0.3))
+///     .returns(expected_result.clone());
+///
+/// assert_eq!(expected_result, formatter.format_float(0.1 + 0.2),)
+/// ```
 pub fn nearly_eq<T, U>(value: T) -> NearlyEqArgumentMatcher<T, U>
 where
     T: NearlyEq<T, U> + MaybeDebug,
@@ -17,7 +36,26 @@ where
     }
 }
 
-/// Creates a new `ArgumentMatcher` that matches against values using [`NearlyEq`]
+/// Creates an argument matcher that matches values using [`NearlyEq`].
+/// A custom epislon value can be passed.
+///
+/// # Examples
+/// ```
+/// use mockiato::{mockable, nearly_eq_with_accuracy};
+///
+/// #[cfg_attr(test, mockable)]
+/// trait FloatFormatter {
+///     fn format_float(&self, value: f64) -> String;
+/// }
+///
+/// let expected_result = String::from("0.3");
+/// let mut formatter = FloatFormatterMock::new();
+/// formatter
+///     .expect_format_float(nearly_eq_with_accuracy(0.3, 1e-10))
+///     .returns(expected_result.clone());
+///
+/// assert_eq!(expected_result, formatter.format_float(0.1 + 0.2),)
+/// ```
 pub fn nearly_eq_with_accuracy<T, U>(value: T, accuracy: U) -> NearlyEqArgumentMatcher<T, U>
 where
     T: NearlyEq<T, U> + MaybeDebug,

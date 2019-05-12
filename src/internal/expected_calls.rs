@@ -4,6 +4,9 @@ use std::ops::{Range, RangeFrom, RangeFull, RangeInclusive, RangeToInclusive};
 
 /// Defines how often a method call is expected
 /// to be called.
+/// See [`MethodCallBuilder::times`] on how to use this.
+///
+/// [`MethodCallBuilder::times`]: crate::MethodCallBuilder::times
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub struct ExpectedCalls(ExpectedCallsKind);
 
