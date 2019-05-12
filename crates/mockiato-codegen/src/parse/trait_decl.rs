@@ -60,12 +60,12 @@ fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
         .iter()
         .map(|generic_param| match generic_param {
             GenericParam::Type(_) => Ok(()),
-            GenericParam::Lifetime(_) => Err(create_spanned_error(
-                generic_param.span(),
+            GenericParam::Lifetime(_) => Err(invalid_generic_param_error(
+                generic_param,
                 "Lifetimes are not supported on mockable traits",
             )),
-            GenericParam::Const(_) => Err(create_spanned_error(
-                generic_param.span(),
+            GenericParam::Const(_) => Err(invalid_generic_param_error(
+                generic_param,
                 "Const generics are not supported on mockable traits",
             )),
         });
@@ -84,6 +84,8 @@ fn collect_generic_type_idents(generics: &Generics) -> HashSet<Ident> {
         .collect()
 }
 
-fn create_spanned_error(span: Span, message: &str) -> Error {
-    DiagnosticBuilder::error(span, message).build().into()
+fn invalid_generic_param_error(generic_param: &GenericParam, message: &str) -> Error {
+    DiagnosticBuilder::error(generic_param.span(), message)
+        .build()
+        .into()
 }

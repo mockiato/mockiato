@@ -22,9 +22,7 @@ impl MethodInputs {
             .next()
             .ok_or(())
             .and_then(MethodSelfArg::parse)
-            .map_err(|_| {
-                Error::from(DiagnosticBuilder::error(span, "The first parameter of a method must be self, so that the trait is object-safe").build())
-            })?;
+            .map_err(|_| first_argument_is_not_self_error(span))?;
 
         let args = inputs_iter.map(MethodArg::parse);
 
@@ -33,6 +31,12 @@ impl MethodInputs {
             args: merge_results(args)?.collect(),
         })
     }
+}
+
+fn first_argument_is_not_self_error(span: Span) -> Error {
+    let error_message =
+        "The first parameter of a method must be self, so that the trait is object-safe";
+    DiagnosticBuilder::error(span, error_message).build().into()
 }
 
 #[derive(Clone)]

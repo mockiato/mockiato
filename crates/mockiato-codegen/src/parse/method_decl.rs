@@ -40,12 +40,7 @@ impl MethodDecl {
     ) -> Result<Self> {
         match trait_item {
             TraitItem::Method(method) => Self::parse_method(method, generic_types_on_trait),
-            _ => Err(DiagnosticBuilder::error(
-                trait_item.span(),
-                "Traits are only allowed to contain methods",
-            )
-            .build()
-            .into()),
+            trait_item => Err(invalid_trait_item_error(&trait_item)),
         }
     }
 
@@ -95,21 +90,32 @@ impl MethodDecl {
     }
 }
 
+fn invalid_trait_item_error(trait_item: &TraitItem) -> Error {
+    DiagnosticBuilder::error(
+        trait_item.span(),
+        "Traits are only allowed to contain methods",
+    )
+    .build()
+    .into()
+}
+
 fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
     let results = generics
         .params
         .iter()
         .map(|generic_param| match generic_param {
             GenericParam::Lifetime(_) => Ok(()),
-            generic_param => Err(DiagnosticBuilder::error(
-                generic_param.span(),
-                "Only lifetimes are supported as generic parameters on methods",
-            )
-            .build()
-            .into()),
+            generic_param => Err(invalid_generic_param(generic_param)),
         });
 
     merge_results(results).map(|_| ())
+}
+
+fn invalid_generic_param(generic_param: &GenericParam) -> Error {
+    let error_message = "Only lifetimes are supported as generic parameters on methods";
+    DiagnosticBuilder::error(generic_param.span(), error_message)
+        .build()
+        .into()
 }
 
 fn validate_usage_of_generic_types(
