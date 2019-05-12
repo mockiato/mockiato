@@ -23,7 +23,9 @@
 //! # Call Verification
 //! Mockiato automatically verifies that all expected calls were made when the mock goes out of scope.
 //! The mock panics when a method is called that was not configured, or if the parameters did not match.
-//! ```
+//! ```no_run
+//! use mockiato::{mockable, partial_eq};
+//!
 //! #[cfg_attr(test, mockable)]
 //! trait Greeter {
 //!     fn greet(&self, name: &str) -> String;
@@ -32,16 +34,17 @@
 //! {
 //!     let mut greeter = GreeterMock::new();
 //!
-//!     greeter.expect_greet(partial_eq("Doe"))
-//!            .times(1..)
-//!            .returns(String::from("Hello Doe"));
+//!     greeter
+//!         .expect_greet(partial_eq("Doe"))
+//!         .times(1..)
+//!         .returns(String::from("Hello Doe"));
 //!
 //!     assert_eq!("Hello Jane", greeter.greet("Jane"));
-//!     ///                              ^^^^^^^^^^^^^
-//!     ///                              This call was not configured, which results in a panic
+//!     //                               ^^^^^^^^^^^^^
+//!     //                               This call was not configured, which results in a panic
 //!
-//!     ///      The mock verifies that all expected calls have been made
-//!     /// <--  and panics otherwise
+//!     //      The mock verifies that all expected calls have been made
+//!     // <--  and panics otherwise
 //! }
 //! ```
 
