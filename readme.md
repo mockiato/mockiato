@@ -31,7 +31,6 @@ mod tests {
 
         assert_eq!("Hello world", greeter.greet("world"));
     }
-
 }
 ```
 
@@ -42,11 +41,15 @@ Trait bounds are currently not supported meaning that the supertraits will not b
 The following traits are always implemented for mocks:
 
 - [Debug](https://doc.rust-lang.org/std/fmt/trait.Debug.html)  
-  Example: `cargo run --example debug`
+  Example: [`cargo run --example debug`](./examples/debug.rs)
 - [Clone](https://doc.rust-lang.org/std/clone/trait.Clone.html)  
-  Example: `cargo test --example clone` 
+  Example: [`cargo test --example clone`](./examples/clone.rs)
 - [Default](https://doc.rust-lang.org/std/default/trait.Default.html)  
-  Example: `cargo test --example default` 
+  Example: [`cargo test --example default`](./examples/default.rs)
+
+## Downcasting
+
+An example of how to use downcasting with mockiato can be found in the [`downcasting`](./examples/downcasting.rs) example.
 
 ## Contributing
 
