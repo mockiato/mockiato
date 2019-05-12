@@ -1,4 +1,4 @@
-use crate::constant::ATTR_NAME;
+use crate::constant::{ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME};
 use crate::diagnostic::DiagnosticBuilder;
 use crate::result::Result;
 use syn::spanned::Spanned;
@@ -16,10 +16,13 @@ impl StaticAttr {
         }
 
         let error_message = format!(
-            "#[{}(static_references) does not take any parameters",
-            ATTR_NAME
+            "#[{}({}) does not take any parameters",
+            ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME
         );
-        let help_message = format!("Example usage: #[{}(static_references)]", ATTR_NAME);
+        let help_message = format!(
+            "Example usage: #[{}({})]",
+            ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME
+        );
         let error = DiagnosticBuilder::error(meta_item_span, error_message)
             .help(help_message)
             .build()

@@ -1,4 +1,4 @@
-use crate::constant::ATTR_NAME;
+use crate::constant::{ATTR_NAME, MOCK_STRUCT_NAME_ATTR_PARAM_NAME};
 use crate::diagnostic::DiagnosticBuilder;
 use crate::result::Result;
 use syn::spanned::Spanned;
@@ -21,8 +21,16 @@ impl NameAttr {
             }
         }
 
-        let error_message = format!("#[{}(name = \"...\") expects a string literal", ATTR_NAME);
-        let help_message = format!("Example usage: #[{}(name = \"FooMock\")]", ATTR_NAME,);
+        let error_message = format!(
+            "#[{attr}({param} = \"...\") expects a string literal",
+            attr = ATTR_NAME,
+            param = MOCK_STRUCT_NAME_ATTR_PARAM_NAME
+        );
+        let help_message = format!(
+            "Example usage: #[{attr}({param} = \"FooMock\")]",
+            attr = ATTR_NAME,
+            param = MOCK_STRUCT_NAME_ATTR_PARAM_NAME
+        );
         let error = DiagnosticBuilder::error(meta_item_span, error_message)
             .help(help_message)
             .build()
