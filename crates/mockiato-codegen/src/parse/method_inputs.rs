@@ -114,24 +114,25 @@ impl MethodArg {
                         Ok(MethodArg {
                             ident: sanitize_method_ident(&pat_ident.ident),
                             ty: captured.ty,
-                            span
+                            span,
                         })
-                    },
-                    _ => {
-                        Err(
-                            DiagnosticBuilder::error(span, "Ignored arguments are not supported")
-                                .build()
-                                .into()
-                        )
-                    },
+                    }
+                    _ => Err(
+                        DiagnosticBuilder::error(span, "Ignored arguments are not supported")
+                            .build()
+                            .into(),
+                    ),
                 }
             }
             _ => Err(
                 DiagnosticBuilder::error(span, "Only captured arguments are supported")
-                    .note("This error should never appear, because rustc already enforces these requirements")
+                    .note(
+                        "This error should never appear, because rustc already enforces these \
+                         requirements",
+                    )
                     .build()
-                    .into()
-            )
+                    .into(),
+            ),
         }
     }
 }
