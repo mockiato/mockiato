@@ -21,7 +21,7 @@
 //! ```
 //!
 //! # Call Verification
-//! Mockiato automatically verifies that all expected calls were made when a mock goes out of scope.
+//! Mockiato automatically verifies that all expected calls were made when the mock goes out of scope.
 //! The mock panics when a method is called that was not configured, or if the parameters did not match.
 //! ```
 //! #[cfg_attr(test, mockable)]
@@ -38,7 +38,7 @@
 //!
 //!     assert_eq!("Hello Jane", greeter.greet("Jane"));
 //!     ///                              ^^^^^^^^^^^^^
-//!     ///                              This call was not configured which results in a panic
+//!     ///                              This call was not configured, which results in a panic
 //!
 //!     ///      The mock verifies that all expected calls have been made
 //!     /// <--  and panics otherwise
@@ -84,7 +84,7 @@ pub use mockiato_codegen::mockable;
 /// ```
 ///
 /// ## `name`
-/// Allows customizing the mock struct's name.
+/// Sets a custom name for the mock struct instead of the default.
 /// ```
 /// use mockiato::mockable;
 ///
