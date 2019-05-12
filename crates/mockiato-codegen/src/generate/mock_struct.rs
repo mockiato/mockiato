@@ -126,7 +126,7 @@ fn generate_method_field(
     let mock_lifetime = mock_lifetime();
 
     quote! {
-        #ident: mockiato::internal::Method<#mock_lifetime, self::#mod_ident::#arguments_matcher_struct_ident #ty_generics, #return_type>,
+        #ident: mockiato::internal::Method<#mock_lifetime, #mod_ident::#arguments_matcher_struct_ident #ty_generics, #return_type>,
     }
 }
 
@@ -226,12 +226,12 @@ panicking if the function was not called by the time the object goes out of scop
         ) -> mockiato::internal::MethodCallBuilder<
             #mock_lifetime,
             '_,
-            self::#mod_ident::#arguments_matcher_ident #ty_generics,
+            #mod_ident::#arguments_matcher_ident #ty_generics,
             #return_type
         > where #where_clause
         {
             self.#method_ident.add_expected_call(
-                self::#mod_ident::#arguments_matcher_ident {
+                #mod_ident::#arguments_matcher_ident {
                     #expected_parameters
                     phantom_data: std::marker::PhantomData,
                 }
