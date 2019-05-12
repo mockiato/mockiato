@@ -74,8 +74,7 @@ fn to_proc_macro_diagnostic(source: Diagnostic) -> ProcMacroDiagnostic {
     let span = to_proc_macro_span(source.span);
     let diagnostic = ProcMacroDiagnostic::spanned(span, level, source.message);
     let diagnostic = add_notes_to_proc_macro_diagnostic(diagnostic, source.notes);
-    let diagnostic = add_help_to_proc_macro_diagnostic(diagnostic, source.help);
-    diagnostic
+    add_help_to_proc_macro_diagnostic(diagnostic, source.help)
 }
 
 fn add_help_to_proc_macro_diagnostic(

@@ -36,7 +36,7 @@ pub(super) fn mock_struct_ident(trait_decl: &TraitDecl) -> Ident {
 
     Ident::new(
         &format!("{}{}", trait_decl.ident, IDENTIFIER_SUFFIX),
-        trait_decl.span.into(),
+        trait_decl.span,
     )
 }
 
