@@ -11,7 +11,7 @@ fn test() {
     let mut greeter = GreeterMock::new();
 
     greeter
-        .expect_greet(|f| f.partial_eq(&name))
+        .expect_greet(|a| a.partial_eq(&name))
         .returns(String::from("Hello Peter Parker"));
 
     assert_eq!(

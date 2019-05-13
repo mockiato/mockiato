@@ -16,7 +16,7 @@ struct Greeting;
 fn trait_with_debug_bound_can_be_formatted() {
     let mut greeter: GreeterMock<'_, Name, Greeting> = GreeterMock::new();
 
-    let mut builder = greeter.expect_greet(|f| f.partial_eq(Name));
+    let mut builder = greeter.expect_greet(|a| a.partial_eq(Name));
     builder.times(..).returns(Greeting);
 
     let _assert_builder_can_be_debug_formatted = format!("{:?}", builder);

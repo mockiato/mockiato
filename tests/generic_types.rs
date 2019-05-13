@@ -50,7 +50,7 @@ fn trait_with_generic_type_argument_can_be_mocked() {
     let mut mock: GreeterMock<Name, String> = GreeterMock::new();
     const EXPECTED_NUMBER_OF_CALLS: u64 = 2;
 
-    mock.expect_generic_param_as_argument(|f| f.partial_eq(Name::new("Foo")))
+    mock.expect_generic_param_as_argument(|a| a.partial_eq(Name::new("Foo")))
         .times(EXPECTED_NUMBER_OF_CALLS)
         .returns(String::from("Hello Foo"));
 

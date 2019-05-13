@@ -1,4 +1,4 @@
-use crate::internal::argument_matcher_factory::ArgumentMatcherFactory;
+use crate::internal::argument::Argument;
 use crate::internal::fmt::MaybeDebug;
 use crate::internal::fmt::MaybeDebugWrapper;
 use crate::internal::ArgumentMatcher;
@@ -6,7 +6,7 @@ use nameof::name_of;
 use nearly_eq::NearlyEq;
 use std::fmt::{self, Debug, Display};
 
-impl ArgumentMatcherFactory {
+impl Argument {
     /// Creates an argument matcher that matches values using [`NearlyEq`].
     /// Uses the default epsilon value defined by [`NearlyEq`].
     ///
@@ -22,7 +22,7 @@ impl ArgumentMatcherFactory {
     /// let expected_result = String::from("0.3");
     /// let mut formatter = FloatFormatterMock::new();
     /// formatter
-    ///     .expect_format_float(|f| f.nearly_eq(0.3))
+    ///     .expect_format_float(|a| a.nearly_eq(0.3))
     ///     .returns(expected_result.clone());
     ///
     /// assert_eq!(expected_result, formatter.format_float(0.1 + 0.2),)
@@ -53,7 +53,7 @@ impl ArgumentMatcherFactory {
     /// let expected_result = String::from("0.3");
     /// let mut formatter = FloatFormatterMock::new();
     /// formatter
-    ///     .expect_format_float(|f| f.nearly_eq_with_accuracy(0.3, 1e-10))
+    ///     .expect_format_float(|a| a.nearly_eq_with_accuracy(0.3, 1e-10))
     ///     .returns(expected_result.clone());
     ///
     /// assert_eq!(expected_result, formatter.format_float(0.1 + 0.2),)
@@ -127,7 +127,7 @@ mod test {
 
     #[test]
     fn float_is_not_nearly_equivalent_to_different_float() {
-        let factory = ArgumentMatcherFactory::internal_new();
+        let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value + 1.0;
 
@@ -138,7 +138,7 @@ mod test {
 
     #[test]
     fn float_is_nearly_equivalent_to_slightly_different_float() {
-        let factory = ArgumentMatcherFactory::internal_new();
+        let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value + 0.000_000_000_000_1;
 
@@ -149,7 +149,7 @@ mod test {
 
     #[test]
     fn float_is_nearly_equal_to_itself() {
-        let factory = ArgumentMatcherFactory::internal_new();
+        let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value;
 
@@ -160,7 +160,7 @@ mod test {
 
     #[test]
     fn float_is_not_nearly_equal_to_different_float_with_no_accuracy() {
-        let factory = ArgumentMatcherFactory::internal_new();
+        let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value + 1.0;
         let accuracy = 0.0;
@@ -172,7 +172,7 @@ mod test {
 
     #[test]
     fn float_is_not_nearly_equal_to_different_float_with_same_accuracy_as_difference() {
-        let factory = ArgumentMatcherFactory::internal_new();
+        let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value + 0.1;
         let accuracy = 0.1;
@@ -184,7 +184,7 @@ mod test {
 
     #[test]
     fn float_is_nearly_equal_to_different_float_low_accuracy() {
-        let factory = ArgumentMatcherFactory::internal_new();
+        let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value + 0.01;
         let accuracy = 0.1;
@@ -196,7 +196,7 @@ mod test {
 
     #[test]
     fn float_is_not_nearly_equal_to_different_float_with_highest_accuracy() {
-        let factory = ArgumentMatcherFactory::internal_new();
+        let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value + 0.1;
         let accuracy = 0.0;
@@ -208,7 +208,7 @@ mod test {
 
     #[test]
     fn float_is_nearly_equal_to_itself_with_highest_accuracy() {
-        let factory = ArgumentMatcherFactory::internal_new();
+        let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value;
         let accuracy = 0.0;

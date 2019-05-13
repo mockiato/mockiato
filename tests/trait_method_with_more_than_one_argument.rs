@@ -11,8 +11,8 @@ fn test() {
 
     message_sender
         .expect_send_message(
-            |f| f.partial_eq("Jane"),
-            |f| f.partial_eq("Don't make lemonade"),
+            |a| a.partial_eq("Jane"),
+            |a| a.partial_eq("Don't make lemonade"),
         )
         .times(1..);
 

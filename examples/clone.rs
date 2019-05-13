@@ -23,7 +23,7 @@ fn main() {
     let mut greeter = GreeterMock::new();
 
     greeter
-        .expect_greet(|f| f.partial_eq("Tom"))
+        .expect_greet(|a| a.partial_eq("Tom"))
         .times(2)
         .returns(String::from("Hello Tom"));
 

@@ -1,10 +1,10 @@
 use super::ArgumentMatcher;
-use crate::internal::argument_matcher_factory::ArgumentMatcherFactory;
+use crate::internal::argument::Argument;
 use crate::internal::fmt::{MaybeDebug, MaybeDebugWrapper};
 use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 
-impl ArgumentMatcherFactory {
+impl Argument {
     /// Creates an argument matcher that matches values using [`PartialEq`].
     ///
     /// # Examples
@@ -18,7 +18,7 @@ impl ArgumentMatcherFactory {
     ///
     /// let mut sender = MessageSenderMock::new();
     /// let message = "Hello World";
-    /// sender.expect_send_message(|f| f.partial_eq(message));
+    /// sender.expect_send_message(|a| a.partial_eq(message));
     /// sender.send_message(message);
     /// ```
     pub fn partial_eq<T>(&self, value: T) -> PartialEqArgumentMatcher<T> {
@@ -43,7 +43,7 @@ impl ArgumentMatcherFactory {
     ///
     /// # fn main() {
     /// let mut sender = MessageSenderMock::new();
-    /// sender.expect_send_message(|f| f.partial_eq_owned(Message::Ping));
+    /// sender.expect_send_message(|a| a.partial_eq_owned(Message::Ping));
     /// sender.send_message(&Message::Ping);
     /// # }
     /// ```

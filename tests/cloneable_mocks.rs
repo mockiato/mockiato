@@ -29,7 +29,7 @@ fn cloneable_mocks_work() {
     let mut greeter = GreeterMock::new();
 
     greeter
-        .expect_greet(|f| f.partial_eq(&name))
+        .expect_greet(|a| a.partial_eq(&name))
         .times(2)
         .returns(String::from("Hello Tom"));
 

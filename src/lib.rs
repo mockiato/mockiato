@@ -13,7 +13,7 @@
 //! let mut greeter = GreeterMock::new();
 //!
 //! greeter
-//!     .expect_greet(|f| f.partial_eq("Jane"))
+//!     .expect_greet(|a| a.partial_eq("Jane"))
 //!     .times(1..)
 //!     .returns(String::from("Hello Jane"));
 //!
@@ -35,7 +35,7 @@
 //!     let mut greeter = GreeterMock::new();
 //!
 //!     greeter
-//!         .expect_greet(|f| f.partial_eq("Doe"))
+//!         .expect_greet(|a| a.partial_eq("Doe"))
 //!         .times(1..)
 //!         .returns(String::from("Hello Doe"));
 //!
@@ -100,7 +100,7 @@ macro_rules! mockable {
     () => {};
 }
 
-pub use crate::internal::argument_matcher_factory::ArgumentMatcherFactory;
+pub use crate::internal::argument::Argument;
 pub use crate::internal::expected_calls::ExpectedCalls;
 pub use crate::internal::MethodCallBuilder;
 

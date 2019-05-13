@@ -1,10 +1,10 @@
 use super::ArgumentMatcher;
-use crate::internal::argument_matcher_factory::ArgumentMatcherFactory;
+use crate::internal::argument::Argument;
 use crate::internal::fmt::{MaybeDebug, MaybeDebugWrapper};
 use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 
-impl ArgumentMatcherFactory {
+impl Argument {
     /// Creates a new `ArgumentMatcher` that matches [`Vec`]s and [`slice`]s
     /// while disregarding the exact order of the elements.
     ///

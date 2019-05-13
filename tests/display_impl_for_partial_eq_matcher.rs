@@ -1,4 +1,4 @@
-use mockiato::{mockable, ArgumentMatcherFactory};
+use mockiato::{mockable, Argument};
 
 #[derive(Debug, PartialEq)]
 struct Person {
@@ -15,7 +15,7 @@ trait Greeter {
 
 #[test]
 fn partial_eq_matcher_has_display_output() {
-    let factory = ArgumentMatcherFactory::internal_new();
+    let factory = Argument::internal_new();
     let matcher = factory.partial_eq(Person {
         name: "Name".into(),
         age: 30,
@@ -57,7 +57,7 @@ fn partial_eq_matcher_has_display_output_for_reference_when_printed_as_expected_
     };
     let mut greeter = GreeterMock::new();
     greeter
-        .expect_greet_ref(|f| f.partial_eq(&person))
+        .expect_greet_ref(|a| a.partial_eq(&person))
         .times(2)
         .returns(String::from("Hello Name"));
 }
