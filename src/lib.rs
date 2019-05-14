@@ -20,6 +20,52 @@
 //! assert_eq!("Hello Jane", greeter.greet("Jane"));
 //! ```
 //!
+//! # Configuring Expected Calls
+//!
+//! Each method on the trait receives two companion methods on the mock struct:
+//!
+//! ## `expect_<method_name>`
+//!
+//! Registers an expected call to the mocked method. Exactly one call is expected by default.
+//! The order in which these methods are called is irrelevant, unless configured otherwise.
+//!
+//! It has the same amount of arguments as the mocked method.
+//! Each argument accepts a closure that is invoked with a reference to [`Argument`], which lets
+//! you create different argument matchers.
+//!
+//! This method returns a [`MethodCallBuilder`] which allows for further customization of an expected call's behavior.
+//!
+//! ```
+//! use mockiato::mockable;
+//!
+//! #[mockable]
+//! trait MessageSender {
+//!     fn send_message(&self, recipient: &str, message: &str);
+//! }
+//!
+//! let mut message_sender = MessageSenderMock::new();
+//! message_sender
+//!     .expect_send_message(|a| a.partial_eq("Paul"), |a| a.any())
+//!     .times(..);
+//! ```
+//!
+//! ## `expect_<method_name>_calls_in_order`
+//!
+//! Configures the mocked method so that the expected calls are processed sequentially.
+//! When this is enabled, the calls to the mocked method must be in the same order as the `expect_` methods were called.
+//!
+//! ```
+//! # use mockiato::mockable;
+//! #
+//! # #[mockable]
+//! # trait MessageSender {
+//! #     fn send_message(&self, recipient: &str, message: &str);
+//! # }
+//! #
+//! # let mut message_sender = MessageSenderMock::new();
+//! message_sender.expect_send_message_calls_in_order();
+//! ```
+//!
 //! # Call Verification
 //! Mockiato automatically verifies that all expected calls were made when the mock goes out of scope.
 //! The mock panics when a method is called that was not configured, or if the parameters did not match.
