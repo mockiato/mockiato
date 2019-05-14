@@ -1,4 +1,4 @@
-use mockiato::{mockable, partial_eq};
+use mockiato::mockable;
 
 #[mockable]
 trait Greeter {
@@ -11,7 +11,7 @@ fn test() {
     let mut greeter = GreeterMock::new();
 
     greeter
-        .expect_greet(partial_eq(&name))
+        .expect_greet(|a| a.partial_eq(&name))
         .returns(String::from("Hello Peter Parker"));
 
     assert_eq!(

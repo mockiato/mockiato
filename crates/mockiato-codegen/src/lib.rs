@@ -1,5 +1,6 @@
 //! Codegen for `mockiato`. Do not use this crate directly.
 
+#![recursion_limit = "128"]
 #![feature(
     proc_macro_diagnostic,
     proc_macro_span,
