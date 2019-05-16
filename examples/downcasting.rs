@@ -1,5 +1,4 @@
-// In order to downcast from a trait object to a concrete implementation, a trait needs an `as_any` method.
-// [Source](https://stackoverflow.com/a/33687996/6827589)
+// [In order to downcast from a trait object to a concrete implementation, a trait needs an `as_any` method.](https://stackoverflow.com/a/33687996/6827589)
 // This is an issue, because there's no way to sensibly mock this method with mockiato.
 // The solution is to split the `as_any` method into a separate trait.
 
