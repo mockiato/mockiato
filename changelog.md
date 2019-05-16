@@ -27,3 +27,9 @@
 
 ## 0.5.1
 - The `Debug` impl for mocks of traits with generic type params no longer require that the generic types implements `Debug`.
+
+## 0.6.0
+- **Breaking:** The `expect_*` methods now require passing a closure for each argument that receives a factory to create argument matchers. This has been changed so that crates using mocks from another crate no longer need to depend on the same version of mockiato.
+- **Breaking:** It is now a hard error when `name` is specified more than once in the `#[mockable]` attribute.
+- The `Display` implementation of some argument matchers has been improved.
+- A lot of documentation has been added.
