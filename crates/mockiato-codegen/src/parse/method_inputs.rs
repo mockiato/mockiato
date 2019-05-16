@@ -1,9 +1,10 @@
-use crate::spanned::SpannedUnstable;
-use crate::{merge_results, Error, Result};
-use proc_macro::{Diagnostic, Level, Span};
-use proc_macro2::TokenStream;
+use crate::constant::CREATE_ISSUE_LINK;
+use crate::diagnostic::DiagnosticBuilder;
+use crate::result::{merge_results, Error, Result};
+use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Token, Type};
 
 #[derive(Clone)]
@@ -15,20 +16,14 @@ pub(crate) struct MethodInputs {
 
 impl MethodInputs {
     pub(crate) fn parse(inputs: Punctuated<FnArg, Token![,]>) -> Result<Self> {
-        let span = inputs.span_unstable();
+        let span = inputs.span();
         let mut inputs_iter = inputs.into_iter();
 
         let self_arg = inputs_iter
             .next()
             .ok_or(())
             .and_then(MethodSelfArg::parse)
-            .map_err(|_| {
-                Error::Diagnostic(Diagnostic::spanned(
-                    span,
-                    Level::Error,
-                    "The first parameter of a method must be self, so that the trait is object-safe",
-                ))
-            })?;
+            .map_err(|_| first_argument_is_not_self_error(span))?;
 
         let args = inputs_iter.map(MethodArg::parse);
 
@@ -37,6 +32,12 @@ impl MethodInputs {
             args: merge_results(args)?.collect(),
         })
     }
+}
+
+fn first_argument_is_not_self_error(span: Span) -> Error {
+    let error_message =
+        "The first parameter of a method must be self, so that the trait is object-safe";
+    DiagnosticBuilder::error(span, error_message).build().into()
 }
 
 #[derive(Clone)]
@@ -94,14 +95,14 @@ pub(crate) struct MethodArg {
 
 impl MethodArg {
     pub(crate) fn parse(arg: FnArg) -> Result<Self> {
-        let span = arg.span_unstable();
+        let span = arg.span();
 
         match arg {
             // A "captured" argument is the "normal" way of specifying an argument
             // with an explicit name and type.
             // E.g. `name: &str`
             FnArg::Captured(captured) => {
-                let span = captured.span_unstable();
+                let span = captured.span();
 
                 match captured.pat {
                     Pat::Ident(pat_ident) => {
@@ -114,22 +115,26 @@ impl MethodArg {
                         Ok(MethodArg {
                             ident: sanitize_method_ident(&pat_ident.ident),
                             ty: captured.ty,
-                            span
+                            span,
                         })
-                    },
-                    _ => {
-                        Err(Error::Diagnostic(Diagnostic::spanned(
-                        span,
-                        Level::Error,
-                        "Ignored arguments are not supported")))
-                    },
+                    }
+                    _ => Err(
+                        DiagnosticBuilder::error(span, "Ignored arguments are not supported")
+                            .build()
+                            .into(),
+                    ),
                 }
             }
-            _ => Err(Error::Diagnostic(Diagnostic::spanned(
-                span,
-                Level::Error,
-                "Only captured arguments are supported",
-            ).note("This error should never appear, because rustc already enforces these requirements"))),
+            _ => Err(
+                DiagnosticBuilder::error(span, "Only captured arguments are supported")
+                    .note(format!(
+                        "This error should never appear, because rustc already enforces these \
+                         requirements. Please report this error using the following link: {}",
+                        CREATE_ISSUE_LINK
+                    ))
+                    .build()
+                    .into(),
+            ),
         }
     }
 }

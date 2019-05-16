@@ -1,52 +1,42 @@
-use proc_macro::Diagnostic;
+use crate::diagnostic::Diagnostic;
+use std::iter::FromIterator;
 
 pub(crate) type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
-pub(crate) enum Error {
-    Diagnostic(Diagnostic),
-    MultipleDiagnostics(Vec<Diagnostic>),
+pub(crate) struct Error {
+    pub(crate) diagnostics: Vec<Diagnostic>,
 }
 
-impl Error {
-    /// Emits all [`Diagnostic`] messages stored in this error.
-    pub(crate) fn emit(self) {
-        self.emit_with(|d| d);
-    }
-
-    /// Emits all [`Diagnostic`] messages stored in this error.
-    /// The passed [`Fn`] acts as a transformation function and is called for every
-    /// [`Diagnostic`] in this error.
-    pub(crate) fn emit_with<F>(self, map_fn: F)
+impl FromIterator<Error> for Error {
+    fn from_iter<T>(iter: T) -> Self
     where
-        F: Fn(Diagnostic) -> Diagnostic,
+        T: IntoIterator<Item = Error>,
     {
-        match self {
-            Error::Diagnostic(diagnostic) => map_fn(diagnostic).emit(),
-            Error::MultipleDiagnostics(diagnostics) => {
-                diagnostics.into_iter().for_each(|d| map_fn(d).emit());
-            }
-        };
+        let diagnostics = iter
+            .into_iter()
+            .map(|error| error.diagnostics.into_iter())
+            .flatten()
+            .collect();
+        Self { diagnostics }
     }
+}
 
-    /// Creates a new [`Error`] by merging an Iterator and collecting
-    /// all [`Diagnostic`] messages.
-    pub(crate) fn merge<I>(errors: I) -> Self
+impl FromIterator<Diagnostic> for Error {
+    fn from_iter<T>(iter: T) -> Self
     where
-        I: Iterator<Item = Error>,
+        T: IntoIterator<Item = Diagnostic>,
     {
-        let mut collected = Vec::new();
+        let diagnostics = iter.into_iter().collect();
+        Self { diagnostics }
+    }
+}
 
-        if let (_, Some(max)) = errors.size_hint() {
-            collected.reserve(max);
+impl From<Diagnostic> for Error {
+    fn from(diagnostic: Diagnostic) -> Error {
+        Error {
+            diagnostics: vec![diagnostic],
         }
-
-        errors.for_each(|err| match err {
-            Error::Diagnostic(diagnostic) => collected.push(diagnostic),
-            Error::MultipleDiagnostics(mut diagnostics) => collected.append(&mut diagnostics),
-        });
-
-        Error::MultipleDiagnostics(collected)
     }
 }
 
@@ -56,7 +46,7 @@ where
 {
     let results: Vec<_> = results.collect();
     if results.iter().any(Result::is_err) {
-        Err(Error::merge(results.into_iter().filter_map(Result::err)))
+        Err(results.into_iter().filter_map(Result::err).collect())
     } else {
         Ok(results.into_iter().map(Result::unwrap))
     }

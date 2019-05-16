@@ -1,21 +1,41 @@
 use super::ArgumentMatcher;
-use crate::internal::fmt::{MaybeDebug, MaybeDebugWrapper};
+use crate::internal::argument::Argument;
+use crate::internal::fmt::MaybeDebugWrapper;
 use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 
-/// Creates a new `ArgumentMatcher` that matches [`Vec`]s and [`slice`]s
-/// while disregarding the exact order of the elements.
-///
-/// [`slice`]: https://doc.rust-lang.org/std/primitive.slice.html
-pub fn unordered_vec_eq<T>(vec: Vec<T>) -> UnorderedVecArgumentMatcher<T> {
-    UnorderedVecArgumentMatcher(vec)
+impl Argument {
+    /// Creates an argument matcher that matches against [`Vec`]s and [`slice`]s
+    /// while disregarding the exact order of the elements.
+    ///
+    /// Requires the elements to implement [`PartialEq`].
+    ///
+    /// # Examples
+    /// ```
+    /// use mockiato::mockable;
+    ///
+    /// #[cfg_attr(test, mockable)]
+    /// trait MessageSender {
+    ///     fn send_message(&self, messages: &[&str]);
+    /// }
+    ///
+    /// let mut sender = MessageSenderMock::new();
+    /// let message = "Hello World";
+    /// sender.expect_send_message(|arg| arg.unordered_vec_eq(vec!["foo", "bar", "baz"]));
+    /// sender.send_message(&["baz", "bar", "foo"]);
+    /// ```
+    ///
+    /// [`slice`]: https://doc.rust-lang.org/std/primitive.slice.html
+    pub fn unordered_vec_eq<T>(&self, vec: Vec<T>) -> UnorderedVecArgumentMatcher<T> {
+        UnorderedVecArgumentMatcher(vec)
+    }
 }
 
 pub struct UnorderedVecArgumentMatcher<T>(Vec<T>);
 
 impl<T> Display for UnorderedVecArgumentMatcher<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        MaybeDebug::fmt(&self.0, f)
+        write!(f, "{:?} in any order", &MaybeDebugWrapper(&self.0))
     }
 }
 

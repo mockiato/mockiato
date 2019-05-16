@@ -1,10 +1,11 @@
 use super::check_option_is_none;
+use crate::diagnostic::DiagnosticBuilder;
 use crate::parse::method_inputs::MethodInputs;
-use crate::spanned::SpannedUnstable;
+use crate::result::{merge_results, Error, Result};
 use crate::syn_ext::PathExt;
-use crate::{merge_results, Error, Result};
-use proc_macro::{Diagnostic, Level, Span};
+use proc_macro2::Span;
 use std::collections::HashSet;
+use syn::spanned::Spanned;
 use syn::visit::{visit_type, Visit};
 use syn::{
     Attribute, FnDecl, GenericParam, Generics, Ident, MethodSig, Path, ReturnType, Token,
@@ -39,11 +40,7 @@ impl MethodDecl {
     ) -> Result<Self> {
         match trait_item {
             TraitItem::Method(method) => Self::parse_method(method, generic_types_on_trait),
-            _ => Err(Error::Diagnostic(Diagnostic::spanned(
-                trait_item.span_unstable(),
-                Level::Error,
-                "Traits are only allowed to contain methods",
-            ))),
+            trait_item => Err(invalid_trait_item_error(&trait_item)),
         }
     }
 
@@ -51,7 +48,7 @@ impl MethodDecl {
         method: TraitItemMethod,
         generic_types_on_trait: &HashSet<Ident>,
     ) -> Result<Self> {
-        let span = method.span_unstable();
+        let span = method.span();
 
         let TraitItemMethod {
             attrs,
@@ -93,20 +90,32 @@ impl MethodDecl {
     }
 }
 
+fn invalid_trait_item_error(trait_item: &TraitItem) -> Error {
+    DiagnosticBuilder::error(
+        trait_item.span(),
+        "Traits are only allowed to contain methods",
+    )
+    .build()
+    .into()
+}
+
 fn validate_generic_type_parameters(generics: &Generics) -> Result<()> {
     let results = generics
         .params
         .iter()
         .map(|generic_param| match generic_param {
             GenericParam::Lifetime(_) => Ok(()),
-            generic_param => Err(Error::Diagnostic(Diagnostic::spanned(
-                generic_param.span_unstable(),
-                Level::Error,
-                "Only lifetimes are supported as generic parameters on methods",
-            ))),
+            generic_param => Err(invalid_generic_param(generic_param)),
         });
 
     merge_results(results).map(|_| ())
+}
+
+fn invalid_generic_param(generic_param: &GenericParam) -> Error {
+    let error_message = "Only lifetimes are supported as generic parameters on methods";
+    DiagnosticBuilder::error(generic_param.span(), error_message)
+        .build()
+        .into()
 }
 
 fn validate_usage_of_generic_types(
@@ -119,20 +128,17 @@ fn validate_usage_of_generic_types(
     if references_to_generic_types.is_empty() {
         Ok(())
     } else {
-        Err(Error::merge(
-            references_to_generic_types
-                .into_iter()
-                .map(error_for_reference_to_generic_type),
-        ))
+        Err(references_to_generic_types
+            .into_iter()
+            .map(error_for_reference_to_generic_type)
+            .collect())
     }
 }
 
 fn error_for_reference_to_generic_type(ty: &Type) -> Error {
-    Error::Diagnostic(Diagnostic::spanned(
-        ty.span_unstable(),
-        Level::Error,
-        "References to generic types are not supported",
-    ))
+    DiagnosticBuilder::error(ty.span(), "References to generic types are not supported")
+        .build()
+        .into()
 }
 
 fn find_references_to_generic_types<'a>(

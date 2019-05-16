@@ -1,23 +1,55 @@
 use super::ArgumentMatcher;
+use crate::internal::argument::Argument;
 use crate::internal::fmt::{MaybeDebug, MaybeDebugWrapper};
 use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 
-/// Creates a new `ArgumentMatcher` that matches against values using [`PartialEq`]
-pub fn partial_eq<T>(value: T) -> PartialEqArgumentMatcher<T>
-where
-    T: MaybeDebug,
-{
-    PartialEqArgumentMatcher { value }
-}
+impl Argument {
+    /// Creates an argument matcher that matches values using [`PartialEq`].
+    ///
+    /// # Examples
+    /// ```
+    /// use mockiato::mockable;
+    ///
+    /// #[cfg_attr(test, mockable)]
+    /// trait MessageSender {
+    ///     fn send_message(&self, message: &str);
+    /// }
+    ///
+    /// let mut sender = MessageSenderMock::new();
+    /// let message = "Hello World";
+    /// sender.expect_send_message(|arg| arg.partial_eq(message));
+    /// sender.send_message(message);
+    /// ```
+    pub fn partial_eq<T>(&self, value: T) -> PartialEqArgumentMatcher<T> {
+        PartialEqArgumentMatcher { value }
+    }
 
-/// Creates a new `ArgumentMatcher` that matches against values using [`PartialEq`].
-/// Supports comparing a reference against an owned value.
-pub fn partial_eq_owned<T>(value: T) -> OwnedPartialEqArgumentMatcher<T>
-where
-    T: MaybeDebug,
-{
-    OwnedPartialEqArgumentMatcher { value }
+    /// Creates an argument matcher that matches an owned value against references of itself using [`PartialEq`].
+    ///
+    /// # Examples
+    /// ```
+    /// use mockiato::mockable;
+    ///
+    /// #[derive(Clone, PartialEq)]
+    /// enum Message {
+    ///     Ping,
+    /// }
+    ///
+    /// #[cfg_attr(test, mockable)]
+    /// trait MessageSender {
+    ///     fn send_message(&self, message: &Message);
+    /// }
+    ///
+    /// # fn main() {
+    /// let mut sender = MessageSenderMock::new();
+    /// sender.expect_send_message(|arg| arg.partial_eq_owned(Message::Ping));
+    /// sender.send_message(&Message::Ping);
+    /// # }
+    /// ```
+    pub fn partial_eq_owned<T>(&self, value: T) -> OwnedPartialEqArgumentMatcher<T> {
+        OwnedPartialEqArgumentMatcher { value }
+    }
 }
 
 pub struct PartialEqArgumentMatcher<T>

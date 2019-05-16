@@ -9,6 +9,7 @@ pub use self::matcher::{ArgumentMatcher, ArgumentsMatcher};
 pub use self::method::Method;
 pub use self::method_call::MethodCallBuilder;
 
+pub(crate) mod argument;
 mod arguments;
 pub(crate) mod expected_calls;
 mod fmt;

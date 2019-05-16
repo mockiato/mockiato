@@ -64,7 +64,7 @@ fn generate_method_impl(
     quote! {
         #unsafety fn #ident#impl_generics(#self_arg, #arguments) #output #where_clause {
             self.#ident.call_unwrap(
-                self::#mod_ident::#arguments_struct_ident {
+                #mod_ident::#arguments_struct_ident {
                     #arguments_struct_fields
                     phantom_data: std::marker::PhantomData,
                 }

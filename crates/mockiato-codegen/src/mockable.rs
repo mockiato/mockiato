@@ -1,10 +1,11 @@
+use crate::diagnostic::DiagnosticBuilder;
 use crate::generate::{generate_mock, GenerateMockOptions};
 use crate::parse::mockable_attr::MockableAttr;
 use crate::parse::trait_decl::TraitDecl;
-use crate::spanned::SpannedUnstable;
-use crate::Error;
-use proc_macro::{Diagnostic, Level, Span, TokenStream};
+use crate::result::Error;
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
+use syn::spanned::Spanned;
 use syn::{AttributeArgs, Item, ItemTrait};
 
 #[derive(Default)]
@@ -15,22 +16,10 @@ impl Mockable {
         Self::default()
     }
 
-    pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> TokenStream {
-        let original_item = item.clone();
-
-        #[doc(hidden)]
-        macro try_or_return($expr: expr) {
-            match $expr {
-                Ok(value) => value,
-                Err(_) => return TokenStream::from(quote! { #original_item }),
-            }
-        }
-
-        let mockable_attr = try_or_return!(MockableAttr::parse(attr).map_err(Error::emit));
-        let item_trait = try_or_return!(extract_item_trait(item).map_err(Error::emit));
-        let trait_decl = try_or_return!(TraitDecl::parse(item_trait.clone())
-            .map_err(|err| err
-                .emit_with(|d| d.span_note(Span::call_site(), "Required for mockable traits"))));
+    pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream, Error> {
+        let mockable_attr = MockableAttr::parse(attr)?;
+        let item_trait = extract_item_trait(item)?;
+        let trait_decl = TraitDecl::parse(item_trait.clone()).map_err(add_note_to_error)?;
 
         let generated_mock = generate_mock(
             &trait_decl,
@@ -40,7 +29,7 @@ impl Mockable {
             },
         );
 
-        TokenStream::from(quote! {
+        Ok(quote! {
             #item_trait
             #generated_mock
         })
@@ -50,13 +39,25 @@ impl Mockable {
 fn extract_item_trait(item: Item) -> Result<ItemTrait, Error> {
     match item {
         Item::Trait(item_trait) => Ok(item_trait),
-        _ => Err(Error::Diagnostic(
-            Diagnostic::spanned(
-                item.span_unstable(),
-                Level::Error,
-                "Only traits can be made mockable",
-            )
-            .span_note(Span::call_site(), "Required because of this attribute"),
-        )),
+        _ => Err(only_traits_can_be_made_mockable_error(&item)),
     }
+}
+
+fn add_note_to_error(error: Error) -> Error {
+    error
+        .diagnostics
+        .into_iter()
+        .map(|diagnostic| {
+            DiagnosticBuilder::from(diagnostic)
+                .note_with_span(Span::call_site(), "Required for mockable traits")
+                .build()
+        })
+        .collect()
+}
+
+fn only_traits_can_be_made_mockable_error(item: &Item) -> Error {
+    DiagnosticBuilder::error(item.span(), "Only traits can be made mockable")
+        .note_with_span(Span::call_site(), "Required because of this attribute")
+        .build()
+        .into()
 }

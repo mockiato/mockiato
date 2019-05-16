@@ -126,7 +126,7 @@ fn generate_method_field(
     let mock_lifetime = mock_lifetime();
 
     quote! {
-        #ident: mockiato::internal::Method<#mock_lifetime, self::#mod_ident::#arguments_matcher_struct_ident #ty_generics, #return_type>,
+        #ident: mockiato::internal::Method<#mock_lifetime, #mod_ident::#arguments_matcher_struct_ident #ty_generics, #return_type>,
     }
 }
 
@@ -188,7 +188,7 @@ fn generate_expect_method(
     let expected_parameters: TokenStream = arguments_with_generics
         .iter()
         .map(|(_, argument)| &argument.ident)
-        .map(|argument_ident| quote! { #argument_ident: Box::new(#argument_ident), })
+        .map(|argument_ident| quote! { #argument_ident: Box::new(#argument_ident(&argument)), })
         .collect();
 
     let requires_must_use_annotation = !is_empty_return_value(&return_type);
@@ -226,12 +226,14 @@ panicking if the function was not called by the time the object goes out of scop
         ) -> mockiato::internal::MethodCallBuilder<
             #mock_lifetime,
             '_,
-            self::#mod_ident::#arguments_matcher_ident #ty_generics,
+            #mod_ident::#arguments_matcher_ident #ty_generics,
             #return_type
         > where #where_clause
         {
+            #[allow(dead_code)]
+            let argument = mockiato::Argument::internal_new();
             self.#method_ident.add_expected_call(
-                self::#mod_ident::#arguments_matcher_ident {
+                #mod_ident::#arguments_matcher_ident {
                     #expected_parameters
                     phantom_data: std::marker::PhantomData,
                 }
@@ -314,7 +316,7 @@ fn generate_argument((generic_type_ident, method_argument): &(Ident, &MethodArg)
     let argument_ident = &method_argument.ident;
 
     quote! {
-        #argument_ident: #generic_type_ident,
+        #argument_ident: impl FnOnce(&mockiato::Argument) -> #generic_type_ident,
     }
 }
 
