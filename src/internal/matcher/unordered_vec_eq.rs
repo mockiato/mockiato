@@ -5,7 +5,7 @@ use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 
 impl Argument {
-    /// Creates an argument matcher that against [`Vec`]s and [`slice`]s
+    /// Creates an argument matcher that matches against [`Vec`]s and [`slice`]s
     /// while disregarding the exact order of the elements.
     ///
     /// Requires the elements to implement [`PartialEq`].
