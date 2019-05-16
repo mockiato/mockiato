@@ -1,4 +1,4 @@
-//! Minimalistic mocking framework, ready for Rust 2018
+//! A strict, yet friendly mocking library for Rust 2018
 //!
 //! # Examples
 //!
