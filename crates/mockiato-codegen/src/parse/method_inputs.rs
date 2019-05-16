@@ -1,3 +1,4 @@
+use crate::constant::CREATE_ISSUE_LINK;
 use crate::diagnostic::DiagnosticBuilder;
 use crate::result::{merge_results, Error, Result};
 use proc_macro2::{Span, TokenStream};
@@ -126,10 +127,11 @@ impl MethodArg {
             }
             _ => Err(
                 DiagnosticBuilder::error(span, "Only captured arguments are supported")
-                    .note(
+                    .note(format!(
                         "This error should never appear, because rustc already enforces these \
-                         requirements",
-                    )
+                         requirements. Please report this error using the following link: {}",
+                        CREATE_ISSUE_LINK
+                    ))
                     .build()
                     .into(),
             ),
