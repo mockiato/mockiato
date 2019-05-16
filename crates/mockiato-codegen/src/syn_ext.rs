@@ -31,6 +31,6 @@ mod tests {
         let path: Path = parse_quote!(Foo<'a>::Bar::Baz);
         let expected_ident: Ident = parse_quote!(Foo);
 
-        assert_eq!(&expected_ident, path.first_segment_as_ident().unwrap(),);
+        assert_eq!(&expected_ident, path.first_segment_as_ident().unwrap());
     }
 }
