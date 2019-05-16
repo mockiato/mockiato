@@ -70,19 +70,17 @@ fn attribute_property_not_supported_error(meta_item: &Meta) -> Error {
 }
 
 fn static_references_specified_more_than_once_error(meta_item: &Meta) -> Error {
-    let error_message = format!(
-        "`{}` is specified more than once.",
-        STATIC_REFERENCES_ATTR_PARAM_NAME
-    );
-    DiagnosticBuilder::error(meta_item.span(), error_message)
-        .build()
-        .into()
+    parameter_specified_more_than_once_error(STATIC_REFERENCES_ATTR_PARAM_NAME, meta_item)
 }
 
 fn name_specified_more_than_once_error(meta_item: &Meta) -> Error {
+    parameter_specified_more_than_once_error(MOCK_STRUCT_NAME_ATTR_PARAM_NAME, meta_item)
+}
+
+fn parameter_specified_more_than_once_error(name: &str, meta_item: &Meta) -> Error {
     let error_message = format!(
-        "`{}` should only be specified once",
-        MOCK_STRUCT_NAME_ATTR_PARAM_NAME
+        "`{}` is specified more than once.",
+        name
     );
     DiagnosticBuilder::error(meta_item.span(), error_message)
         .build()
