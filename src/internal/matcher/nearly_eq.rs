@@ -183,7 +183,7 @@ mod test {
     }
 
     #[test]
-     fn float_is_nearly_equal_to_different_float_with_low_accuracy() {
+    fn float_is_nearly_equal_to_different_float_with_low_accuracy() {
         let factory = Argument::internal_new();
         let first_value = 3.0;
         let second_value = first_value + 0.01;

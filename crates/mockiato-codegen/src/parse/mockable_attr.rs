@@ -78,10 +78,7 @@ fn name_specified_more_than_once_error(meta_item: &Meta) -> Error {
 }
 
 fn parameter_specified_more_than_once_error(name: &str, meta_item: &Meta) -> Error {
-    let error_message = format!(
-        "`{}` is specified more than once.",
-        name
-    );
+    let error_message = format!("`{}` is specified more than once.", name);
     DiagnosticBuilder::error(meta_item.span(), error_message)
         .build()
         .into()
