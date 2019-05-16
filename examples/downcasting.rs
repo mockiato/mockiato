@@ -7,7 +7,7 @@
 use mockiato::mockable;
 use std::any::Any;
 
-// `static_references` is required, because the `Any` trait requires `'static`
+// `static_references` is required, because the `Any` trait requires `'static`.
 #[cfg_attr(test, mockable(static_references))]
 trait ObjectBehavior: ObjectBehaviorAsAny {
     fn step(&mut self);
