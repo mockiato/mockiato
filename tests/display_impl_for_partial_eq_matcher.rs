@@ -57,7 +57,7 @@ fn partial_eq_matcher_has_display_output_for_reference_when_printed_as_expected_
     };
     let mut greeter = GreeterMock::new();
     greeter
-        .expect_greet_ref(|a| a.partial_eq(&person))
+        .expect_greet_ref(|arg| arg.partial_eq(&person))
         .times(2)
         .returns(String::from("Hello Name"));
 }

@@ -13,7 +13,7 @@
 //! let mut greeter = GreeterMock::new();
 //!
 //! greeter
-//!     .expect_greet(|a| a.partial_eq("Jane"))
+//!     .expect_greet(|arg| arg.partial_eq("Jane"))
 //!     .times(1..)
 //!     .returns(String::from("Hello Jane"));
 //!
@@ -45,7 +45,7 @@
 //!
 //! let mut message_sender = MessageSenderMock::new();
 //! message_sender
-//!     .expect_send_message(|a| a.partial_eq("Paul"), |a| a.any())
+//!     .expect_send_message(|arg| arg.partial_eq("Paul"), |arg| arg.any())
 //!     .times(..);
 //! ```
 //!
@@ -81,7 +81,7 @@
 //!     let mut greeter = GreeterMock::new();
 //!
 //!     greeter
-//!         .expect_greet(|a| a.partial_eq("Doe"))
+//!         .expect_greet(|arg| arg.partial_eq("Doe"))
 //!         .times(1..)
 //!         .returns(String::from("Hello Doe"));
 //!

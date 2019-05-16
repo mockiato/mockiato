@@ -21,7 +21,7 @@ impl Argument {
     ///
     /// let mut sender = MessageSenderMock::new();
     /// let message = "Hello World";
-    /// sender.expect_send_message(|a| a.unordered_vec_eq(vec!["foo", "bar", "baz"]));
+    /// sender.expect_send_message(|arg| arg.unordered_vec_eq(vec!["foo", "bar", "baz"]));
     /// sender.send_message(&["baz", "bar", "foo"]);
     /// ```
     ///

@@ -18,7 +18,7 @@ impl Argument {
     ///
     /// let mut sender = MessageSenderMock::new();
     /// let message = "Hello World";
-    /// sender.expect_send_message(|a| a.partial_eq(message));
+    /// sender.expect_send_message(|arg| arg.partial_eq(message));
     /// sender.send_message(message);
     /// ```
     pub fn partial_eq<T>(&self, value: T) -> PartialEqArgumentMatcher<T> {
@@ -43,7 +43,7 @@ impl Argument {
     ///
     /// # fn main() {
     /// let mut sender = MessageSenderMock::new();
-    /// sender.expect_send_message(|a| a.partial_eq_owned(Message::Ping));
+    /// sender.expect_send_message(|arg| arg.partial_eq_owned(Message::Ping));
     /// sender.send_message(&Message::Ping);
     /// # }
     /// ```

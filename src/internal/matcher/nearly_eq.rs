@@ -22,7 +22,7 @@ impl Argument {
     /// let expected_result = String::from("0.3");
     /// let mut formatter = FloatFormatterMock::new();
     /// formatter
-    ///     .expect_format_float(|a| a.nearly_eq(0.3))
+    ///     .expect_format_float(|arg| arg.nearly_eq(0.3))
     ///     .returns(expected_result.clone());
     ///
     /// assert_eq!(expected_result, formatter.format_float(0.1 + 0.2),)
@@ -53,7 +53,7 @@ impl Argument {
     /// let expected_result = String::from("0.3");
     /// let mut formatter = FloatFormatterMock::new();
     /// formatter
-    ///     .expect_format_float(|a| a.nearly_eq_with_accuracy(0.3, 1e-10))
+    ///     .expect_format_float(|arg| arg.nearly_eq_with_accuracy(0.3, 1e-10))
     ///     .returns(expected_result.clone());
     ///
     /// assert_eq!(expected_result, formatter.format_float(0.1 + 0.2),)
