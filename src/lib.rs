@@ -121,6 +121,9 @@ pub use mockiato_codegen::mockable;
 /// ## `static_references`
 /// Forces values stored in argument matchers to be `'static`. This is used when the mock needs to satisfy
 /// `'static` e.g. when downcasting the mocked trait to a concrete implementation using the `Any` trait.
+/// There is an [example] available on how to do this.
+/// 
+/// [example]: https://github.com/myelin-ai/mockiato/blob/master/examples/downcasting.rs
 ///
 /// ```
 /// use mockiato::mockable;
