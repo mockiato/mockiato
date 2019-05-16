@@ -20,7 +20,7 @@ impl StaticAttr {
             ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME
         );
         let help_message = format!(
-            "Example usage: #[{}({})]",
+            "Correct usage: #[{}({})]",
             ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME
         );
         let error = DiagnosticBuilder::error(meta_item_span, error_message)
