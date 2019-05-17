@@ -31,3 +31,6 @@ members = [
     "crates/mockiato-doc-example",
     "crates/mockiato-compiletest",
 ]
+
+[badges]
+travis-ci = { repository = "myelin-ai/mockiato" }
