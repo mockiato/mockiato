@@ -36,5 +36,4 @@
 
 ## 0.6.1
 - Added nightly notice to readme.
-- Updated crate description, keywords and categories.
-
+- Updated crate description, keywords, categories and badges.
