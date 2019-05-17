@@ -14,6 +14,7 @@ documentation = "https://docs.rs/mockiato"
 edition = "2018"
 license = "MIT"
 keywords = ["test", "testing", "mock", "mocking"]
+categories = ["development-tools::testing"]
 
 [dependencies]
 mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.6.1" }
