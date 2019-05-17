@@ -37,3 +37,6 @@
 ## 0.6.1
 - Added nightly notice to readme.
 - Updated crate description, keywords, categories and badges.
+
+## 0.6.2
+- Quickstart example in the readme has been fixed.
