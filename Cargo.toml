@@ -8,6 +8,7 @@ authors = [
     "Jan Nils Ferner <jan@myelin.ch>",
 ]
 repository = "https://github.com/myelin-ai/mockiato"
+readme = "readme.md"
 homepage = "https://github.com/myelin-ai/mockiato"
 documentation = "https://docs.rs/mockiato"
 edition = "2018"
