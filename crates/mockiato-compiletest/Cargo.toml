@@ -9,6 +9,7 @@ authors = [
 ]
 edition = "2018"
 license = "MIT"
+publish = false
 
 [dev-dependencies]
 trybuild = "1.0"

@@ -8,6 +8,7 @@ authors = [
 ]
 edition = "2018"
 license = "MIT"
+publish = false
 
 [dependencies]
 mockiato = { path = "../.." }
