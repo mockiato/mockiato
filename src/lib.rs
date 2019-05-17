@@ -95,7 +95,7 @@
 //! ```
 
 #![feature(specialization)]
-#![feature(doc_cfg)]
+#![feature(doc_cfg, external_doc)]
 #![warn(missing_docs, clippy::dbg_macro, clippy::unimplemented)]
 #![deny(
     rust_2018_idioms,
@@ -148,6 +148,9 @@ pub use mockiato_codegen::mockable;
 macro_rules! mockable {
     () => {};
 }
+
+#[doc(include = "../readme.md")]
+mod test_readme {}
 
 pub use crate::internal::argument::Argument;
 pub use crate::internal::expected_calls::ExpectedCalls;
