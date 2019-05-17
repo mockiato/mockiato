@@ -3,9 +3,9 @@ name = "mockiato-compiletest"
 description = "Compilation tests for mockiato"
 version = "0.1.0"
 authors = [
-    "Jan Nils Ferner <jan@myelin.ch>",
     "Ruben Schmidmeister <ruben@myelin.ch>",
     "Jeremy Stucki <jeremy@myelin.ch>",
+    "Jan Nils Ferner <jan@myelin.ch>",
 ]
 edition = "2018"
 license = "MIT"
