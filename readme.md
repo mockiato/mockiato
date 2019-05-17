@@ -5,7 +5,7 @@
 [![Documentation](https://docs.rs/mockiato/badge.svg)](https://docs.rs/mockiato)
 [![dependency status](https://deps.rs/repo/github/myelin-ai/mockiato/status.svg)](https://deps.rs/repo/github/myelin-ai/mockiato)
 
-Minimalistic mocking framework, ready for Rust 2018! 🎉
+A strict, yet friendly mocking library for Rust 2018
 
 ## Quickstart
 
