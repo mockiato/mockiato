@@ -1,7 +1,7 @@
 [package]
 name = "mockiato"
 description = "A strict, yet friendly mocking library for Rust 2018"
-version = "0.6.1"
+version = "0.6.2"
 authors = [
     "Ruben Schmidmeister <ruben@myelin.ch>",
     "Jeremy Stucki <jeremy@myelin.ch>",
@@ -17,7 +17,7 @@ keywords = ["test", "testing", "mock", "mocking"]
 categories = ["development-tools::testing"]
 
 [dependencies]
-mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.6.1" }
+mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.6.2" }
 nearly_eq = "0.2"
 nameof = "1.0.2"
 
@@ -31,6 +31,3 @@ members = [
     "crates/mockiato-doc-example",
     "crates/mockiato-compiletest",
 ]
-
-[badges]
-travis-ci = { repository = "myelin-ai/mockiato" }
