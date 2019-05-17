@@ -7,6 +7,8 @@
 
 A strict, yet friendly mocking library for Rust 2018
 
+ > ⚠️ This crate requires the nightly compiler
+
 ## Quickstart
 
 ```rust
