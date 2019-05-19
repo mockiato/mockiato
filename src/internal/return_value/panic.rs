@@ -1,5 +1,5 @@
 use super::ReturnValueGenerator;
-use crate::internal::fmt::{DisplayOption};
+use crate::internal::fmt::DisplayOption;
 use crate::internal::ArgumentsMatcher;
 use std::fmt::{self, Display};
 

@@ -1,5 +1,5 @@
 use super::ReturnValueGenerator;
-use crate::internal::fmt::{MaybeDebug};
+use crate::internal::fmt::MaybeDebug;
 use crate::internal::ArgumentsMatcher;
 use std::fmt::{self, Debug, Display};
 
