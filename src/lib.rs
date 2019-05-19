@@ -96,6 +96,7 @@
 
 #![feature(specialization)]
 #![feature(doc_cfg, external_doc)]
+#![feature(trait_alias)]
 #![warn(missing_docs, clippy::dbg_macro, clippy::unimplemented)]
 #![deny(
     rust_2018_idioms,

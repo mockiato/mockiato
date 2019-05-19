@@ -41,6 +41,16 @@ where
         self
     }
 
+    pub fn returns_with<F>(&mut self, return_value_fn: F) -> &mut Self
+    where
+        F: (Fn(<A as ArgumentsMatcher<'_>>::Arguments) -> R) + 'mock,
+        A: 'mock,
+        R: 'mock,
+    {
+        self.call.return_value = Some(Rc::new(return_value::Closure(Box::new(return_value_fn))));
+        self
+    }
+
     /// Defines that this method panics.
     pub fn panics(&mut self) -> &mut Self {
         self.call.return_value = Some(Rc::new(return_value::Panic(None)));
