@@ -96,7 +96,7 @@ where
         let matching_method_call = self
             .calls
             .iter()
-            .find(|call| !call.was_called_expected_number_of_times());
+            .find(|call| call.accepts_more_calls());
 
         match matching_method_call {
             Some(matching_method_call)

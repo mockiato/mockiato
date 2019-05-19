@@ -25,11 +25,8 @@ fn sequential_calls_work_with_expected_call_amount_with_no_upper_limit() {
 
     mock.expect_bar_calls_in_order();
     mock.expect_bar().returns(true).times(3..);
-    mock.expect_bar().returns(false).times(..);
 
     for _ in 0..3 {
         assert!(mock.bar());
     }
-
-    assert!(!mock.bar());
 }
