@@ -93,10 +93,7 @@ where
         &'a self,
         arguments: <A as ArgumentsMatcher<'a>>::Arguments,
     ) -> Result<R, CallError<'mock, 'a, A, R>> {
-        let matching_method_call = self
-            .calls
-            .iter()
-            .find(|call| call.accepts_more_calls());
+        let matching_method_call = self.calls.iter().find(|call| call.accepts_more_calls());
 
         match matching_method_call {
             Some(matching_method_call)
@@ -127,7 +124,7 @@ where
                 } else {
                     Err(CallError::NoMatching(arguments, self))
                 }
-            },
+            }
             _ => Err(CallError::MoreThanOneMatching(
                 arguments,
                 self,
