@@ -280,7 +280,9 @@ mod test {
     #[test]
     fn errors_when_matching_call_is_called_more_than_expected() {
         let mut method = Method::<_, ()>::new("test");
-        method.add_expected_call(ArgumentsMatcherMock::new(Some(true))).times(1);
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
+            .times(1);
 
         assert!(method.call(ArgumentsMock).is_ok());
         assert!(method.call(ArgumentsMock).is_err());
