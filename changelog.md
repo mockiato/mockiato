@@ -33,3 +33,10 @@
 - **Breaking:** It is now a hard error when `name` is specified more than once in the `#[mockable]` attribute.
 - The `Display` implementation of some argument matchers has been improved.
 - A lot of documentation has been added.
+
+## 0.6.1
+- Added nightly notice to readme.
+- Updated crate description, keywords, categories and badges.
+
+## 0.6.2
+- Quickstart example in the readme has been fixed.

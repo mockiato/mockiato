@@ -5,13 +5,15 @@
 [![Documentation](https://docs.rs/mockiato/badge.svg)](https://docs.rs/mockiato)
 [![dependency status](https://deps.rs/repo/github/myelin-ai/mockiato/status.svg)](https://deps.rs/repo/github/myelin-ai/mockiato)
 
-Minimalistic mocking framework, ready for Rust 2018! 🎉
+A strict, yet friendly mocking library for Rust 2018
+
+ > ⚠️ This crate requires the nightly compiler
 
 ## Quickstart
 
 ```rust
 #[cfg(test)]
-use mockiato::*;
+use mockiato::mockable;
 
 #[cfg_attr(test, mockable)]
 trait Greeter {
@@ -25,8 +27,10 @@ mod tests {
     #[test]
     fn greet_the_world() {
         let mut greeter = GreeterMock::new();
+
         greeter
-            .expect_greet(partial_eq("world"))
+            .expect_greet(|arg| arg.partial_eq("world"))
+            .times(1..2)
             .returns(String::from("Hello world"));
 
         assert_eq!("Hello world", greeter.greet("world"));

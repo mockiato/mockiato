@@ -1,6 +1,11 @@
 dist: xenial
 language: rust
 
+os:
+  - linux
+  - osx
+  - windows
+
 install:
 - rustup component add rustfmt clippy
 
