@@ -311,8 +311,12 @@ mod test {
     fn unordered_expectations_work_with_one_matching_expected_call() {
         let mut method = Method::<_, ()>::new("test");
 
-        method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
-        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(Some(false)))
+            .returns(());
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
+            .returns(());
 
         let result = method.call(ArgumentsMock {});
 
@@ -336,8 +340,12 @@ mod test {
     fn ordered_expectations_fail_if_first_call_does_not_match() {
         let mut method = Method::<_, ()>::new("test");
 
-        method.add_expected_call(ArgumentsMatcherMock::new(Some(false)));
-        method.add_expected_call(ArgumentsMatcherMock::new(None));
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(Some(false)))
+            .returns(());
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(None))
+            .returns(());
         method.expect_method_calls_in_order();
 
         let result = method.call(ArgumentsMock {});
@@ -349,8 +357,12 @@ mod test {
     fn ordered_expectations_use_first_matching_call_regardless_of_other_expected_calls() {
         let mut method = Method::<_, ()>::new("test");
 
-        method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
-        method.add_expected_call(ArgumentsMatcherMock::new(None));
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
+            .returns(());
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(None))
+            .returns(());
         method.expect_method_calls_in_order();
 
         let result = method.call(ArgumentsMock {});

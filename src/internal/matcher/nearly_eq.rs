@@ -14,7 +14,10 @@ impl Argument {
     /// ```
     /// use mockiato::mockable;
     ///
+    /// # const IGNORED: &str = "
     /// #[cfg_attr(test, mockable)]
+    /// # ";
+    /// # #[mockable]
     /// trait FloatFormatter {
     ///     fn format_float(&self, value: f64) -> String;
     /// }
@@ -45,7 +48,10 @@ impl Argument {
     /// ```
     /// use mockiato::mockable;
     ///
+    /// # const IGNORED: &str = "
     /// #[cfg_attr(test, mockable)]
+    /// # ";
+    /// # #[mockable]
     /// trait FloatFormatter {
     ///     fn format_float(&self, value: f64) -> String;
     /// }

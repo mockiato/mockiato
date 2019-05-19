@@ -11,14 +11,19 @@ impl Argument {
     /// ```
     /// use mockiato::mockable;
     ///
+    /// # const IGNORED: &str = "
     /// #[cfg_attr(test, mockable)]
+    /// # ";
+    /// # #[mockable]
     /// trait MessageSender {
     ///     fn send_message(&self, message: &str);
     /// }
     ///
     /// let mut sender = MessageSenderMock::new();
     /// let message = "Hello World";
-    /// sender.expect_send_message(|arg| arg.partial_eq(message));
+    /// sender
+    ///     .expect_send_message(|arg| arg.partial_eq(message))
+    ///     .returns(());
     /// sender.send_message(message);
     /// ```
     pub fn partial_eq<T>(&self, value: T) -> PartialEqArgumentMatcher<T> {
@@ -36,14 +41,19 @@ impl Argument {
     ///     Ping,
     /// }
     ///
+    /// # const IGNORED: &str = "
     /// #[cfg_attr(test, mockable)]
+    /// # ";
+    /// # #[mockable]
     /// trait MessageSender {
     ///     fn send_message(&self, message: &Message);
     /// }
     ///
     /// # fn main() {
     /// let mut sender = MessageSenderMock::new();
-    /// sender.expect_send_message(|arg| arg.partial_eq_owned(Message::Ping));
+    /// sender
+    ///     .expect_send_message(|arg| arg.partial_eq_owned(Message::Ping))
+    ///     .returns(());
     /// sender.send_message(&Message::Ping);
     /// # }
     /// ```

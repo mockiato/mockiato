@@ -21,6 +21,9 @@ mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.6.2" }
 nearly_eq = "0.2"
 nameof = "1.0.2"
 
+[build-dependencies]
+rustc_version = "0.2.3"
+
 [[example]]
 name = "downcasting"
 test = true

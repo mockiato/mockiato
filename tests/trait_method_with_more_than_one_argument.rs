@@ -14,7 +14,8 @@ fn test() {
             |arg| arg.partial_eq("Jane"),
             |arg| arg.partial_eq("Don't make lemonade"),
         )
-        .times(1..);
+        .times(1..)
+        .returns(());
 
     message_sender.send_message("Jane", "Don't make lemonade")
 }

@@ -1,14 +1,17 @@
 //! Codegen for `mockiato`. Do not use this crate directly.
 
 #![recursion_limit = "128"]
-#![feature(
-    proc_macro_diagnostic,
-    proc_macro_span,
-    proc_macro_hygiene,
-    bind_by_move_pattern_guards,
-    decl_macro,
-    box_syntax,
-    box_patterns
+#![cfg_attr(
+    rustc_is_nightly,
+    feature(
+        proc_macro_diagnostic,
+        proc_macro_span,
+        proc_macro_hygiene,
+        bind_by_move_pattern_guards,
+        decl_macro,
+        box_syntax,
+        box_patterns
+    )
 )]
 #![warn(clippy::dbg_macro, clippy::unimplemented)]
 #![deny(
@@ -34,12 +37,17 @@ mod result;
 mod syn_ext;
 
 use self::mockable::Mockable;
+#[cfg(rustc_is_nightly)]
 use crate::diagnostic::{Diagnostic, DiagnosticLevel, DiagnosticMessage};
 use crate::result::Error;
+#[cfg(not(rustc_is_nightly))]
+use itertools::Itertools;
+use proc_macro::TokenStream as ProcMacroTokenStream;
+#[cfg(rustc_is_nightly)]
 use proc_macro::{
     Diagnostic as ProcMacroDiagnostic, Level as ProcMacroLevel, Span as ProcMacroSpan,
-    TokenStream as ProcMacroTokenStream,
 };
+#[cfg(rustc_is_nightly)]
 use proc_macro2::Span;
 use syn::{parse_macro_input, AttributeArgs, Item};
 
@@ -62,6 +70,17 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
     }
 }
 
+#[cfg(not(rustc_is_nightly))]
+fn emit_diagnostics(error: Error) {
+    let errors = error
+        .diagnostics
+        .into_iter()
+        .map(|diagnostic| diagnostic.message)
+        .join("\n");
+    panic!("{}", errors);
+}
+
+#[cfg(rustc_is_nightly)]
 fn emit_diagnostics(error: Error) {
     error
         .diagnostics
@@ -70,6 +89,7 @@ fn emit_diagnostics(error: Error) {
         .for_each(ProcMacroDiagnostic::emit);
 }
 
+#[cfg(rustc_is_nightly)]
 fn to_proc_macro_diagnostic(source: Diagnostic) -> ProcMacroDiagnostic {
     let level = to_proc_macro_level(source.level);
     let span = to_proc_macro_span(source.span);
@@ -78,6 +98,7 @@ fn to_proc_macro_diagnostic(source: Diagnostic) -> ProcMacroDiagnostic {
     add_help_to_proc_macro_diagnostic(diagnostic, source.help)
 }
 
+#[cfg(rustc_is_nightly)]
 fn add_help_to_proc_macro_diagnostic(
     diagnostic: ProcMacroDiagnostic,
     help: Vec<DiagnosticMessage>,
@@ -89,6 +110,7 @@ fn add_help_to_proc_macro_diagnostic(
         })
 }
 
+#[cfg(rustc_is_nightly)]
 fn add_notes_to_proc_macro_diagnostic(
     diagnostic: ProcMacroDiagnostic,
     notes: Vec<DiagnosticMessage>,
@@ -101,10 +123,12 @@ fn add_notes_to_proc_macro_diagnostic(
         })
 }
 
+#[cfg(rustc_is_nightly)]
 fn to_proc_macro_span(span: Span) -> ProcMacroSpan {
     span.unstable()
 }
 
+#[cfg(rustc_is_nightly)]
 fn to_proc_macro_level(level: DiagnosticLevel) -> ProcMacroLevel {
     match level {
         DiagnosticLevel::Error => ProcMacroLevel::Error,

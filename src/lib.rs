@@ -5,7 +5,10 @@
 //! ```
 //! use mockiato::mockable;
 //!
+//! # const IGNORED: &str = "
 //! #[cfg_attr(test, mockable)]
+//! # ";
+//! # #[mockable]
 //! trait Greeter {
 //!     fn greet(&self, name: &str) -> String;
 //! }
@@ -38,7 +41,10 @@
 //! ```
 //! use mockiato::mockable;
 //!
-//! #[mockable]
+//! # const IGNORED: &str = "
+//! #[cfg_attr(test, mockable)]
+//! # ";
+//! # #[mockable]
 //! trait MessageSender {
 //!     fn send_message(&self, recipient: &str, message: &str);
 //! }
@@ -46,7 +52,8 @@
 //! let mut message_sender = MessageSenderMock::new();
 //! message_sender
 //!     .expect_send_message(|arg| arg.partial_eq("Paul"), |arg| arg.any())
-//!     .times(..);
+//!     .times(..)
+//!     .returns(());
 //! ```
 //!
 //! ## `expect_<method_name>_calls_in_order`
@@ -57,6 +64,9 @@
 //! ```
 //! # use mockiato::mockable;
 //! #
+//! # const IGNORED: &str = "
+//! #[cfg_attr(test, mockable)]
+//! # ";
 //! # #[mockable]
 //! # trait MessageSender {
 //! #     fn send_message(&self, recipient: &str, message: &str);
@@ -72,7 +82,10 @@
 //! ```no_run
 //! use mockiato::mockable;
 //!
+//! # const IGNORED: &str = "
 //! #[cfg_attr(test, mockable)]
+//! # ";
+//! # #[mockable]
 //! trait Greeter {
 //!     fn greet(&self, name: &str) -> String;
 //! }
@@ -94,8 +107,7 @@
 //! }
 //! ```
 
-#![feature(specialization)]
-#![feature(doc_cfg, external_doc)]
+#![cfg_attr(rustc_is_nightly, feature(doc_cfg, external_doc, specialization))]
 #![warn(missing_docs, clippy::dbg_macro, clippy::unimplemented)]
 #![deny(
     rust_2018_idioms,
@@ -109,10 +121,10 @@
     clippy::explicit_into_iter_loop
 )]
 
-#[cfg(not(rustdoc))]
+#[cfg(any(not(rustc_is_nightly), not(rustdoc)))]
 pub use mockiato_codegen::mockable;
 
-#[cfg(rustdoc)]
+#[cfg(all(rustc_is_nightly, rustdoc))]
 #[macro_export]
 /// Generates a mock struct from a trait.
 ///
@@ -149,7 +161,7 @@ macro_rules! mockable {
     () => {};
 }
 
-#[doc(include = "../readme.md")]
+#[cfg_attr(rustc_is_nightly, doc(include = "../readme.md"))]
 mod test_readme {}
 
 pub use crate::internal::argument::Argument;

@@ -4,18 +4,14 @@ use std::fmt::{self, Debug, Display};
 use std::rc::Rc;
 
 pub trait DefaultReturnValue<A>: Sized {
-    fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>>;
-}
-
-impl<A, T> DefaultReturnValue<A> for T
-where
-    A: for<'args> ArgumentsMatcher<'args>,
-{
-    default fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, T>>> {
+    fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>> {
         None
     }
 }
 
+impl<A, T> DefaultReturnValue<A> for T where A: for<'args> ArgumentsMatcher<'args> {}
+
+#[cfg(rustc_is_nightly)]
 impl<A> DefaultReturnValue<A> for ()
 where
     A: for<'args> ArgumentsMatcher<'args>,
