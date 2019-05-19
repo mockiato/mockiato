@@ -148,7 +148,7 @@ where
 
     pub(crate) fn was_called_expected_number_of_times(&self) -> bool {
         self.expected_calls
-            .matches_value(*self.actual_number_of_calls.borrow())
+            .contains(*self.actual_number_of_calls.borrow())
     }
 
     pub(crate) fn matches_expected_arguments<'a>(
