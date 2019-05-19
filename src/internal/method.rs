@@ -120,7 +120,14 @@ where
 
         match matching_method_calls.len() {
             0 => Err(CallError::NoMatching(arguments, self)),
-            1 => Ok(matching_method_calls.first().unwrap().call(arguments)),
+            1 => {
+                let expected_call = matching_method_calls.first().unwrap();
+                if expected_call.accepts_more_calls() {
+                    Ok(expected_call.call(arguments))
+                } else {
+                    Err(CallError::NoMatching(arguments, self))
+                }
+            },
             _ => Err(CallError::MoreThanOneMatching(
                 arguments,
                 self,
