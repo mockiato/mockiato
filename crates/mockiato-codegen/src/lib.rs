@@ -1,18 +1,7 @@
 //! Codegen for `mockiato`. Do not use this crate directly.
 
 #![recursion_limit = "128"]
-#![cfg_attr(
-    rustc_is_nightly,
-    feature(
-        proc_macro_diagnostic,
-        proc_macro_span,
-        proc_macro_hygiene,
-        bind_by_move_pattern_guards,
-        decl_macro,
-        box_syntax,
-        box_patterns
-    )
-)]
+#![cfg_attr(rustc_is_nightly, feature(proc_macro_diagnostic))]
 #![warn(clippy::dbg_macro, clippy::unimplemented)]
 #![deny(
     rust_2018_idioms,
