@@ -1,7 +1,8 @@
+use crate::internal::default_return_value::DefaultReturnValue;
 use crate::internal::expected_calls::ExpectedCalls;
 use crate::internal::fmt::{DisplayOption, DisplayTimes};
 use crate::internal::matcher::ArgumentsMatcher;
-use crate::internal::return_value::{self, DefaultReturnValue, ReturnValueGenerator};
+use crate::internal::return_value::{self, ReturnValueGenerator};
 use nameof::name_of;
 use std::cell::RefCell;
 use std::fmt::{self, Debug, Display};
