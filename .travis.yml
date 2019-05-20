@@ -6,6 +6,11 @@ os:
   - osx
   - windows
 
+rust:
+  - stable
+  - beta
+  - nightly-2019-05-09
+
 install:
 - rustup component add rustfmt clippy
 
