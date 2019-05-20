@@ -11,6 +11,7 @@ pub use self::method_call::MethodCallBuilder;
 
 pub(crate) mod argument;
 mod arguments;
+pub(crate) mod default_return_value;
 pub(crate) mod expected_calls;
 mod fmt;
 pub(crate) mod matcher;
