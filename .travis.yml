@@ -1,17 +1,15 @@
 dist: xenial
 language: rust
 
-os:
-  - linux
-  - osx
-  - windows
-
 matrix:
   include:
     - rust: beta
       os: linux
     - rust: stable
       os: linux
+    - os: linux
+    - os: windows
+    - os: osx
 
 install:
 - rustup component add rustfmt clippy
