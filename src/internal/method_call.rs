@@ -149,7 +149,15 @@ where
 
     pub(crate) fn was_called_expected_number_of_times(&self) -> bool {
         self.expected_calls
-            .matches_value(*self.actual_number_of_calls.borrow())
+            .contains(*self.actual_number_of_calls.borrow())
+    }
+
+    pub(crate) fn accepts_more_calls(&self) -> bool {
+        let number_of_calls = *self.actual_number_of_calls.borrow();
+        match self.expected_calls.max_value() {
+            Some(max_value) => number_of_calls < max_value,
+            None => true,
+        }
     }
 
     pub(crate) fn matches_expected_arguments<'a>(

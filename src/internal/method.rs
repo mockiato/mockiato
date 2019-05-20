@@ -93,10 +93,7 @@ where
         &'a self,
         arguments: <A as ArgumentsMatcher<'a>>::Arguments,
     ) -> Result<R, CallError<'mock, 'a, A, R>> {
-        let matching_method_call = self
-            .calls
-            .iter()
-            .find(|call| !call.was_called_expected_number_of_times());
+        let matching_method_call = self.calls.iter().find(|call| call.accepts_more_calls());
 
         match matching_method_call {
             Some(matching_method_call)
@@ -120,9 +117,17 @@ where
 
         match matching_method_calls.len() {
             0 => Err(CallError::NoMatching(arguments, self)),
-            1 => Ok(matching_method_calls.first().unwrap().call(arguments)),
+            1 => {
+                let expected_call = matching_method_calls.first().unwrap();
+                if expected_call.accepts_more_calls() {
+                    Ok(expected_call.call(arguments))
+                } else {
+                    Err(CallError::NoMatching(arguments, self))
+                }
+            }
             _ => Err(CallError::MoreThanOneMatching(
                 arguments,
+                self,
                 matching_method_calls,
             )),
         }
@@ -152,6 +157,7 @@ where
     ),
     MoreThanOneMatching(
         <A as ArgumentsMatcher<'a>>::Arguments,
+        &'a Method<'mock, A, R>,
         Vec<&'a MethodCall<'mock, A, R>>,
     ),
 }
@@ -175,9 +181,10 @@ where
                     )
                 }
             }
-            CallError::MoreThanOneMatching(arguments, calls) => writeln!(
+            CallError::MoreThanOneMatching(arguments, method, calls) => writeln!(
                 f,
-                "\nThe call {} matches more than one expected call:\n{}",
+                "\nThe call {}{} matches more than one expected call:\n{}",
+                method.name,
                 arguments,
                 DisplayCalls(calls)
             ),
@@ -242,7 +249,7 @@ mod test {
         method.add_expected_call(ArgumentsMatcherMock::new(Some(true)));
 
         match method.call(ArgumentsMock) {
-            Err(CallError::MoreThanOneMatching(_, method_calls)) => {
+            Err(CallError::MoreThanOneMatching(_, _, method_calls)) => {
                 assert_eq!(2, method_calls.len());
             }
             _ => panic!("unexpected result from method call"),
@@ -272,6 +279,17 @@ mod test {
             .returns(String::from("bar"));
 
         assert_eq!(String::from("bar"), method.call(ArgumentsMock).unwrap());
+    }
+
+    #[test]
+    fn errors_when_matching_call_is_called_more_than_expected() {
+        let mut method = Method::<_, ()>::new("test");
+        method
+            .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
+            .times(1);
+
+        assert!(method.call(ArgumentsMock).is_ok());
+        assert!(method.call(ArgumentsMock).is_err());
     }
 
     #[test]
