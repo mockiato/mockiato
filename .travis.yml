@@ -6,10 +6,12 @@ os:
   - osx
   - windows
 
-rust:
-  - stable
-  - beta
-  - nightly-2019-05-09
+matrix:
+  include:
+    - rust: beta
+      os: linux
+    - rust: stable
+      os: linux
 
 install:
 - rustup component add rustfmt clippy
