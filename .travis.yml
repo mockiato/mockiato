@@ -6,19 +6,19 @@ matrix:
     - rust: beta
       env:
         - CARGO_FLAGS=+beta
-        - TOOLCHAIN="--toolchain beta"
+        - RUSTUP_OPTIONS="--toolchain beta"
       os: linux
     - rust: stable
       env: 
         - CARGO_FLAGS=+stable
-        - TOOLCHAIN="--toolchain stable"
+        - RUSTUP_OPTIONS="--toolchain stable"
       os: linux
     - os: linux
     - os: windows
     - os: osx
 
 install:
-- rustup component add $TOOLCHAIN rustfmt clippy
+- rustup component add $RUSTUP_OPTIONS rustfmt clippy
 
 script:
 - cargo $CARGO_FLAGS build --all --all-features --verbose
