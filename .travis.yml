@@ -4,8 +4,10 @@ language: rust
 matrix:
   include:
     - rust: beta
+      env: CARGO_FLAGS=+beta
       os: linux
     - rust: stable
+      env: CARGO_FLAGS=+stable
       os: linux
     - os: linux
     - os: windows
@@ -15,9 +17,9 @@ install:
 - rustup component add rustfmt clippy
 
 script:
-- cargo build --all --all-features --verbose
-- cargo test --all --all-features --verbose
-- cargo clippy --all -- -Dwarnings
-- cargo clippy --all --tests -- -Dwarnings
-- cargo fmt --all -- --check
-- cargo doc --all --no-deps
+- cargo build  $CARGO_FLAGS --all --all-features --verbose
+- cargo test   $CARGO_FLAGS --all --all-features --verbose
+- cargo clippy $CARGO_FLAGS --all -- -Dwarnings
+- cargo clippy $CARGO_FLAGS --all --tests -- -Dwarnings
+- cargo fmt    $CARGO_FLAGS --all -- --check
+- cargo doc    $CARGO_FLAGS --all --no-deps
