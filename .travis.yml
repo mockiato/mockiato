@@ -4,17 +4,21 @@ language: rust
 matrix:
   include:
     - rust: beta
-      env: CARGO_FLAGS=+beta
+      env:
+        - CARGO_FLAGS=+beta
+        - RUSTUP_TOOLCHAIN="--toolchain beta"
       os: linux
     - rust: stable
-      env: CARGO_FLAGS=+stable
+      env: 
+        - CARGO_FLAGS=+stable
+        - RUSTUP_TOOLCHAIN="--toolchain stable"
       os: linux
     - os: linux
     - os: windows
     - os: osx
 
 install:
-- rustup component add rustfmt clippy
+- rustup component add $RUSTUP_TOOLCHAIN rustfmt clippy
 
 script:
 - cargo $CARGO_FLAGS build --all --all-features --verbose
