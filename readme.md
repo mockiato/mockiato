@@ -7,7 +7,12 @@
 
 A strict, yet friendly mocking library for Rust 2018
 
- > ⚠️ This crate requires the nightly compiler
+## ⚠️ Disclaimer for working with stable rust
+Mockiato relies on the unstable `proc_macro_diagnostics` API to print helpful messages
+and the unstable `specialization` feature to be able to print expected calls.
+
+Mocks work as expected on stable rust, but diagnostics are very limited.  
+We recommend re-running failing tests using nighly rust in order to pin-point the issue.
 
 ## Quickstart
 
