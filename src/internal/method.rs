@@ -3,6 +3,12 @@ use crate::internal::method_call::{MethodCall, MethodCallBuilder};
 use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 
+#[cfg(rustc_is_nightly)]
+const FOOTER: &str = "";
+#[cfg(not(rustc_is_nightly))]
+const FOOTER: &str = "\n\n----\nSome mockiato messages may not be displayed correctly. Re-run \
+                      with nightly rust to see full error messages.\n----\n\n";
+
 #[derive(Clone, Debug)]
 enum ExpectedCallOrder {
     Sequentially,
@@ -70,11 +76,12 @@ where
 
     pub fn call_unwrap<'a>(&'a self, arguments: <A as ArgumentsMatcher<'a>>::Arguments) -> R {
         self.call(arguments)
-            .unwrap_or_else(|err| panic!("\n\n{}\n", err))
+            .unwrap_or_else(|err| panic!("\n\n{}{}\n", err, FOOTER))
     }
 
     pub fn verify_unwrap(&self) {
-        self.verify().unwrap_or_else(|err| panic!("{}", err))
+        self.verify()
+            .unwrap_or_else(|err| panic!("{}{}", err, FOOTER))
     }
 
     fn call<'a>(
