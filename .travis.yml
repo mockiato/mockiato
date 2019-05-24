@@ -17,9 +17,9 @@ install:
 - rustup component add rustfmt clippy
 
 script:
-- cargo build $CARGO_FLAGS --all --all-features --verbose
-- cargo test $CARGO_FLAGS --all --all-features --verbose
-- cargo clippy $CARGO_FLAGS --all -- -Dwarnings
-- cargo clippy $CARGO_FLAGS --all --tests -- -Dwarnings
-- cargo fmt $CARGO_FLAGS --all -- --check
-- cargo doc $CARGO_FLAGS --all --no-deps
+- cargo $CARGO_FLAGS build --all --all-features --verbose
+- cargo $CARGO_FLAGS test --all --all-features --verbose
+- cargo $CARGO_FLAGS clippy --all -- -Dwarnings
+- cargo $CARGO_FLAGS clippy --all --tests -- -Dwarnings
+- cargo $CARGO_FLAGS fmt --all -- --check
+- cargo $CARGO_FLAGS doc --all --no-deps
