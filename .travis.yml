@@ -4,14 +4,10 @@ language: rust
 matrix:
   include:
     - rust: beta
-      env:
-        - CARGO_FLAGS=+beta
-        - RUSTUP_TOOLCHAIN="--toolchain beta"
+      env: RUSTUP_TOOLCHAIN=beta
       os: linux
     - rust: stable
-      env: 
-        - CARGO_FLAGS=+stable
-        - RUSTUP_TOOLCHAIN="--toolchain stable"
+      env: RUSTUP_TOOLCHAIN=stable
       os: linux
     - os: linux
     - os: windows
