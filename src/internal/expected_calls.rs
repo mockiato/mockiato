@@ -21,7 +21,7 @@ enum ExpectedCallsKind {
 }
 
 impl ExpectedCalls {
-    pub(crate) fn matches_value(&self, value: u64) -> bool {
+    pub(crate) fn contains(&self, value: u64) -> bool {
         match self.0 {
             ExpectedCallsKind::Exact(expected) => expected == value,
             ExpectedCallsKind::AtLeast(min) => value >= min,
@@ -29,6 +29,16 @@ impl ExpectedCalls {
             ExpectedCallsKind::Between { start, end } => value >= start && value < end,
             ExpectedCallsKind::BetweenInclusive { start, end } => value >= start && value <= end,
             ExpectedCallsKind::Any => true,
+        }
+    }
+
+    pub(crate) fn max_value(&self) -> Option<u64> {
+        match self.0 {
+            ExpectedCallsKind::Exact(expected) => Some(expected),
+            ExpectedCallsKind::AtMost(max) => Some(max),
+            ExpectedCallsKind::Between { end, .. } => Some(end.saturating_sub(1)),
+            ExpectedCallsKind::BetweenInclusive { end, .. } => Some(end),
+            _ => None,
         }
     }
 }
@@ -106,133 +116,120 @@ mod test {
 
     #[test]
     fn exact_matches_specified_value() {
-        assert!(ExpectedCalls(ExpectedCallsKind::Exact(4)).matches_value(4));
+        assert!(ExpectedCalls(ExpectedCallsKind::Exact(4)).contains(4));
     }
 
     #[test]
     fn exact_does_not_match_other_values() {
-        assert!(!ExpectedCalls(ExpectedCallsKind::Exact(6)).matches_value(1));
-        assert!(!ExpectedCalls(ExpectedCallsKind::Exact(6)).matches_value(0));
-        assert!(!ExpectedCalls(ExpectedCallsKind::Exact(10)).matches_value(1));
-        assert!(!ExpectedCalls(ExpectedCallsKind::Exact(100)).matches_value(1));
+        assert!(!ExpectedCalls(ExpectedCallsKind::Exact(6)).contains(1));
+        assert!(!ExpectedCalls(ExpectedCallsKind::Exact(6)).contains(0));
+        assert!(!ExpectedCalls(ExpectedCallsKind::Exact(10)).contains(1));
+        assert!(!ExpectedCalls(ExpectedCallsKind::Exact(100)).contains(1));
     }
 
     #[test]
     fn at_least_matches_minimum_value() {
-        assert!(ExpectedCalls(ExpectedCallsKind::AtLeast(4)).matches_value(4));
+        assert!(ExpectedCalls(ExpectedCallsKind::AtLeast(4)).contains(4));
     }
 
     #[test]
     fn at_least_matches_values_above_minimum() {
-        assert!(ExpectedCalls(ExpectedCallsKind::AtLeast(4)).matches_value(5));
-        assert!(ExpectedCalls(ExpectedCallsKind::AtLeast(4)).matches_value(10));
-        assert!(ExpectedCalls(ExpectedCallsKind::AtLeast(4)).matches_value(100));
+        assert!(ExpectedCalls(ExpectedCallsKind::AtLeast(4)).contains(5));
+        assert!(ExpectedCalls(ExpectedCallsKind::AtLeast(4)).contains(10));
+        assert!(ExpectedCalls(ExpectedCallsKind::AtLeast(4)).contains(100));
     }
 
     #[test]
     fn at_least_does_not_match_values_below_minimum() {
-        assert!(!ExpectedCalls(ExpectedCallsKind::AtLeast(50)).matches_value(49));
-        assert!(!ExpectedCalls(ExpectedCallsKind::AtLeast(50)).matches_value(0));
-        assert!(!ExpectedCalls(ExpectedCallsKind::AtLeast(50)).matches_value(16));
+        assert!(!ExpectedCalls(ExpectedCallsKind::AtLeast(50)).contains(49));
+        assert!(!ExpectedCalls(ExpectedCallsKind::AtLeast(50)).contains(0));
+        assert!(!ExpectedCalls(ExpectedCallsKind::AtLeast(50)).contains(16));
     }
 
     #[test]
     fn at_most_matches_maximum() {
-        assert!(ExpectedCalls(ExpectedCallsKind::AtMost(40)).matches_value(40));
+        assert!(ExpectedCalls(ExpectedCallsKind::AtMost(40)).contains(40));
     }
 
     #[test]
     fn at_most_matches_values_below_maximum() {
-        assert!(ExpectedCalls(ExpectedCallsKind::AtMost(40)).matches_value(0));
-        assert!(ExpectedCalls(ExpectedCallsKind::AtMost(40)).matches_value(39));
-        assert!(ExpectedCalls(ExpectedCallsKind::AtMost(40)).matches_value(24));
+        assert!(ExpectedCalls(ExpectedCallsKind::AtMost(40)).contains(0));
+        assert!(ExpectedCalls(ExpectedCallsKind::AtMost(40)).contains(39));
+        assert!(ExpectedCalls(ExpectedCallsKind::AtMost(40)).contains(24));
     }
 
     #[test]
     fn at_most_does_not_match_values_above_maximum() {
-        assert!(!ExpectedCalls(ExpectedCallsKind::AtMost(20)).matches_value(21));
-        assert!(!ExpectedCalls(ExpectedCallsKind::AtMost(20)).matches_value(67));
-        assert!(!ExpectedCalls(ExpectedCallsKind::AtMost(20)).matches_value(100));
+        assert!(!ExpectedCalls(ExpectedCallsKind::AtMost(20)).contains(21));
+        assert!(!ExpectedCalls(ExpectedCallsKind::AtMost(20)).contains(67));
+        assert!(!ExpectedCalls(ExpectedCallsKind::AtMost(20)).contains(100));
     }
 
     #[test]
     fn between_does_not_match_values_outside_of_range() {
-        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(0));
-        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(9));
-        assert!(
-            !ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(21)
-        );
-        assert!(
-            !ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(40)
-        );
+        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).contains(0));
+        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).contains(9));
+        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).contains(21));
+        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).contains(40));
     }
 
     #[test]
     fn between_does_not_match_end_value() {
-        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 1, end: 3 }).matches_value(3));
+        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 1, end: 3 }).contains(3));
     }
 
     #[test]
     fn between_matches_start_value() {
-        assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 1, end: 3 }).matches_value(1));
+        assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 1, end: 3 }).contains(1));
     }
 
     #[test]
     fn between_matches_values_in_range() {
-        assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(11));
-        assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(15));
-        assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).matches_value(19));
+        assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).contains(11));
+        assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).contains(15));
+        assert!(ExpectedCalls(ExpectedCallsKind::Between { start: 10, end: 20 }).contains(19));
     }
 
     #[test]
     fn between_inclusive_does_not_match_values_outside_of_range() {
         assert!(
-            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
-                .matches_value(0)
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 }).contains(0)
         );
         assert!(
-            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
-                .matches_value(9)
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 }).contains(9)
         );
         assert!(
-            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
-                .matches_value(21)
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 }).contains(21)
         );
         assert!(
-            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
-                .matches_value(40)
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 }).contains(40)
         );
     }
 
     #[test]
     fn between_inclusive_matches_end_value() {
         assert!(
-            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 1, end: 3 })
-                .matches_value(3)
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 1, end: 3 }).contains(3)
         );
     }
 
     #[test]
     fn between_inclusive_matches_start_value() {
         assert!(
-            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 1, end: 3 })
-                .matches_value(1)
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 1, end: 3 }).contains(1)
         );
     }
 
     #[test]
     fn between_inclusive_matches_values_in_range() {
         assert!(
-            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
-                .matches_value(11)
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 }).contains(11)
         );
         assert!(
-            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
-                .matches_value(15)
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 }).contains(15)
         );
         assert!(
-            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 })
-                .matches_value(19)
+            ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 10, end: 20 }).contains(19)
         );
     }
 
@@ -283,13 +280,10 @@ mod test {
         // See: https://play.rust-lang.org/?version=nightly&mode=debug&edition=2015&gist=c87572feae3b49e7ad150ad1494f6042
 
         assert!(
-            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 100, end: 0 })
-                .matches_value(50),
+            !ExpectedCalls(ExpectedCallsKind::BetweenInclusive { start: 100, end: 0 }).contains(50),
         );
 
-        assert!(
-            !ExpectedCalls(ExpectedCallsKind::Between { start: 100, end: 0 }).matches_value(50),
-        );
+        assert!(!ExpectedCalls(ExpectedCallsKind::Between { start: 100, end: 0 }).contains(50),);
     }
 
     #[test]
@@ -298,7 +292,7 @@ mod test {
             start: 100,
             end: 100
         })
-        .matches_value(100));
+        .contains(100));
     }
 
     #[test]
@@ -307,7 +301,7 @@ mod test {
             start: 100,
             end: 100
         })
-        .matches_value(100));
+        .contains(100));
     }
 
     #[test]
@@ -337,5 +331,40 @@ mod test {
         let formatted = format!("{}", ExpectedCalls::from(..));
 
         assert_eq!("any amount of times", formatted);
+    }
+
+    #[test]
+    fn exact_has_max_value() {
+        assert_eq!(Some(6), ExpectedCalls::from(6).max_value(),);
+    }
+
+    #[test]
+    fn at_most_has_max_value() {
+        assert_eq!(Some(6), ExpectedCalls::from(..=6).max_value(),);
+    }
+
+    #[test]
+    fn between_has_max_value() {
+        assert_eq!(Some(1), ExpectedCalls::from(1..2).max_value(),);
+    }
+
+    #[test]
+    fn between_max_value_does_not_underflow() {
+        assert_eq!(Some(0), ExpectedCalls::from(0..0).max_value(),);
+    }
+
+    #[test]
+    fn between_inclusive_has_max_value() {
+        assert_eq!(Some(2), ExpectedCalls::from(1..=2).max_value(),);
+    }
+
+    #[test]
+    fn at_least_has_no_max_value() {
+        assert!(ExpectedCalls::from(1..).max_value().is_none());
+    }
+
+    #[test]
+    fn any_has_no_max_value() {
+        assert!(ExpectedCalls::from(..).max_value().is_none());
     }
 }
