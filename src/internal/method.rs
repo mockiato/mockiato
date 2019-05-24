@@ -286,7 +286,8 @@ mod test {
         let mut method = Method::<_, ()>::new("test");
         method
             .add_expected_call(ArgumentsMatcherMock::new(Some(true)))
-            .times(1);
+            .times(1)
+            .returns(());
 
         assert!(method.call(ArgumentsMock).is_ok());
         assert!(method.call(ArgumentsMock).is_err());
