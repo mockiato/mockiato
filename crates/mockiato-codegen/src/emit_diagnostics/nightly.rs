@@ -5,8 +5,6 @@ use proc_macro::{
 };
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
-#[cfg(not(rustc_is_nightly))]
-use quote::quote_spanned;
 
 pub(crate) fn emit_diagnostics(error: Error) -> TokenStream {
     error
