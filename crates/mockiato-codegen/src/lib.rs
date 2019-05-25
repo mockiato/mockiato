@@ -29,8 +29,6 @@ use self::mockable::Mockable;
 #[cfg(rustc_is_nightly)]
 use crate::diagnostic::{Diagnostic, DiagnosticLevel, DiagnosticMessage};
 use crate::result::Error;
-#[cfg(not(rustc_is_nightly))]
-use itertools::Itertools;
 use proc_macro::TokenStream as ProcMacroTokenStream;
 #[cfg(rustc_is_nightly)]
 use proc_macro::{
@@ -39,6 +37,9 @@ use proc_macro::{
 #[cfg(rustc_is_nightly)]
 use proc_macro2::Span;
 use syn::{parse_macro_input, AttributeArgs, Item};
+use proc_macro2::TokenStream;
+#[cfg(not(rustc_is_nightly))]
+use quote::quote_spanned;
 
 #[doc(hidden)]
 #[proc_macro_attribute]
@@ -53,29 +54,36 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
     match mockable.expand(attr, item) {
         Ok(output) => ProcMacroTokenStream::from(output),
         Err(error) => {
-            emit_diagnostics(error);
-            original_input
+            let mut output = original_input;
+
+            let diagnostics_output = emit_diagnostics(error);
+            output.extend(ProcMacroTokenStream::from(diagnostics_output));
+
+            output
         }
     }
 }
 
 #[cfg(not(rustc_is_nightly))]
-fn emit_diagnostics(error: Error) {
-    let errors = error
+fn emit_diagnostics(error: Error) -> TokenStream {
+    error
         .diagnostics
         .into_iter()
-        .map(|diagnostic| diagnostic.message)
-        .join("\n");
-    panic!("{}", errors);
+        .map(|diagnostic| {
+            let message = diagnostic.message;
+            quote_spanned!(diagnostic.span => compile_error!(#message);)
+        })
+        .collect()
 }
 
 #[cfg(rustc_is_nightly)]
-fn emit_diagnostics(error: Error) {
+fn emit_diagnostics(error: Error) -> TokenStream {
     error
         .diagnostics
         .into_iter()
         .map(to_proc_macro_diagnostic)
         .for_each(ProcMacroDiagnostic::emit);
+    TokenStream::new()
 }
 
 #[cfg(rustc_is_nightly)]
