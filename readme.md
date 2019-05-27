@@ -4,6 +4,7 @@
 [![Latest Version](https://img.shields.io/crates/v/mockiato.svg)](https://crates.io/crates/mockiato)
 [![Documentation](https://docs.rs/mockiato/badge.svg)](https://docs.rs/mockiato)
 [![dependency status](https://deps.rs/repo/github/myelin-ai/mockiato/status.svg)](https://deps.rs/repo/github/myelin-ai/mockiato)
+[![Changelog](https://img.shields.io/badge/changelog-changelog.md-blue.svg)](changelog.md)
 
 A strict, yet friendly mocking library for Rust 2018
 
