@@ -18,7 +18,7 @@ categories = ["development-tools::testing"]
 
 [dependencies]
 mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.6.3" }
-nearly_eq = "0.2"
+nearly_eq = "0.2.4"
 nameof = "1.0.2"
 
 [build-dependencies]
