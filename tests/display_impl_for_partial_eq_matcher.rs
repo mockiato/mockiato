@@ -1,4 +1,6 @@
-use mockiato::{mockable, Argument};
+use mockiato::mockable;
+#[cfg(rustc_is_nightly)]
+use mockiato::Argument;
 
 #[derive(Debug, PartialEq)]
 struct Person {
@@ -13,6 +15,7 @@ trait Greeter {
     fn greet_ref(&self, person: &Person) -> String;
 }
 
+#[cfg(rustc_is_nightly)]
 #[test]
 fn partial_eq_matcher_has_display_output() {
     let factory = Argument::internal_new();
@@ -27,6 +30,7 @@ fn partial_eq_matcher_has_display_output() {
     );
 }
 
+#[cfg(rustc_is_nightly)]
 #[test]
 #[should_panic(
     expected = "The expected calls for GreeterMock::greet were not satisified.
@@ -45,6 +49,7 @@ fn partial_eq_matcher_has_display_output_when_printed_as_expected_call() {
         .returns(String::from("Hello Name"));
 }
 
+#[cfg(rustc_is_nightly)]
 #[test]
 #[should_panic(
     expected = "The expected calls for GreeterMock::greet_ref were not satisified.

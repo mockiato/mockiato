@@ -14,14 +14,19 @@ impl Argument {
     /// ```
     /// use mockiato::mockable;
     ///
+    /// # const IGNORED: &str = "
     /// #[cfg_attr(test, mockable)]
+    /// # ";
+    /// # #[mockable]
     /// trait MessageSender {
     ///     fn send_message(&self, messages: &[&str]);
     /// }
     ///
     /// let mut sender = MessageSenderMock::new();
     /// let message = "Hello World";
-    /// sender.expect_send_message(|arg| arg.unordered_vec_eq(vec!["foo", "bar", "baz"]));
+    /// sender
+    ///     .expect_send_message(|arg| arg.unordered_vec_eq(vec!["foo", "bar", "baz"]))
+    ///     .returns(());
     /// sender.send_message(&["baz", "bar", "foo"]);
     /// ```
     ///

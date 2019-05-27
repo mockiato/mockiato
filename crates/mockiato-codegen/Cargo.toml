@@ -18,7 +18,10 @@ proc-macro = true
 
 [dependencies]
 quote = "0.6.12"
-heck = "0.3"
+heck = "0.3.1"
+
+[build-dependencies]
+rustc_version = "0.2.3"
 
 [dependencies.syn]
 version = "0.15.32"

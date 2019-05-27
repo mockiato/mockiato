@@ -10,14 +10,17 @@ impl Argument {
     /// ```
     /// use mockiato::{mockable, Argument};
     ///
+    /// # const IGNORED: &str = "
     /// #[cfg_attr(test, mockable)]
+    /// # ";
+    /// # #[mockable]
     /// trait MessageSender {
     ///     fn send_message(&self, message: &str);
     /// }
     ///
     /// let mut sender = MessageSenderMock::new();
     /// let message = "Don't make lemonade";
-    /// sender.expect_send_message(Argument::any);
+    /// sender.expect_send_message(Argument::any).returns(());
     /// sender.send_message(message);
     /// ```
     pub fn any(&self) -> AnyArgumentMatcher {

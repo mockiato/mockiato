@@ -33,7 +33,9 @@ where
     A: for<'args> ArgumentsMatcher<'args>,
 {
     /// Defines the return value for this method.
-    /// The value must be [`Clone`]able.g
+    /// The value must be [`Clone`]able.
+    ///
+    /// This method does not need to be called on nightly for the unit type `()`.
     pub fn returns(&mut self, return_value: R) -> &mut Self
     where
         R: Clone + 'mock,

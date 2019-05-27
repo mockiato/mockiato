@@ -1,15 +1,7 @@
 //! Codegen for `mockiato`. Do not use this crate directly.
 
 #![recursion_limit = "128"]
-#![feature(
-    proc_macro_diagnostic,
-    proc_macro_span,
-    proc_macro_hygiene,
-    bind_by_move_pattern_guards,
-    decl_macro,
-    box_syntax,
-    box_patterns
-)]
+#![cfg_attr(rustc_is_nightly, feature(proc_macro_diagnostic))]
 #![warn(clippy::dbg_macro, clippy::unimplemented)]
 #![deny(
     rust_2018_idioms,
@@ -27,6 +19,7 @@ extern crate proc_macro;
 
 mod constant;
 mod diagnostic;
+mod emit_diagnostics;
 mod generate;
 mod mockable;
 mod parse;
@@ -34,13 +27,8 @@ mod result;
 mod syn_ext;
 
 use self::mockable::Mockable;
-use crate::diagnostic::{Diagnostic, DiagnosticLevel, DiagnosticMessage};
-use crate::result::Error;
-use proc_macro::{
-    Diagnostic as ProcMacroDiagnostic, Level as ProcMacroLevel, Span as ProcMacroSpan,
-    TokenStream as ProcMacroTokenStream,
-};
-use proc_macro2::Span;
+use crate::emit_diagnostics::emit_diagnostics;
+use proc_macro::TokenStream as ProcMacroTokenStream;
 use syn::{parse_macro_input, AttributeArgs, Item};
 
 #[doc(hidden)]
@@ -56,57 +44,12 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
     match mockable.expand(attr, item) {
         Ok(output) => ProcMacroTokenStream::from(output),
         Err(error) => {
-            emit_diagnostics(error);
-            original_input
+            let mut output = original_input;
+
+            let diagnostics_output = emit_diagnostics(error);
+            output.extend(ProcMacroTokenStream::from(diagnostics_output));
+
+            output
         }
-    }
-}
-
-fn emit_diagnostics(error: Error) {
-    error
-        .diagnostics
-        .into_iter()
-        .map(to_proc_macro_diagnostic)
-        .for_each(ProcMacroDiagnostic::emit);
-}
-
-fn to_proc_macro_diagnostic(source: Diagnostic) -> ProcMacroDiagnostic {
-    let level = to_proc_macro_level(source.level);
-    let span = to_proc_macro_span(source.span);
-    let diagnostic = ProcMacroDiagnostic::spanned(span, level, source.message);
-    let diagnostic = add_notes_to_proc_macro_diagnostic(diagnostic, source.notes);
-    add_help_to_proc_macro_diagnostic(diagnostic, source.help)
-}
-
-fn add_help_to_proc_macro_diagnostic(
-    diagnostic: ProcMacroDiagnostic,
-    help: Vec<DiagnosticMessage>,
-) -> ProcMacroDiagnostic {
-    help.into_iter()
-        .fold(diagnostic, |diagnostic, help| match help.span {
-            Some(span) => diagnostic.span_help(to_proc_macro_span(span), help.message),
-            None => diagnostic.help(help.message),
-        })
-}
-
-fn add_notes_to_proc_macro_diagnostic(
-    diagnostic: ProcMacroDiagnostic,
-    notes: Vec<DiagnosticMessage>,
-) -> ProcMacroDiagnostic {
-    notes
-        .into_iter()
-        .fold(diagnostic, |diagnostic, note| match note.span {
-            Some(span) => diagnostic.span_note(to_proc_macro_span(span), note.message),
-            None => diagnostic.note(note.message),
-        })
-}
-
-fn to_proc_macro_span(span: Span) -> ProcMacroSpan {
-    span.unstable()
-}
-
-fn to_proc_macro_level(level: DiagnosticLevel) -> ProcMacroLevel {
-    match level {
-        DiagnosticLevel::Error => ProcMacroLevel::Error,
     }
 }

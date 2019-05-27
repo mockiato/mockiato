@@ -66,7 +66,7 @@ impl MethodSelfArg {
 
         match arg.pat {
             Pat::Ident(PatIdent { ref ident, .. }) if ident == SELF_ARG_NAME => {
-                Ok(MethodSelfArg::Captured(box arg))
+                Ok(MethodSelfArg::Captured(Box::new(arg)))
             }
             _ => Err(()),
         }

@@ -5,6 +5,7 @@ trait MessageSender {
     fn ping(&self);
 }
 
+#[cfg(rustc_is_nightly)]
 #[test]
 #[should_panic(
     expected = "The call MessageSenderMock::ping() matches more than one expected call:\nping() \
