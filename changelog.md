@@ -41,5 +41,5 @@
 ## 0.6.2
 - Quickstart example in the readme has been fixed.
 
-## 0.6.3
+## 0.7.0
 - A typo in the documentation has been fixed.
