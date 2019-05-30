@@ -41,5 +41,9 @@
 ## 0.6.2
 - Quickstart example in the readme has been fixed.
 
-## 0.7.0
+## 0.6.3
 - A typo in the documentation has been fixed.
+
+## 0.7.0
+- Support for stable rust has been added. (See [disclaimer in readme](https://github.com/myelin-ai/mockiato/tree/0.7.0))
+- Dependencies have been updated.
