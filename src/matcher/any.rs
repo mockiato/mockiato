@@ -1,5 +1,5 @@
 use super::ArgumentMatcher;
-use crate::internal::argument::Argument;
+use crate::argument::Argument;
 use std::fmt::Write;
 use std::fmt::{self, Display};
 

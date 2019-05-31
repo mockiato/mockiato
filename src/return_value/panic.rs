@@ -1,6 +1,6 @@
 use super::ReturnValueGenerator;
-use crate::internal::fmt::DisplayOption;
-use crate::internal::ArgumentsMatcher;
+use crate::fmt::DisplayOption;
+use crate::matcher::ArgumentsMatcher;
 use std::fmt::{self, Display};
 
 #[derive(Debug)]
@@ -27,8 +27,8 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::internal::arguments::ArgumentsMock;
-    use crate::internal::matcher::ArgumentsMatcherMock;
+    use crate::arguments::ArgumentsMock;
+    use crate::matcher::ArgumentsMatcherMock;
 
     #[test]
     #[should_panic(expected = "<panic message>")]

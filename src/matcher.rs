@@ -1,4 +1,4 @@
-use crate::internal::arguments::Arguments;
+use crate::arguments::Arguments;
 use std::fmt::{Debug, Display};
 
 pub(crate) mod any;
@@ -6,10 +6,12 @@ pub(crate) mod nearly_eq;
 pub(crate) mod partial_eq;
 pub(crate) mod unordered_vec_eq;
 
+#[allow(missing_docs)]
 pub trait ArgumentMatcher<T>: Display + Debug {
     fn matches_argument(&self, input: &T) -> bool;
 }
 
+#[allow(missing_docs)]
 pub trait ArgumentsMatcher<'args>: Display + Debug {
     type Arguments: Arguments;
 
@@ -22,7 +24,7 @@ pub(crate) use self::mock::*;
 #[cfg(test)]
 mod mock {
     use super::ArgumentsMatcher;
-    use crate::internal::arguments::ArgumentsMock;
+    use crate::arguments::ArgumentsMock;
     use std::cell::RefCell;
 
     use std::fmt::{self, Display};

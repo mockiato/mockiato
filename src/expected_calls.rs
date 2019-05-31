@@ -1,4 +1,4 @@
-use crate::internal::fmt::DisplayTimes;
+use crate::fmt::DisplayTimes;
 use std::fmt::{self, Display};
 use std::ops::{Range, RangeFrom, RangeFull, RangeInclusive, RangeToInclusive};
 

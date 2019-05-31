@@ -1,7 +1,7 @@
-use crate::internal::argument::Argument;
-use crate::internal::fmt::MaybeDebug;
-use crate::internal::fmt::MaybeDebugWrapper;
-use crate::internal::ArgumentMatcher;
+use crate::argument::Argument;
+use crate::fmt::MaybeDebug;
+use crate::fmt::MaybeDebugWrapper;
+use crate::matcher::ArgumentMatcher;
 use nameof::name_of;
 use nearly_eq::NearlyEq;
 use std::fmt::{self, Debug, Display};

@@ -1,8 +1,8 @@
-use crate::internal::default_return_value::DefaultReturnValue;
-use crate::internal::expected_calls::ExpectedCalls;
-use crate::internal::fmt::{DisplayOption, DisplayTimes};
-use crate::internal::matcher::ArgumentsMatcher;
-use crate::internal::return_value::{self, ReturnValueGenerator};
+use crate::default_return_value::DefaultReturnValue;
+use crate::expected_calls::ExpectedCalls;
+use crate::fmt::{DisplayOption, DisplayTimes};
+use crate::matcher::ArgumentsMatcher;
+use crate::return_value::{self, ReturnValueGenerator};
 use nameof::name_of;
 use std::cell::RefCell;
 use std::fmt::{self, Debug, Display};
@@ -189,8 +189,8 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::internal::arguments::ArgumentsMock;
-    use crate::internal::matcher::ArgumentsMatcherMock;
+    use crate::arguments::ArgumentsMock;
+    use crate::matcher::ArgumentsMatcherMock;
     use std::cell::RefCell;
     use std::fmt::Debug;
     use std::thread::panicking;
