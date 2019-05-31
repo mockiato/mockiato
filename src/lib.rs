@@ -168,13 +168,13 @@ pub use crate::argument::Argument;
 pub use crate::expected_calls::ExpectedCalls;
 pub use crate::method_call::MethodCallBuilder;
 
-#[doc(hidden)]
-pub mod internal;
 mod argument;
 mod arguments;
 mod default_return_value;
 mod expected_calls;
 mod fmt;
+#[doc(hidden)]
+pub mod internal;
 mod matcher;
 mod method;
 mod method_call;
