@@ -7,4 +7,3 @@ pub use crate::arguments::Arguments;
 pub use crate::fmt::MaybeDebugWrapper;
 pub use crate::matcher::{ArgumentMatcher, ArgumentsMatcher};
 pub use crate::method::Method;
-pub use crate::method_call::MethodCallBuilder;

@@ -223,7 +223,7 @@ panicking if the function was not called by the time the object goes out of scop
         #visibility fn #expect_method_ident <#generics> (
             &mut self,
             #arguments
-        ) -> mockiato::internal::MethodCallBuilder<
+        ) -> mockiato::MethodCallBuilder<
             #mock_lifetime,
             '_,
             #mod_ident::#arguments_matcher_ident #ty_generics,
