@@ -1,7 +1,7 @@
 pub(crate) use self::cloned::*;
 pub(crate) use self::panic::*;
 
-use crate::internal::ArgumentsMatcher;
+use crate::matcher::ArgumentsMatcher;
 use std::fmt::{Debug, Display};
 use std::rc::Rc;
 

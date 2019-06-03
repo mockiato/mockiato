@@ -1,6 +1,6 @@
 use super::ReturnValueGenerator;
-use crate::internal::fmt::MaybeDebug;
-use crate::internal::ArgumentsMatcher;
+use crate::fmt::MaybeDebug;
+use crate::matcher::ArgumentsMatcher;
 use std::fmt::{self, Debug, Display};
 
 pub struct Cloned<T>(pub(crate) T);
@@ -36,8 +36,8 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::internal::arguments::ArgumentsMock;
-    use crate::internal::matcher::ArgumentsMatcherMock;
+    use crate::arguments::ArgumentsMock;
+    use crate::matcher::ArgumentsMatcherMock;
 
     #[test]
     fn test_cloned_returns_expected_value() {

@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Display};
 
+#[allow(missing_docs)]
 pub trait Arguments: Display + Debug {}
 
 #[cfg(test)]

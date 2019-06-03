@@ -1,9 +1,9 @@
-use crate::internal::matcher::ArgumentsMatcher;
-use crate::internal::return_value::ReturnValueGenerator;
+use crate::matcher::ArgumentsMatcher;
+use crate::return_value::ReturnValueGenerator;
 use std::rc::Rc;
 
 #[cfg(rustc_is_nightly)]
-use crate::internal::return_value::Cloned;
+use crate::return_value::Cloned;
 
 pub trait DefaultReturnValue<A>: Sized {
     fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>> {

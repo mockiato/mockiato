@@ -1,6 +1,6 @@
 use super::ArgumentMatcher;
-use crate::internal::argument::Argument;
-use crate::internal::fmt::{MaybeDebug, MaybeDebugWrapper};
+use crate::argument::Argument;
+use crate::fmt::{MaybeDebug, MaybeDebugWrapper};
 use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 

@@ -164,9 +164,18 @@ macro_rules! mockable {
 #[cfg_attr(rustc_is_nightly, doc(include = "../readme.md"))]
 mod test_readme {}
 
-pub use crate::internal::argument::Argument;
-pub use crate::internal::expected_calls::ExpectedCalls;
-pub use crate::internal::MethodCallBuilder;
+pub use crate::argument::Argument;
+pub use crate::expected_calls::ExpectedCalls;
+pub use crate::method_call::MethodCallBuilder;
 
+mod argument;
+mod arguments;
+mod default_return_value;
+mod expected_calls;
+mod fmt;
 #[doc(hidden)]
 pub mod internal;
+mod matcher;
+mod method;
+mod method_call;
+mod return_value;

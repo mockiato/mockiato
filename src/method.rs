@@ -1,5 +1,5 @@
-use crate::internal::matcher::ArgumentsMatcher;
-use crate::internal::method_call::{MethodCall, MethodCallBuilder};
+use crate::matcher::ArgumentsMatcher;
+use crate::method_call::{MethodCall, MethodCallBuilder};
 use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 
@@ -15,6 +15,7 @@ enum ExpectedCallOrder {
     Unordered,
 }
 
+#[allow(missing_docs)]
 pub struct Method<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
@@ -50,6 +51,7 @@ where
     }
 }
 
+#[allow(missing_docs)]
 impl<'mock, A, R> Method<'mock, A, R>
 where
     A: for<'args> ArgumentsMatcher<'args>,
@@ -244,8 +246,8 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::internal::arguments::ArgumentsMock;
-    use crate::internal::matcher::ArgumentsMatcherMock;
+    use crate::arguments::ArgumentsMock;
+    use crate::matcher::ArgumentsMatcherMock;
 
     #[test]
     fn call_errors_if_more_than_one_call_matches() {

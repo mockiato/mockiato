@@ -3,18 +3,7 @@
 //! It may change at any time. Do not use this module directly.
 //!
 
-pub use self::arguments::Arguments;
-pub use self::fmt::MaybeDebugWrapper;
-pub use self::matcher::{ArgumentMatcher, ArgumentsMatcher};
-pub use self::method::Method;
-pub use self::method_call::MethodCallBuilder;
-
-pub(crate) mod argument;
-mod arguments;
-pub(crate) mod default_return_value;
-pub(crate) mod expected_calls;
-mod fmt;
-pub(crate) mod matcher;
-mod method;
-mod method_call;
-mod return_value;
+pub use crate::arguments::Arguments;
+pub use crate::fmt::MaybeDebugWrapper;
+pub use crate::matcher::{ArgumentMatcher, ArgumentsMatcher};
+pub use crate::method::Method;
