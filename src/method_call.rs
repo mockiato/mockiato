@@ -44,6 +44,18 @@ where
         self
     }
 
+    /// Defines a return value for this method that will be returned once.
+    /// The mocked method will panic on subsequent calls.
+    ///
+    /// This method does not need to be called on nightly for the unit type `()`.
+    pub fn returns_once(&mut self, return_value: R) -> &mut Self
+    where
+        R: 'mock,
+    {
+        self.call.return_value = Some(Rc::new(return_value::Once::new(return_value)));
+        self
+    }
+
     /// Defines that this method panics.
     pub fn panics(&mut self) -> &mut Self {
         self.call.return_value = Some(Rc::new(return_value::Panic(None)));

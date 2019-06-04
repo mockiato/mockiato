@@ -1,4 +1,5 @@
 pub(crate) use self::cloned::*;
+pub(crate) use self::once::*;
 pub(crate) use self::panic::*;
 
 use crate::matcher::ArgumentsMatcher;
@@ -6,6 +7,7 @@ use std::fmt::{Debug, Display};
 use std::rc::Rc;
 
 mod cloned;
+mod once;
 mod panic;
 
 pub trait DefaultReturnValue<A>: Sized {
