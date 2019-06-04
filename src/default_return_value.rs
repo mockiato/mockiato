@@ -5,7 +5,7 @@ use std::rc::Rc;
 #[cfg(rustc_is_nightly)]
 use crate::return_value::Cloned;
 
-pub trait DefaultReturnValue<A>: Sized {
+pub(crate) trait DefaultReturnValue<A>: Sized {
     fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>> {
         None
     }
