@@ -33,4 +33,8 @@ where
     A: for<'args> ArgumentsMatcher<'args>,
 {
     fn generate_return_value(&self, input: <A as ArgumentsMatcher<'_>>::Arguments) -> R;
+
+    fn can_return_more_than_once(&self) -> bool {
+        true
+    }
 }

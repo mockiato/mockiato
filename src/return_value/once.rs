@@ -22,6 +22,10 @@ where
             .take()
             .expect("This value was already returned")
     }
+
+    fn can_return_more_than_once(&self) -> bool {
+        false
+    }
 }
 
 impl<R> Display for Once<R>

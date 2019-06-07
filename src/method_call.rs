@@ -53,6 +53,7 @@ where
         R: 'mock,
     {
         self.call.return_value = Some(Rc::new(return_value::Once::new(return_value)));
+        self.assert_times_and_return_value_are_compatible();
         self
     }
 
@@ -93,11 +94,29 @@ where
         E: Into<ExpectedCalls>,
     {
         self.call.expected_calls = expected_calls.into();
+        self.assert_times_and_return_value_are_compatible();
         self
     }
 
     pub(crate) fn new(call: &'a mut MethodCall<'mock, A, R>) -> Self {
         Self { call }
+    }
+
+    fn assert_times_and_return_value_are_compatible(&self) {
+        let one_expected_call = ExpectedCalls::from(1);
+        let returns_only_once = self
+            .call
+            .return_value
+            .as_ref()
+            .map(|r| !r.can_return_more_than_once())
+            .unwrap_or_default();
+        let expected_calls = &self.call.expected_calls;
+        if returns_only_once && expected_calls != &one_expected_call {
+            panic!(
+                "Return value can only be returned once but call was expected {}.",
+                expected_calls
+            );
+        }
     }
 }
 
