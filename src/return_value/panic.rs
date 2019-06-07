@@ -4,7 +4,7 @@ use crate::matcher::ArgumentsMatcher;
 use std::fmt::{self, Display};
 
 #[derive(Debug)]
-pub struct Panic(pub(crate) Option<&'static str>);
+pub(crate) struct Panic(pub(crate) Option<&'static str>);
 
 impl Display for Panic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

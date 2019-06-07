@@ -2,7 +2,7 @@
 
 #![recursion_limit = "128"]
 #![cfg_attr(rustc_is_nightly, feature(proc_macro_diagnostic))]
-#![warn(clippy::dbg_macro, clippy::unimplemented)]
+#![warn(clippy::dbg_macro, clippy::unimplemented, unreachable_pub)]
 #![deny(
     rust_2018_idioms,
     future_incompatible,

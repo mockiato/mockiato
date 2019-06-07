@@ -108,7 +108,12 @@
 //! ```
 
 #![cfg_attr(rustc_is_nightly, feature(doc_cfg, external_doc, specialization))]
-#![warn(missing_docs, clippy::dbg_macro, clippy::unimplemented)]
+#![warn(
+    missing_docs,
+    clippy::dbg_macro,
+    clippy::unimplemented,
+    unreachable_pub
+)]
 #![deny(
     rust_2018_idioms,
     future_incompatible,

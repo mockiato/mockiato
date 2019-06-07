@@ -10,7 +10,7 @@ mod cloned;
 mod once;
 mod panic;
 
-pub trait DefaultReturnValue<A>: Sized {
+pub(crate) trait DefaultReturnValue<A>: Sized {
     fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>> {
         None
     }
@@ -28,7 +28,7 @@ where
     }
 }
 
-pub trait ReturnValueGenerator<A, R>: Display + Debug
+pub(crate) trait ReturnValueGenerator<A, R>: Display + Debug
 where
     A: for<'args> ArgumentsMatcher<'args>,
 {

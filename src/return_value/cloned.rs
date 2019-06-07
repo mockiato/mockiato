@@ -3,7 +3,7 @@ use crate::fmt::MaybeDebug;
 use crate::matcher::ArgumentsMatcher;
 use std::fmt::{self, Debug, Display};
 
-pub struct Cloned<T>(pub(crate) T);
+pub(crate) struct Cloned<T>(pub(crate) T);
 
 impl<A, R> ReturnValueGenerator<A, R> for Cloned<R>
 where
