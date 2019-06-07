@@ -89,7 +89,7 @@ where
     }
 }
 
-pub struct MethodCall<'mock, A, R> {
+pub(crate) struct MethodCall<'mock, A, R> {
     expected_calls: ExpectedCalls,
     actual_number_of_calls: RefCell<u64>,
     matcher: Rc<A>,
