@@ -1,52 +1,51 @@
-use super::name_attr::NameAttr;
-use super::static_attr::StaticAttr;
+use super::{MockableAttr, MockableAttrParser};
 use crate::constant::{
     ATTR_NAME, MOCK_STRUCT_NAME_ATTR_PARAM_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME,
 };
 use crate::diagnostic::DiagnosticBuilder;
 use crate::result::{merge_results, Error, Result};
 use syn::spanned::Spanned;
-use syn::{AttributeArgs, Lit, Meta, NestedMeta};
+use syn::{AttributeArgs, Ident, Lit, Meta, MetaNameValue, NestedMeta};
 
-/// The `#[mockable]` attribute, which is placed on a trait.
+#[derive(Default)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
-pub(crate) struct MockableAttr {
-    /// The name sub-attribute. Example: `#[name = "FooMock"]`
-    /// This customizes the name of the generated mock struct.
-    pub(crate) name_attr: Option<NameAttr>,
-    /// The static sub-attribute. Example: `#[mockable(static)]`.
-    /// Enforces that only static lifetimes are used within the mock.
-    pub(crate) static_attr: Option<StaticAttr>,
+pub(crate) struct MockableAttrParserImpl;
+
+impl MockableAttrParserImpl {
+    pub(crate) fn new() -> Self {
+        Self
+    }
 }
 
-impl MockableAttr {
-    pub(crate) fn parse(args: AttributeArgs) -> Result<Self> {
+impl MockableAttrParser for MockableAttrParserImpl {
+    fn parse(&self, args: AttributeArgs) -> Result<MockableAttr> {
         let meta_items = get_meta_items(args)?;
 
-        let mut name_attr = None;
-        let mut static_attr = None;
+        let mut name = None;
+        let mut enforce_static_references = false;
 
         for item in meta_items {
             let item_name = item.name();
 
             if item_name == MOCK_STRUCT_NAME_ATTR_PARAM_NAME {
-                if name_attr.is_some() {
+                if name.is_some() {
                     return Err(name_specified_more_than_once_error(&item));
                 }
-                name_attr = Some(NameAttr::parse(item)?);
+                name = Some(parse_name_property(item)?);
             } else if item_name == STATIC_REFERENCES_ATTR_PARAM_NAME {
-                if static_attr.is_some() {
+                if enforce_static_references {
                     return Err(static_references_specified_more_than_once_error(&item));
                 }
-                static_attr = Some(StaticAttr::parse(item)?);
+                validate_static_references_property(&item)?;
+                enforce_static_references = true;
             } else {
                 return Err(attribute_property_not_supported_error(&item));
             }
         }
 
-        Ok(Self {
-            name_attr,
-            static_attr,
+        Ok(MockableAttr {
+            name,
+            enforce_static_references,
         })
     }
 }
@@ -57,6 +56,54 @@ fn get_meta_items(args: AttributeArgs) -> Result<impl Iterator<Item = Meta>> {
         NestedMeta::Literal(literal) => Err(unsupported_syntax_error(&literal)),
     });
     merge_results(meta_items)
+}
+
+fn parse_name_property(meta_item: Meta) -> Result<Ident> {
+    let meta_item_span = meta_item.span();
+
+    if let Meta::NameValue(MetaNameValue { lit, .. }) = meta_item {
+        if let Lit::Str(str_lit) = lit {
+            return Ok(Ident::new(&str_lit.value(), str_lit.span()));
+        }
+    }
+
+    let error_message = format!(
+        "#[{attr}({param} = \"...\") expects a string literal",
+        attr = ATTR_NAME,
+        param = MOCK_STRUCT_NAME_ATTR_PARAM_NAME
+    );
+    let help_message = format!(
+        "Example usage: #[{attr}({param} = \"FooMock\")]",
+        attr = ATTR_NAME,
+        param = MOCK_STRUCT_NAME_ATTR_PARAM_NAME
+    );
+    let error = DiagnosticBuilder::error(meta_item_span, error_message)
+        .help(help_message)
+        .build()
+        .into();
+    Err(error)
+}
+
+fn validate_static_references_property(meta_item: &Meta) -> Result<()> {
+    let meta_item_span = meta_item.span();
+
+    if let Meta::Word(_ident) = meta_item {
+        return Ok(());
+    }
+
+    let error_message = format!(
+        "#[{}({}) does not take any parameters",
+        ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME
+    );
+    let help_message = format!(
+        "Correct usage: #[{}({})]",
+        ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME
+    );
+    let error = DiagnosticBuilder::error(meta_item_span, error_message)
+        .help(help_message)
+        .build()
+        .into();
+    Err(error)
 }
 
 fn attribute_property_not_supported_error(meta_item: &Meta) -> Error {
