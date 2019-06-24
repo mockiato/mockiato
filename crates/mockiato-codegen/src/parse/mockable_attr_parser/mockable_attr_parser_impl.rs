@@ -4,6 +4,7 @@ use crate::constant::{
 };
 use crate::diagnostic::DiagnosticBuilder;
 use crate::result::{merge_results, Error, Result};
+use proc_macro2::Span;
 use syn::spanned::Spanned;
 use syn::{AttributeArgs, Ident, Lit, Meta, MetaNameValue, NestedMeta};
 
@@ -67,6 +68,10 @@ fn parse_name_property(meta_item: Meta) -> Result<Ident> {
         }
     }
 
+    Err(invalid_name_property_syntax_error(meta_item_span))
+}
+
+fn invalid_name_property_syntax_error(span: Span) -> Error {
     let error_message = format!(
         "#[{attr}({param} = \"...\") expects a string literal",
         attr = ATTR_NAME,
@@ -77,20 +82,25 @@ fn parse_name_property(meta_item: Meta) -> Result<Ident> {
         attr = ATTR_NAME,
         param = MOCK_STRUCT_NAME_ATTR_PARAM_NAME
     );
-    let error = DiagnosticBuilder::error(meta_item_span, error_message)
+    DiagnosticBuilder::error(span, error_message)
         .help(help_message)
         .build()
-        .into();
-    Err(error)
+        .into()
 }
 
 fn validate_static_references_property(meta_item: &Meta) -> Result<()> {
     let meta_item_span = meta_item.span();
 
     if let Meta::Word(_ident) = meta_item {
-        return Ok(());
+        Ok(())
+    } else {
+        Err(invalid_static_references_property_syntax_error(
+            meta_item_span,
+        ))
     }
+}
 
+fn invalid_static_references_property_syntax_error(span: Span) -> Error {
     let error_message = format!(
         "#[{}({}) does not take any parameters",
         ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME
@@ -99,11 +109,10 @@ fn validate_static_references_property(meta_item: &Meta) -> Result<()> {
         "Correct usage: #[{}({})]",
         ATTR_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME
     );
-    let error = DiagnosticBuilder::error(meta_item_span, error_message)
+    DiagnosticBuilder::error(span, error_message)
         .help(help_message)
         .build()
-        .into();
-    Err(error)
+        .into()
 }
 
 fn attribute_property_not_supported_error(meta_item: &Meta) -> Error {
