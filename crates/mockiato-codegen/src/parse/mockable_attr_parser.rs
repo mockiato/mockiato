@@ -8,11 +8,11 @@ mod mockable_attr_parser_impl;
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct MockableAttr {
     /// Customizes the name of the generated mock struct.
-    /// Example: `#[name = "FooMock"]`
+    /// Example usage: `#[name = "FooMock"]`
     pub(crate) name: Option<Ident>,
-    /// The static sub-attribute. Example: `#[mockable(static_references)]`.
     /// Enforces that only static lifetimes are used within the mock.
-    pub(crate) enforce_static_references: bool,
+    /// Example usage: `#[mockable(static_references)]`.
+    pub(crate) force_static_lifetimes: bool,
 }
 
 pub(crate) trait MockableAttrParser {

@@ -26,7 +26,7 @@ impl Mockable {
             &trait_decl,
             GenerateMockOptions {
                 custom_struct_ident: mockable_attr.name,
-                force_static_lifetimes: mockable_attr.enforce_static_references,
+                force_static_lifetimes: mockable_attr.force_static_lifetimes,
             },
         );
 

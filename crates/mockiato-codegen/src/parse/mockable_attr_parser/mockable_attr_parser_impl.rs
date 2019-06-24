@@ -23,7 +23,7 @@ impl MockableAttrParser for MockableAttrParserImpl {
         let meta_items = get_meta_items(args)?;
 
         let mut name = None;
-        let mut enforce_static_references = false;
+        let mut force_static_lifetimes = false;
 
         for item in meta_items {
             let item_name = item.name();
@@ -34,11 +34,11 @@ impl MockableAttrParser for MockableAttrParserImpl {
                 }
                 name = Some(parse_name_property(item)?);
             } else if item_name == STATIC_REFERENCES_ATTR_PARAM_NAME {
-                if enforce_static_references {
+                if force_static_lifetimes {
                     return Err(static_references_specified_more_than_once_error(&item));
                 }
                 validate_static_references_property(&item)?;
-                enforce_static_references = true;
+                force_static_lifetimes = true;
             } else {
                 return Err(attribute_property_not_supported_error(&item));
             }
@@ -46,7 +46,7 @@ impl MockableAttrParser for MockableAttrParserImpl {
 
         Ok(MockableAttr {
             name,
-            enforce_static_references,
+            force_static_lifetimes,
         })
     }
 }
