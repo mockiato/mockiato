@@ -24,7 +24,7 @@ heck = "0.3.1"
 rustc_version = "0.2.3"
 
 [dependencies.syn]
-version = "0.15.34"
+version = "0.15.39"
 features = ["full", "visit", "visit-mut"]
 
 [dependencies.proc-macro2]
