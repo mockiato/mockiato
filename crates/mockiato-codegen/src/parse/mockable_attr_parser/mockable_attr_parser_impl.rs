@@ -20,10 +20,8 @@ impl MockableAttrParserImpl {
 
 impl MockableAttrParser for MockableAttrParserImpl {
     fn parse(&self, args: AttributeArgs) -> Result<MockableAttr> {
-        let meta_items = get_meta_items(args)?;
-
-        meta_items.fold(Ok(MockableAttr::default()), |mockable_attr, item| {
-            mockable_attr.and_then(|mockable_attr| parse_meta_item(mockable_attr, item))
+        get_meta_items(args)?.try_fold(MockableAttr::default(), |mockable_attr, item| {
+            parse_meta_item(mockable_attr, item)
         })
     }
 }
