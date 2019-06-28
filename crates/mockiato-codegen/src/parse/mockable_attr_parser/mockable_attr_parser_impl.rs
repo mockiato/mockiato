@@ -34,7 +34,7 @@ fn parse_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<MockableAt
         ref item_name if item_name == STATIC_REFERENCES_ATTR_PARAM_NAME => {
             parse_static_references_meta_item(mockable_attr, item)
         }
-        _ => return Err(attribute_property_not_supported_error(&item)),
+        _ => Err(attribute_property_not_supported_error(&item)),
     }
 }
 
