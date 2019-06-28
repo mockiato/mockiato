@@ -19,7 +19,7 @@ categories = ["development-tools::testing"]
 [dependencies]
 mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.8.0" }
 nearly_eq = "0.2.4"
-nameof = "1.0.2"
+nameof = "1.1.0"
 
 [build-dependencies]
 rustc_version = "0.2.3"
