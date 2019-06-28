@@ -6,6 +6,7 @@ mod mockable_attr_parser_impl;
 
 /// The `#[mockable]` attribute, which is placed on a trait.
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
+#[derive(Default)]
 pub(crate) struct MockableAttr {
     /// Customizes the name of the generated mock struct.
     /// Example usage: `#[name = "FooMock"]`

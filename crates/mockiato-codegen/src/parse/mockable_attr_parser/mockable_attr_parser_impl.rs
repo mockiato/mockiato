@@ -22,31 +22,47 @@ impl MockableAttrParser for MockableAttrParserImpl {
     fn parse(&self, args: AttributeArgs) -> Result<MockableAttr> {
         let meta_items = get_meta_items(args)?;
 
-        let mut name = None;
-        let mut force_static_lifetimes = false;
+        meta_items.fold(Ok(MockableAttr::default()), |mockable_attr, item| {
+            mockable_attr.and_then(|mockable_attr| parse_meta_item(mockable_attr, item))
+        })
+    }
+}
 
-        for item in meta_items {
-            let item_name = item.name();
-
-            if item_name == MOCK_STRUCT_NAME_ATTR_PARAM_NAME {
-                if name.is_some() {
-                    return Err(name_specified_more_than_once_error(&item));
-                }
-                name = Some(parse_name_property(item)?);
-            } else if item_name == STATIC_REFERENCES_ATTR_PARAM_NAME {
-                if force_static_lifetimes {
-                    return Err(static_references_specified_more_than_once_error(&item));
-                }
-                validate_static_references_property(&item)?;
-                force_static_lifetimes = true;
-            } else {
-                return Err(attribute_property_not_supported_error(&item));
-            }
+fn parse_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<MockableAttr> {
+    match item.name() {
+        ref item_name if item_name == MOCK_STRUCT_NAME_ATTR_PARAM_NAME => {
+            parse_name_meta_item(mockable_attr, item)
         }
+        ref item_name if item_name == STATIC_REFERENCES_ATTR_PARAM_NAME => {
+            parse_static_references_meta_item(mockable_attr, item)
+        }
+        _ => return Err(attribute_property_not_supported_error(&item)),
+    }
+}
 
+fn parse_name_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<MockableAttr> {
+    if mockable_attr.name.is_some() {
+        Err(name_specified_more_than_once_error(&item))
+    } else {
+        let name = Some(parse_name_property(item)?);
         Ok(MockableAttr {
             name,
-            force_static_lifetimes,
+            ..mockable_attr
+        })
+    }
+}
+
+fn parse_static_references_meta_item(
+    mockable_attr: MockableAttr,
+    item: Meta,
+) -> Result<MockableAttr> {
+    if mockable_attr.force_static_lifetimes {
+        Err(static_references_specified_more_than_once_error(&item))
+    } else {
+        validate_static_references_property(&item)?;
+        Ok(MockableAttr {
+            force_static_lifetimes: true,
+            ..mockable_attr
         })
     }
 }
