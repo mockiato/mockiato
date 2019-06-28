@@ -1,12 +1,13 @@
 use super::{MockableAttr, MockableAttrParser};
 use crate::constant::{
-    ATTR_NAME, MOCK_STRUCT_NAME_ATTR_PARAM_NAME, STATIC_REFERENCES_ATTR_PARAM_NAME,
+    ATTR_NAME, MOCK_STRUCT_NAME_ATTR_PARAM_NAME, REMOTE_ATTR_PARAM_NAME,
+    STATIC_REFERENCES_ATTR_PARAM_NAME,
 };
 use crate::diagnostic::DiagnosticBuilder;
 use crate::result::{merge_results, Error, Result};
 use proc_macro2::Span;
 use syn::spanned::Spanned;
-use syn::{AttributeArgs, Ident, Lit, Meta, MetaNameValue, NestedMeta};
+use syn::{AttributeArgs, Ident, Lit, Meta, MetaNameValue, NestedMeta, Path};
 
 #[derive(Default)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
@@ -33,6 +34,9 @@ fn parse_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<MockableAt
         }
         ref item_name if item_name == STATIC_REFERENCES_ATTR_PARAM_NAME => {
             parse_static_references_meta_item(mockable_attr, item)
+        }
+        ref item_name if item_name == REMOTE_ATTR_PARAM_NAME => {
+            parse_remote_meta_item(mockable_attr, item)
         }
         _ => Err(attribute_property_not_supported_error(&item)),
     }
@@ -65,6 +69,21 @@ fn parse_static_references_meta_item(
     }
 }
 
+fn parse_remote_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<MockableAttr> {
+    if mockable_attr.remote_trait_path.is_some() {
+        Err(parameter_specified_more_than_once_error(
+            REMOTE_ATTR_PARAM_NAME,
+            &item,
+        ))
+    } else {
+        let remote_trait_path = Some(parse_remote_property(item)?);
+        Ok(MockableAttr {
+            remote_trait_path,
+            ..mockable_attr
+        })
+    }
+}
+
 fn get_meta_items(args: AttributeArgs) -> Result<impl Iterator<Item = Meta>> {
     let meta_items = args.into_iter().map(|nested| match nested {
         NestedMeta::Meta(meta) => Ok(meta),
@@ -83,6 +102,37 @@ fn parse_name_property(meta_item: Meta) -> Result<Ident> {
     }
 
     Err(invalid_name_property_syntax_error(meta_item_span))
+}
+
+fn parse_remote_property(meta_item: Meta) -> Result<Path> {
+    let meta_item_span = meta_item.span();
+
+    if let Meta::NameValue(MetaNameValue { lit, .. }) = meta_item {
+        if let Lit::Str(str_lit) = lit {
+            return str_lit
+                .parse()
+                .map_err(|err| invalid_remote_property_syntax_error(err.span()));
+        }
+    }
+
+    Err(invalid_remote_property_syntax_error(meta_item_span))
+}
+
+fn invalid_remote_property_syntax_error(span: Span) -> Error {
+    let error_message = format!(
+        "#[{attr}({param} = \"...\") must be a valid path",
+        attr = ATTR_NAME,
+        param = REMOTE_ATTR_PARAM_NAME
+    );
+    let help_message = format!(
+        "Example usage: #[{attr}({param} = \"io::Write\")]",
+        attr = ATTR_NAME,
+        param = REMOTE_ATTR_PARAM_NAME
+    );
+    DiagnosticBuilder::error(span, error_message)
+        .help(help_message)
+        .build()
+        .into()
 }
 
 fn invalid_name_property_syntax_error(span: Span) -> Error {

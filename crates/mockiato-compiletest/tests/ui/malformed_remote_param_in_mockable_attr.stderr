@@ -1,0 +1,21 @@
+error: #[mockable(remote = "...") must be a valid path
+ --> $DIR/malformed_remote_param_in_mockable_attr.rs:3:12
+  |
+3 | #[mockable(remote = 1)]
+  |            ^^^^^^
+  |
+  = help: Example usage: #[mockable(remote = "io::Write")]
+
+error: `remote` is specified more than once.
+ --> $DIR/malformed_remote_param_in_mockable_attr.rs:6:28
+  |
+6 | #[mockable(remote = "foo", remote = "bar")]
+  |                            ^^^^^^
+
+error: #[mockable(remote = "...") must be a valid path
+ --> $DIR/malformed_remote_param_in_mockable_attr.rs:9:21
+  |
+9 | #[mockable(remote = "foo?")]
+  |                     ^^^^^^
+  |
+  = help: Example usage: #[mockable(remote = "io::Write")]

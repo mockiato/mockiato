@@ -1,6 +1,6 @@
 pub(crate) use self::mockable_attr_parser_impl::*;
 use crate::result::Result;
-use syn::{AttributeArgs, Ident};
+use syn::{AttributeArgs, Ident, Path};
 
 mod mockable_attr_parser_impl;
 
@@ -14,6 +14,9 @@ pub(crate) struct MockableAttr {
     /// Enforces that only static lifetimes are used within the mock.
     /// Example usage: `#[mockable(static_references)]`.
     pub(crate) force_static_lifetimes: bool,
+    /// Enables mocking of a remote trait.
+    /// Example usage: `#[mockable(remote = "io::Write")]`
+    pub(crate) remote_trait_path: Option<Path>,
 }
 
 pub(crate) trait MockableAttrParser {
