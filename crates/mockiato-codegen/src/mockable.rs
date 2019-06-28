@@ -1,6 +1,6 @@
 use crate::diagnostic::DiagnosticBuilder;
 use crate::generate::{generate_mock, GenerateMockOptions};
-use crate::parse::mockable_attr::MockableAttr;
+use crate::parse::mockable_attr_parser::{MockableAttrParser, MockableAttrParserImpl};
 use crate::parse::trait_decl::TraitDecl;
 use crate::result::Error;
 use proc_macro2::{Span, TokenStream};
@@ -17,15 +17,16 @@ impl Mockable {
     }
 
     pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream, Error> {
-        let mockable_attr = MockableAttr::parse(attr)?;
+        let mockable_attr_parser = MockableAttrParserImpl::new();
+        let mockable_attr = mockable_attr_parser.parse(attr)?;
         let item_trait = extract_item_trait(item)?;
         let trait_decl = TraitDecl::parse(item_trait.clone()).map_err(add_note_to_error)?;
 
         let generated_mock = generate_mock(
             &trait_decl,
             GenerateMockOptions {
-                custom_struct_ident: mockable_attr.name_attr.map(|attr| attr.ident),
-                force_static_lifetimes: mockable_attr.static_attr.is_some(),
+                custom_struct_ident: mockable_attr.name,
+                force_static_lifetimes: mockable_attr.force_static_lifetimes,
             },
         );
 
