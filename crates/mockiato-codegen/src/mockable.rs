@@ -27,6 +27,7 @@ impl Mockable {
             GenerateMockOptions {
                 custom_struct_ident: mockable_attr.name,
                 force_static_lifetimes: mockable_attr.force_static_lifetimes,
+                custom_trait_path: mockable_attr.remote_trait_path,
             },
         );
 

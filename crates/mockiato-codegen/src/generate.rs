@@ -11,7 +11,7 @@ use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{parse_quote, Generics, Ident, ReturnType, Type, WherePredicate};
+use syn::{parse_quote, Generics, Ident, Path, ReturnType, Type, WherePredicate};
 
 pub(crate) mod arguments;
 pub(crate) mod arguments_matcher;
@@ -26,11 +26,11 @@ mod trait_impl;
 mod util;
 mod visibility;
 
-#[derive(Default)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) struct GenerateMockOptions {
     pub(crate) custom_struct_ident: Option<Ident>,
     pub(crate) force_static_lifetimes: bool,
+    pub(crate) custom_trait_path: Option<Path>,
 }
 
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
@@ -38,6 +38,7 @@ pub(crate) struct GenerateMockParameters {
     pub(crate) mock_struct_ident: Ident,
     pub(crate) mod_ident: Ident,
     pub(crate) generics: Generics,
+    pub(crate) trait_path: Path,
     pub(crate) methods: Vec<MethodDeclMetadata>,
 }
 
@@ -61,6 +62,10 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
         None
     };
 
+    let trait_path = options
+        .custom_trait_path
+        .unwrap_or_else(|| ident_to_path(&trait_decl.ident));
+
     let methods = trait_decl
         .methods
         .iter()
@@ -73,6 +78,7 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
         mod_ident: mod_ident(&mock_struct_ident),
         generics: generics_for_trait_decl(trait_decl, static_lifetime_restriction),
         methods,
+        trait_path,
     };
 
     let mock_struct = generate_mock_struct(trait_decl, &parameters);
@@ -103,6 +109,10 @@ pub(crate) fn generate_mock(trait_decl: &TraitDecl, options: GenerateMockOptions
             #arguments
         }
     }
+}
+
+fn ident_to_path(ident: &Ident) -> Path {
+    parse_quote!(#ident)
 }
 
 fn map_method_decl_to_method_decl_metadata(
