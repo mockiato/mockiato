@@ -16,7 +16,17 @@ pub(crate) struct MockableAttr {
     pub(crate) force_static_lifetimes: bool,
     /// Enables mocking of a remote trait.
     /// Example usage: `#[mockable(remote = "io::Write")]`
-    pub(crate) remote_trait_path: Option<Path>,
+    pub(crate) remote_trait_path: Option<RemoteTraitPath>,
+}
+
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
+pub(crate) enum RemoteTraitPath {
+    /// Corresponds to the `remote` parameter without a value:  
+    /// `#[mockable(remote)]`
+    SameAsLocalIdent,
+    /// Corresponds to the `remote` parameter with a [`Path`] as value:  
+    /// `#[mockable(remote = "std::io::Write")]`
+    Path(Path),
 }
 
 pub(crate) trait MockableAttrParser {

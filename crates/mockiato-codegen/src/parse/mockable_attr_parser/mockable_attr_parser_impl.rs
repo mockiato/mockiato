@@ -1,4 +1,4 @@
-use super::{MockableAttr, MockableAttrParser};
+use super::{MockableAttr, MockableAttrParser, RemoteTraitPath};
 use crate::constant::{
     ATTR_NAME, MOCK_STRUCT_NAME_ATTR_PARAM_NAME, REMOTE_ATTR_PARAM_NAME,
     STATIC_REFERENCES_ATTR_PARAM_NAME,
@@ -7,7 +7,7 @@ use crate::diagnostic::DiagnosticBuilder;
 use crate::result::{merge_results, Error, Result};
 use proc_macro2::Span;
 use syn::spanned::Spanned;
-use syn::{AttributeArgs, Ident, Lit, Meta, MetaNameValue, NestedMeta, Path};
+use syn::{AttributeArgs, Ident, Lit, Meta, MetaNameValue, NestedMeta};
 
 #[derive(Default)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
@@ -104,18 +104,22 @@ fn parse_name_property(meta_item: Meta) -> Result<Ident> {
     Err(invalid_name_property_syntax_error(meta_item_span))
 }
 
-fn parse_remote_property(meta_item: Meta) -> Result<Path> {
+fn parse_remote_property(meta_item: Meta) -> Result<RemoteTraitPath> {
     let meta_item_span = meta_item.span();
 
-    if let Meta::NameValue(MetaNameValue { lit, .. }) = meta_item {
-        if let Lit::Str(str_lit) = lit {
-            return str_lit
+    match meta_item {
+        Meta::Word(_) => Ok(RemoteTraitPath::SameAsLocalIdent),
+        Meta::NameValue(MetaNameValue {
+            lit: Lit::Str(str_lit),
+            ..
+        }) => {
+            let path = str_lit
                 .parse()
-                .map_err(|err| invalid_remote_property_syntax_error(err.span()));
+                .map_err(|err| invalid_remote_property_syntax_error(err.span()))?;
+            Ok(RemoteTraitPath::Path(path))
         }
+        _ => Err(invalid_remote_property_syntax_error(meta_item_span)),
     }
-
-    Err(invalid_remote_property_syntax_error(meta_item_span))
 }
 
 fn invalid_remote_property_syntax_error(span: Span) -> Error {
