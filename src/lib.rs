@@ -185,7 +185,7 @@ pub use mockiato_codegen::mockable;
 ///
 ///     // Methods with a default implementation can be omitted.
 /// }
-/// ```g
+/// ```
 ///
 /// #### Without value
 /// ```
