@@ -22,6 +22,11 @@ impl Mockable {
         let item_trait = extract_item_trait(item)?;
         let trait_decl = TraitDecl::parse(item_trait.clone()).map_err(add_note_to_error)?;
 
+        let emit_item_trait = match mockable_attr.remote_trait_path {
+            Some(_) => None,
+            None => Some(item_trait),
+        };
+
         let generated_mock = generate_mock(
             &trait_decl,
             GenerateMockOptions {
@@ -32,7 +37,7 @@ impl Mockable {
         );
 
         Ok(quote! {
-            #item_trait
+            #emit_item_trait
             #generated_mock
         })
     }
