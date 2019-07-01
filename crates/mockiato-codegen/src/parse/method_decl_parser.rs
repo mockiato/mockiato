@@ -35,58 +35,58 @@ impl MethodDeclParser for MethodDeclParserImpl {
         generic_types_on_trait: &HashSet<Ident, RandomState>,
     ) -> Result<MethodDecl> {
         match trait_item {
-            TraitItem::Method(method) => {
-                parse_method(method, generic_types_on_trait, &self.method_inputs_parser)
-            }
+            TraitItem::Method(method) => self.parse_method(method, generic_types_on_trait),
             trait_item => Err(invalid_trait_item_error(&trait_item)),
         }
     }
 }
 
-fn parse_method(
-    method: TraitItemMethod,
-    generic_types_on_trait: &HashSet<Ident>,
-    method_inputs_parser: &Box<dyn MethodInputsParser>,
-) -> Result<MethodDecl> {
-    let span = method.span();
+impl MethodDeclParserImpl {
+    fn parse_method(
+        &self,
+        method: TraitItemMethod,
+        generic_types_on_trait: &HashSet<Ident>,
+    ) -> Result<MethodDecl> {
+        let span = method.span();
 
-    let TraitItemMethod {
-        attrs,
-        sig: signature,
-        ..
-    } = method;
-    let MethodSig {
-        constness,
-        unsafety,
-        asyncness,
-        ident,
-        decl,
-        ..
-    } = signature;
+        let TraitItemMethod {
+            attrs,
+            sig: signature,
+            ..
+        } = method;
+        let MethodSig {
+            constness,
+            unsafety,
+            asyncness,
+            ident,
+            decl,
+            ..
+        } = signature;
 
-    validate_usage_of_generic_types(&decl, generic_types_on_trait)?;
+        validate_usage_of_generic_types(&decl, generic_types_on_trait)?;
 
-    let FnDecl {
-        generics,
-        inputs,
-        output,
-        ..
-    } = decl;
+        let FnDecl {
+            generics,
+            inputs,
+            output,
+            ..
+        } = decl;
 
-    validate_generic_type_parameters(&generics)?;
+        validate_generic_type_parameters(&generics)?;
 
-    check_option_is_none(&constness, span, "`const` methods are not supported")?;
-    check_option_is_none(&asyncness, span, "`async` methods are not supported")?;
+        check_option_is_none(&constness, span, "`const` methods are not supported")?;
+        check_option_is_none(&asyncness, span, "`async` methods are not supported")?;
 
-    Ok(MethodDecl {
-        attrs,
-        unsafety,
-        ident,
-        generics,
-        span,
-        inputs: method_inputs_parser.parse(inputs)?,
-        output,
-    })
+        Ok(MethodDecl {
+            attrs,
+            unsafety,
+            ident,
+            generics,
+            span,
+            inputs: self.method_inputs_parser.parse(inputs)?,
+            output,
+        })
+    }
 }
 
 fn invalid_trait_item_error(trait_item: &TraitItem) -> Error {
