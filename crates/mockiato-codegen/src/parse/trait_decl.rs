@@ -1,7 +1,5 @@
-
-
 use crate::parse::method_decl::MethodDecl;
-use crate::result::{Result};
+use crate::result::Result;
 use proc_macro2::Span;
 
 use std::fmt::Debug;
