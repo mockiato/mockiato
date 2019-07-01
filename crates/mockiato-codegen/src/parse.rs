@@ -5,6 +5,7 @@ pub(crate) mod method_decl;
 pub(crate) mod method_inputs;
 pub(crate) mod mockable_attr_parser;
 pub(crate) mod trait_decl;
+pub(crate) mod trait_decl_parser;
 
 fn check_option_is_none<T>(value: &Option<T>, span: Span, error_message: &str) -> Result<()> {
     match value {
