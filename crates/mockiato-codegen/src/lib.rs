@@ -18,18 +18,24 @@
 extern crate proc_macro;
 
 mod constant;
+mod controller;
 mod diagnostic;
 mod emit_diagnostics;
 mod generate;
-mod mockable;
 mod parse;
 mod result;
 mod syn_ext;
 
-use self::mockable::Mockable;
+use self::controller::ControllerImpl;
 use crate::emit_diagnostics::emit_diagnostics;
+use crate::result::Result;
 use proc_macro::TokenStream as ProcMacroTokenStream;
+use proc_macro2::TokenStream;
 use syn::{parse_macro_input, AttributeArgs, Item};
+
+pub(crate) trait Controller {
+    fn expand_mockable_trait(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream>;
+}
 
 #[doc(hidden)]
 #[proc_macro_attribute]
@@ -39,9 +45,8 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
     let attr = parse_macro_input!(args as AttributeArgs);
     let item = parse_macro_input!(input as Item);
 
-    let mockable = Mockable::new();
-
-    match mockable.expand(attr, item) {
+    let controller = create_controller();
+    match controller.expand_mockable_trait(attr, item) {
         Ok(output) => ProcMacroTokenStream::from(output),
         Err(error) => {
             let mut output = original_input;
@@ -52,4 +57,8 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
             output
         }
     }
+}
+
+fn create_controller() -> impl Controller {
+    ControllerImpl::new()
 }

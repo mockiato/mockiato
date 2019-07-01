@@ -4,21 +4,24 @@ use crate::parse::mockable_attr_parser::{
     MockableAttrParser, MockableAttrParserImpl, RemoteTraitPath,
 };
 use crate::parse::trait_decl::TraitDecl;
-use crate::result::Error;
+use crate::result::{Error, Result};
+use crate::Controller;
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::spanned::Spanned;
 use syn::{AttributeArgs, Item, ItemTrait};
 
-#[derive(Default)]
-pub(crate) struct Mockable;
+#[derive(Debug, Default)]
+pub(crate) struct ControllerImpl;
 
-impl Mockable {
+impl ControllerImpl {
     pub(crate) fn new() -> Self {
-        Self::default()
+        Self
     }
+}
 
-    pub(crate) fn expand(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream, Error> {
+impl Controller for ControllerImpl {
+    fn expand_mockable_trait(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream> {
         let mockable_attr_parser = MockableAttrParserImpl::new();
         let mockable_attr = mockable_attr_parser.parse(attr)?;
         let item_trait = extract_item_trait(item)?;
@@ -48,7 +51,7 @@ impl Mockable {
     }
 }
 
-fn extract_item_trait(item: Item) -> Result<ItemTrait, Error> {
+fn extract_item_trait(item: Item) -> Result<ItemTrait> {
     match item {
         Item::Trait(item_trait) => Ok(item_trait),
         _ => Err(only_traits_can_be_made_mockable_error(&item)),
