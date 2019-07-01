@@ -1,11 +1,11 @@
+use std::fmt::Debug;
+
+use proc_macro2::Span;
+use syn::punctuated::Punctuated;
+use syn::{Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
+
 use crate::parse::method_decl::MethodDecl;
 use crate::result::Result;
-use proc_macro2::Span;
-
-use std::fmt::Debug;
-use syn::punctuated::Punctuated;
-
-use syn::{Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
 
 #[derive(Clone)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]

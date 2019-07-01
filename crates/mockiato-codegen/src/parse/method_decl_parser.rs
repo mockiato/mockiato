@@ -1,17 +1,19 @@
+use std::collections::hash_map::RandomState;
+use std::collections::HashSet;
+
+use proc_macro2::Ident;
+use syn::spanned::Spanned;
+use syn::visit::{visit_type, Visit};
+use syn::{
+    FnDecl, GenericParam, Generics, MethodSig, Path, TraitItem, TraitItemMethod, Type, TypePath,
+};
+
 use crate::diagnostic::DiagnosticBuilder;
 use crate::parse::check_option_is_none;
 use crate::parse::method_decl::{MethodDecl, MethodDeclParser};
 use crate::parse::method_inputs::MethodInputsParser;
 use crate::result::{merge_results, Error, Result};
 use crate::syn_ext::PathExt;
-use proc_macro2::Ident;
-use std::collections::hash_map::RandomState;
-use std::collections::HashSet;
-use syn::spanned::Spanned;
-use syn::visit::{visit_type, Visit};
-use syn::{
-    FnDecl, GenericParam, Generics, MethodSig, Path, TraitItem, TraitItemMethod, Type, TypePath,
-};
 
 #[derive(Debug)]
 pub(crate) struct MethodDeclParserImpl {

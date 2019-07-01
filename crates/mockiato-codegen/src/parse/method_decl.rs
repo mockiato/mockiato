@@ -1,17 +1,11 @@
-use super::check_option_is_none;
-use crate::diagnostic::DiagnosticBuilder;
-use crate::parse::method_inputs::{MethodInputs, MethodInputsParser};
-use crate::result::{merge_results, Error, Result};
-use crate::syn_ext::PathExt;
-use proc_macro2::Span;
 use std::collections::HashSet;
 use std::fmt::Debug;
-use syn::spanned::Spanned;
-use syn::visit::{visit_type, Visit};
-use syn::{
-    Attribute, FnDecl, GenericParam, Generics, Ident, MethodSig, Path, ReturnType, Token,
-    TraitItem, TraitItemMethod, Type, TypePath,
-};
+
+use proc_macro2::Span;
+use syn::{Attribute, Generics, Ident, ReturnType, Token, TraitItem};
+
+use crate::parse::method_inputs::MethodInputs;
+use crate::result::Result;
 
 /// Holds everything required to generate a mock struct
 /// from a trait declaration.

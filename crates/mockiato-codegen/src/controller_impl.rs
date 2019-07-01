@@ -1,6 +1,6 @@
 use crate::code_generator::{self, CodeGenerator};
 use crate::diagnostic::DiagnosticBuilder;
-use crate::parse::mockable_attr_parser::{MockableAttr, MockableAttrParser, RemoteTraitPath};
+use crate::parse::mockable_attr::{MockableAttr, MockableAttrParser, RemoteTraitPath};
 use crate::parse::trait_decl::TraitDeclParser;
 use crate::result::{Error, Result};
 use crate::Controller;

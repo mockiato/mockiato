@@ -1,12 +1,14 @@
-use crate::diagnostic::DiagnosticBuilder;
-use crate::parse::check_option_is_none;
-use crate::parse::method_decl::{MethodDecl, MethodDeclParser};
-use crate::parse::trait_decl::{TraitDecl, TraitDeclParser};
-use crate::result::{merge_results, Error, Result};
-use proc_macro2::Ident;
 use std::collections::HashSet;
+
+use proc_macro2::Ident;
 use syn::spanned::Spanned;
 use syn::{GenericParam, Generics, ItemTrait};
+
+use crate::diagnostic::DiagnosticBuilder;
+use crate::parse::check_option_is_none;
+use crate::parse::method_decl::MethodDeclParser;
+use crate::parse::trait_decl::{TraitDecl, TraitDeclParser};
+use crate::result::{merge_results, Error, Result};
 
 #[derive(Debug)]
 pub(crate) struct TraitDeclParserImpl {

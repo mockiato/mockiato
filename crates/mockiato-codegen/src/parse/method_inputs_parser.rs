@@ -1,3 +1,8 @@
+use proc_macro2::Span;
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
+use syn::{ArgCaptured, FnArg, Ident, Pat, PatIdent, Token};
+
 use crate::constant::CREATE_ISSUE_LINK;
 use crate::diagnostic::DiagnosticBuilder;
 use crate::parse::method_inputs::{
@@ -5,11 +10,6 @@ use crate::parse::method_inputs::{
     MethodSelfArgParser,
 };
 use crate::result::{merge_results, Error, Result};
-use proc_macro2::{Span, TokenStream};
-use quote::{quote, ToTokens};
-use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
-use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Token, Type};
 
 #[derive(Debug)]
 pub(crate) struct MethodInputsParserImpl {

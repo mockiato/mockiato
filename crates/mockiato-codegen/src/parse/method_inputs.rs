@@ -1,12 +1,12 @@
-use crate::constant::CREATE_ISSUE_LINK;
-use crate::diagnostic::DiagnosticBuilder;
-use crate::result::{merge_results, Error, Result};
-use proc_macro2::{Span, TokenStream};
-use quote::{quote, ToTokens};
 use std::fmt::Debug;
+
+use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
-use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Token, Type};
+use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Token, Type};
+
+use quote::{quote, ToTokens};
+
+use crate::result::Result;
 
 #[derive(Clone)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
