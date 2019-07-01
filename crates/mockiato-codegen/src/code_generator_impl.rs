@@ -1,20 +1,33 @@
-use super::{CodeGenerator, GenerateMockOptions, GenerateMockParameters, MethodDeclMetadata};
-use crate::code_generator::arguments::generate_arguments;
-use crate::code_generator::arguments_matcher::generate_arguments_matcher;
-use crate::code_generator::constant::{arguments_ident, arguments_matcher_ident};
-use crate::code_generator::constant::{
+use crate::code_generator::{CodeGenerator, GenerateMockOptions};
+use crate::code_generator_impl::arguments::generate_arguments;
+use crate::code_generator_impl::arguments_matcher::generate_arguments_matcher;
+use crate::code_generator_impl::constant::{arguments_ident, arguments_matcher_ident};
+use crate::code_generator_impl::constant::{
     mock_lifetime, mock_lifetime_as_generic_param, mock_struct_ident, mod_ident,
 };
-use crate::code_generator::drop_impl::generate_drop_impl;
-use crate::code_generator::generics::get_matching_generics_for_method_inputs;
-use crate::code_generator::mock_struct::generate_mock_struct;
-use crate::code_generator::trait_impl::generate_trait_impl;
-use crate::code_generator::visibility::raise_visibility_by_one_level;
+use crate::code_generator_impl::drop_impl::generate_drop_impl;
+use crate::code_generator_impl::generics::get_matching_generics_for_method_inputs;
+use crate::code_generator_impl::mock_struct::generate_mock_struct;
+use crate::code_generator_impl::trait_impl::generate_trait_impl;
+use crate::code_generator_impl::visibility::raise_visibility_by_one_level;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{parse_quote, Generics, Ident, Path, ReturnType, Type, WherePredicate};
+
+pub(crate) mod arguments;
+pub(crate) mod arguments_matcher;
+mod bound_lifetimes;
+mod constant;
+mod debug_impl;
+mod drop_impl;
+mod generics;
+mod lifetime_rewriter;
+mod mock_struct;
+mod trait_impl;
+mod util;
+mod visibility;
 
 #[derive(Debug)]
 pub(crate) struct CodeGeneratorImpl;
@@ -85,6 +98,24 @@ impl CodeGenerator for CodeGeneratorImpl {
             }
         }
     }
+}
+
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
+pub(crate) struct GenerateMockParameters {
+    pub(crate) mock_struct_ident: Ident,
+    pub(crate) mod_ident: Ident,
+    pub(crate) generics: Generics,
+    pub(crate) trait_path: Path,
+    pub(crate) methods: Vec<MethodDeclMetadata>,
+}
+
+#[cfg_attr(feature = "debug-impls", derive(Debug))]
+pub(crate) struct MethodDeclMetadata {
+    pub(crate) method_decl: MethodDecl,
+    pub(crate) arguments_struct_ident: Ident,
+    pub(crate) arguments_matcher_struct_ident: Ident,
+    pub(crate) generics: Generics,
+    pub(crate) return_type: Type,
 }
 
 fn ident_to_path(ident: &Ident) -> Path {

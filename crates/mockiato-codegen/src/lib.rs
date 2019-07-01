@@ -18,6 +18,7 @@
 extern crate proc_macro;
 
 mod code_generator;
+mod code_generator_impl;
 mod constant;
 mod controller_impl;
 mod diagnostic;
@@ -26,7 +27,7 @@ mod parse;
 mod result;
 mod syn_ext;
 
-use crate::code_generator::CodeGeneratorImpl;
+use crate::code_generator_impl::CodeGeneratorImpl;
 use crate::controller_impl::ControllerImpl;
 use crate::emit_diagnostics::emit_diagnostics;
 use crate::parse::mockable_attr_parser::MockableAttrParserImpl;

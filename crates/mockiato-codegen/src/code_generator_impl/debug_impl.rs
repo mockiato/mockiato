@@ -1,4 +1,4 @@
-use crate::code_generator::util::ident_to_string_literal;
+use crate::code_generator_impl::util::ident_to_string_literal;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Generics, Ident};

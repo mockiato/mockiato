@@ -5,7 +5,7 @@ use super::constant::{
 };
 use super::debug_impl::{generate_debug_impl, DebugImplField};
 use super::MethodDeclMetadata;
-use crate::code_generator::util::ident_to_string_literal;
+use crate::code_generator_impl::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::{MethodArg, MethodInputs};
 use proc_macro2::TokenStream;
