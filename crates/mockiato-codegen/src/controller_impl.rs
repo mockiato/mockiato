@@ -1,6 +1,6 @@
 use crate::code_generator::{self, CodeGenerator};
 use crate::diagnostic::DiagnosticBuilder;
-use crate::parse::mockable_attr_parser::{MockableAttrParser, RemoteTraitPath};
+use crate::parse::mockable_attr_parser::{MockableAttr, MockableAttrParser, RemoteTraitPath};
 use crate::parse::trait_decl::TraitDeclParser;
 use crate::result::{Error, Result};
 use crate::Controller;
@@ -44,20 +44,31 @@ impl Controller for ControllerImpl {
             None => Some(item_trait),
         };
 
-        let options = code_generator::GenerateOptions {
-            custom_struct_ident: mockable_attr.name,
-            force_static_lifetimes: mockable_attr.force_static_lifetimes,
-            custom_trait_path: match mockable_attr.remote_trait_path {
-                Some(RemoteTraitPath::Path(path)) => Some(path),
-                _ => None,
-            },
-        };
+        let options = generate_options_from_mockable_attr(mockable_attr);
         let generated_mock = self.code_generator.generate(&trait_decl, options);
 
         Ok(quote! {
             #emit_item_trait
             #generated_mock
         })
+    }
+}
+
+fn generate_options_from_mockable_attr(
+    MockableAttr {
+        remote_trait_path,
+        name,
+        force_static_lifetimes,
+    }: MockableAttr,
+) -> code_generator::GenerateOptions {
+    let custom_trait_path = match remote_trait_path {
+        Some(RemoteTraitPath::Path(path)) => Some(path),
+        _ => None,
+    };
+    code_generator::GenerateOptions {
+        custom_struct_ident: name,
+        force_static_lifetimes,
+        custom_trait_path,
     }
 }
 
