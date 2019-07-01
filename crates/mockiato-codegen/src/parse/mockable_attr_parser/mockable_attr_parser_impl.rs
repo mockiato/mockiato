@@ -20,9 +20,7 @@ impl MockableAttrParserImpl {
 
 impl MockableAttrParser for MockableAttrParserImpl {
     fn parse(&self, args: AttributeArgs) -> Result<MockableAttr> {
-        get_meta_items(args)?.try_fold(MockableAttr::default(), |mockable_attr, item| {
-            parse_meta_item(mockable_attr, item)
-        })
+        get_meta_items(args)?.try_fold(MockableAttr::default(), parse_meta_item)
     }
 }
 
@@ -69,17 +67,18 @@ fn parse_static_references_meta_item(
 }
 
 fn parse_remote_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<MockableAttr> {
-    if mockable_attr.remote_trait_path.is_some() {
-        Err(parameter_specified_more_than_once_error(
+    match mockable_attr.remote_trait_path {
+        Some(_) => Err(parameter_specified_more_than_once_error(
             REMOTE_ATTR_PARAM_NAME,
             &item,
-        ))
-    } else {
-        let remote_trait_path = Some(parse_remote_property(item)?);
-        Ok(MockableAttr {
-            remote_trait_path,
-            ..mockable_attr
-        })
+        )),
+        None => {
+            let remote_trait_path = Some(parse_remote_property(item)?);
+            Ok(MockableAttr {
+                remote_trait_path,
+                ..mockable_attr
+            })
+        }
     }
 }
 
@@ -111,12 +110,10 @@ fn parse_remote_property(meta_item: Meta) -> Result<RemoteTraitPath> {
         Meta::NameValue(MetaNameValue {
             lit: Lit::Str(str_lit),
             ..
-        }) => {
-            let path = str_lit
-                .parse()
-                .map_err(|err| invalid_remote_property_syntax_error(err.span()))?;
-            Ok(RemoteTraitPath::Path(path))
-        }
+        }) => str_lit
+            .parse()
+            .map(RemoteTraitPath::Path)
+            .map_err(|err| invalid_remote_property_syntax_error(err.span())),
         _ => Err(invalid_remote_property_syntax_error(meta_item_span)),
     }
 }
