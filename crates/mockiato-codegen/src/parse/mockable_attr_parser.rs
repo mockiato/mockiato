@@ -1,5 +1,6 @@
 pub(crate) use self::mockable_attr_parser_impl::*;
 use crate::result::Result;
+use std::fmt::Debug;
 use syn::{AttributeArgs, Ident, Path};
 
 mod mockable_attr_parser_impl;
@@ -29,6 +30,6 @@ pub(crate) enum RemoteTraitPath {
     Path(Path),
 }
 
-pub(crate) trait MockableAttrParser {
+pub(crate) trait MockableAttrParser: Debug {
     fn parse(&self, args: AttributeArgs) -> Result<MockableAttr>;
 }

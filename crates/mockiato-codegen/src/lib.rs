@@ -26,8 +26,9 @@ mod parse;
 mod result;
 mod syn_ext;
 
-use self::controller::ControllerImpl;
+use crate::controller::ControllerImpl;
 use crate::emit_diagnostics::emit_diagnostics;
+use crate::parse::mockable_attr_parser::MockableAttrParserImpl;
 use crate::result::Result;
 use proc_macro::TokenStream as ProcMacroTokenStream;
 use proc_macro2::TokenStream;
@@ -60,5 +61,6 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
 }
 
 fn create_controller() -> impl Controller {
-    ControllerImpl::new()
+    let mockable_attr_parser = Box::new(MockableAttrParserImpl::new());
+    ControllerImpl::new(mockable_attr_parser)
 }

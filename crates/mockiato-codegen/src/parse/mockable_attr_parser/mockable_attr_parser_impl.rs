@@ -9,8 +9,7 @@ use proc_macro2::Span;
 use syn::spanned::Spanned;
 use syn::{AttributeArgs, Ident, Lit, Meta, MetaNameValue, NestedMeta};
 
-#[derive(Default)]
-#[cfg_attr(feature = "debug-impls", derive(Debug))]
+#[derive(Default, Debug)]
 pub(crate) struct MockableAttrParserImpl;
 
 impl MockableAttrParserImpl {

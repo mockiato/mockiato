@@ -1,8 +1,6 @@
 use crate::diagnostic::DiagnosticBuilder;
 use crate::generate::{generate_mock, GenerateMockOptions};
-use crate::parse::mockable_attr_parser::{
-    MockableAttrParser, MockableAttrParserImpl, RemoteTraitPath,
-};
+use crate::parse::mockable_attr_parser::{MockableAttrParser, RemoteTraitPath};
 use crate::parse::trait_decl::TraitDecl;
 use crate::result::{Error, Result};
 use crate::Controller;
@@ -11,19 +9,22 @@ use quote::quote;
 use syn::spanned::Spanned;
 use syn::{AttributeArgs, Item, ItemTrait};
 
-#[derive(Debug, Default)]
-pub(crate) struct ControllerImpl;
+#[derive(Debug)]
+pub(crate) struct ControllerImpl {
+    mockable_attr_parser: Box<dyn MockableAttrParser>,
+}
 
 impl ControllerImpl {
-    pub(crate) fn new() -> Self {
-        Self
+    pub(crate) fn new(mockable_attr_parser: Box<dyn MockableAttrParser>) -> Self {
+        Self {
+            mockable_attr_parser,
+        }
     }
 }
 
 impl Controller for ControllerImpl {
     fn expand_mockable_trait(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream> {
-        let mockable_attr_parser = MockableAttrParserImpl::new();
-        let mockable_attr = mockable_attr_parser.parse(attr)?;
+        let mockable_attr = self.mockable_attr_parser.parse(attr)?;
         let item_trait = extract_item_trait(item)?;
         let trait_decl = TraitDecl::parse(item_trait.clone()).map_err(add_note_to_error)?;
 
