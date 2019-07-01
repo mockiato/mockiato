@@ -12,19 +12,24 @@ use syn::spanned::Spanned;
 use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Pat, PatIdent, Token, Type};
 
 #[derive(Debug)]
-pub(crate) struct MethodsInputsParserImpl {
+pub(crate) struct MethodInputsParserImpl {
     method_self_arg_parser: Box<dyn MethodSelfArgParser>,
+    method_arg_parser: Box<dyn MethodArgParser>,
 }
 
-impl MethodsInputsParserImpl {
-    pub(crate) fn new(method_self_arg_parser: Box<dyn MethodSelfArgParser>) -> Self {
+impl MethodInputsParserImpl {
+    pub(crate) fn new(
+        method_self_arg_parser: Box<dyn MethodSelfArgParser>,
+        method_arg_parser: Box<dyn MethodArgParser>,
+    ) -> Self {
         Self {
             method_self_arg_parser,
+            method_arg_parser,
         }
     }
 }
 
-impl MethodInputsParser for MethodsInputsParserImpl {
+impl MethodInputsParser for MethodInputsParserImpl {
     fn parse(&self, inputs: Punctuated<FnArg, Token![,]>) -> Result<MethodInputs> {
         let span = inputs.span();
         let mut inputs_iter = inputs.into_iter();
@@ -35,7 +40,7 @@ impl MethodInputsParser for MethodsInputsParserImpl {
             .and_then(|arg| self.method_self_arg_parser.parse(arg))
             .map_err(|_| first_argument_is_not_self_error(span))?;
 
-        let args = inputs_iter.map(|arg| self.method_self_arg_parser.parse(arg));
+        let args = inputs_iter.map(|arg| self.method_arg_parser.parse(arg));
 
         Ok(MethodInputs {
             self_arg,
@@ -91,7 +96,7 @@ impl MethodArgParserImpl {
 }
 
 impl MethodArgParser for MethodArgParserImpl {
-    fn parse(arg: FnArg) -> Result<MethodArg> {
+    fn parse(&self, arg: FnArg) -> Result<MethodArg> {
         let span = arg.span();
 
         match arg {

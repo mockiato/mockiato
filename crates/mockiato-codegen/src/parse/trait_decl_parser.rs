@@ -1,6 +1,6 @@
 use crate::diagnostic::DiagnosticBuilder;
 use crate::parse::check_option_is_none;
-use crate::parse::method_decl::MethodDecl;
+use crate::parse::method_decl::{MethodDecl, MethodDeclParser};
 use crate::parse::trait_decl::{TraitDecl, TraitDeclParser};
 use crate::result::{merge_results, Error, Result};
 use proc_macro2::Ident;
@@ -9,11 +9,13 @@ use syn::spanned::Spanned;
 use syn::{GenericParam, Generics, ItemTrait};
 
 #[derive(Debug)]
-pub(crate) struct TraitDeclParserImpl;
+pub(crate) struct TraitDeclParserImpl {
+    method_decl_parser: Box<dyn MethodDeclParser>,
+}
 
 impl TraitDeclParserImpl {
-    pub(crate) fn new() -> Self {
-        Self {}
+    pub(crate) fn new(method_decl_parser: Box<dyn MethodDeclParser>) -> Self {
+        Self { method_decl_parser }
     }
 }
 
@@ -37,7 +39,7 @@ impl TraitDeclParser for TraitDeclParserImpl {
         let generic_types = collect_generic_type_idents(&generics);
         let methods = items
             .into_iter()
-            .map(move |method| MethodDecl::parse(method, &generic_types));
+            .map(move |method| self.method_decl_parser.parse(method, &generic_types));
 
         Ok(TraitDecl {
             visibility,

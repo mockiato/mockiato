@@ -30,6 +30,10 @@ mod syn_ext;
 use crate::code_generator_impl::{ArgumentsMatcherGeneratorImpl, CodeGeneratorImpl};
 use crate::controller_impl::ControllerImpl;
 use crate::emit_diagnostics::emit_diagnostics;
+use crate::parse::method_decl_parser::MethodDeclParserImpl;
+use crate::parse::method_inputs_parser::{
+    MethodArgParserImpl, MethodInputsParserImpl, MethodSelfArgParserImpl,
+};
 use crate::parse::mockable_attr_parser::MockableAttrParserImpl;
 use crate::parse::trait_decl_parser::TraitDeclParserImpl;
 use crate::result::Result;
@@ -65,7 +69,14 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
 
 fn create_controller() -> impl Controller {
     let mockable_attr_parser = Box::new(MockableAttrParserImpl::new());
-    let trait_decl_parser = Box::new(TraitDeclParserImpl::new());
+    let method_self_arg_parser = Box::new(MethodSelfArgParserImpl::new());
+    let method_arg_parser = Box::new(MethodArgParserImpl::new());
+    let method_inputs_parser = Box::new(MethodInputsParserImpl::new(
+        method_self_arg_parser,
+        method_arg_parser,
+    ));
+    let method_decl_parser = Box::new(MethodDeclParserImpl::new(method_inputs_parser));
+    let trait_decl_parser = Box::new(TraitDeclParserImpl::new(method_decl_parser));
     let arguments_matcher_generator = Box::new(ArgumentsMatcherGeneratorImpl::new());
     let code_generator = Box::new(CodeGeneratorImpl::new(arguments_matcher_generator));
     ControllerImpl::new(mockable_attr_parser, trait_decl_parser, code_generator)

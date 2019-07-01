@@ -55,7 +55,7 @@ pub(crate) struct MethodArg {
 }
 
 pub(crate) trait MethodArgParser: Debug {
-    fn parse(arg: FnArg) -> Result<MethodArg>;
+    fn parse(&self, arg: FnArg) -> Result<MethodArg>;
 }
 
 impl ToTokens for MethodArg {
