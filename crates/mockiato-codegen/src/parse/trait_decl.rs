@@ -1,13 +1,13 @@
-use super::check_option_is_none;
-use crate::diagnostic::DiagnosticBuilder;
+
+
 use crate::parse::method_decl::MethodDecl;
-use crate::result::{merge_results, Error, Result};
+use crate::result::{Result};
 use proc_macro2::Span;
-use std::collections::HashSet;
+
 use std::fmt::Debug;
 use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
-use syn::{GenericParam, Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
+
+use syn::{Generics, Ident, ItemTrait, Token, TypeParamBound, Visibility};
 
 #[derive(Clone)]
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
