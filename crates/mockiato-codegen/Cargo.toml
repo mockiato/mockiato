@@ -19,7 +19,6 @@ proc-macro = true
 [dependencies]
 quote = "0.6.12"
 heck = "0.3.1"
-wonderbox = "0.5.0"
 
 [build-dependencies]
 rustc_version = "0.2.3"
