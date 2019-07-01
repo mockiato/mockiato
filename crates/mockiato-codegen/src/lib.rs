@@ -27,14 +27,18 @@ mod parse;
 mod result;
 mod syn_ext;
 
-use crate::code_generator_impl::{ArgumentsMatcherGeneratorImpl, CodeGeneratorImpl};
+use crate::code_generator::CodeGenerator;
+use crate::code_generator_impl::{
+    ArgumentsMatcherGenerator, ArgumentsMatcherGeneratorImpl, CodeGeneratorImpl,
+};
 use crate::controller_impl::ControllerImpl;
 use crate::emit_diagnostics::emit_diagnostics;
-use crate::parse::mockable_attr_parser::MockableAttrParserImpl;
+use crate::parse::mockable_attr_parser::{MockableAttrParser, MockableAttrParserImpl};
 use crate::result::Result;
 use proc_macro::TokenStream as ProcMacroTokenStream;
 use proc_macro2::TokenStream;
 use syn::{parse_macro_input, AttributeArgs, Item};
+use wonderbox::Container;
 
 pub(crate) trait Controller {
     fn expand_mockable_trait(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream>;
@@ -48,7 +52,8 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
     let attr = parse_macro_input!(args as AttributeArgs);
     let item = parse_macro_input!(input as Item);
 
-    let controller = create_controller();
+    let container = build_composition_root();
+    let controller: Box<dyn Controller> = container.resolve();
     match controller.expand_mockable_trait(attr, item) {
         Ok(output) => ProcMacroTokenStream::from(output),
         Err(error) => {
@@ -62,9 +67,21 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
     }
 }
 
-fn create_controller() -> impl Controller {
-    let mockable_attr_parser = Box::new(MockableAttrParserImpl::new());
-    let arguments_matcher_generator = Box::new(ArgumentsMatcherGeneratorImpl::new());
-    let code_generator = Box::new(CodeGeneratorImpl::new(arguments_matcher_generator));
-    ControllerImpl::new(mockable_attr_parser, code_generator)
+macro_rules! container {
+    ($($type:ty = $container:ident => $factory:expr,)+) => {{
+        let mut container = Container::new();
+        $(
+            container.register(|$container| $factory as $type);
+        )+
+        container
+    }}
+}
+
+fn build_composition_root() -> Container {
+    container!(
+        Box<dyn MockableAttrParser> = _c => Box::new(MockableAttrParserImpl::new()),
+        Box<dyn ArgumentsMatcherGenerator> = _c => Box::new(ArgumentsMatcherGeneratorImpl::new()),
+        Box<dyn CodeGenerator> = c => Box::new(CodeGeneratorImpl::new(c.resolve())),
+        Box<dyn Controller> = c => Box::new(ControllerImpl::new(c.resolve(), c.resolve())),
+    )
 }
