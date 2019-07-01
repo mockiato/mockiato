@@ -1,4 +1,4 @@
-use crate::code_generator::{CodeGenerator, GenerateMockOptions};
+use crate::code_generator::{CodeGenerator, self};
 use crate::diagnostic::DiagnosticBuilder;
 use crate::parse::mockable_attr_parser::{MockableAttrParser, RemoteTraitPath};
 use crate::parse::trait_decl::TraitDecl;
@@ -38,7 +38,7 @@ impl Controller for ControllerImpl {
             None => Some(item_trait),
         };
 
-        let options = GenerateMockOptions {
+        let options = code_generator::GenerateOptions {
             custom_struct_ident: mockable_attr.name,
             force_static_lifetimes: mockable_attr.force_static_lifetimes,
             custom_trait_path: match mockable_attr.remote_trait_path {
