@@ -114,7 +114,7 @@ fn parse_remote_property(meta_item: Meta) -> Result<RemoteTraitPath> {
             ..
         }) => str_lit
             .parse()
-            .map(|path| RemoteTraitPath::Path(path))
+            .map(RemoteTraitPath::Path)
             .map_err(|err| invalid_remote_property_syntax_error(err.span())),
         _ => Err(invalid_remote_property_syntax_error(meta_item_span)),
     }
