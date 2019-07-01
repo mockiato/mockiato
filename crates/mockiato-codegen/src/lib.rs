@@ -17,15 +17,16 @@
 
 extern crate proc_macro;
 
+mod code_generator;
 mod constant;
 mod controller_impl;
 mod diagnostic;
 mod emit_diagnostics;
-mod generate;
 mod parse;
 mod result;
 mod syn_ext;
 
+use crate::code_generator::CodeGeneratorImpl;
 use crate::controller_impl::ControllerImpl;
 use crate::emit_diagnostics::emit_diagnostics;
 use crate::parse::mockable_attr_parser::MockableAttrParserImpl;
@@ -62,5 +63,6 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
 
 fn create_controller() -> impl Controller {
     let mockable_attr_parser = Box::new(MockableAttrParserImpl::new());
-    ControllerImpl::new(mockable_attr_parser)
+    let code_generator = Box::new(CodeGeneratorImpl::new());
+    ControllerImpl::new(mockable_attr_parser, code_generator)
 }
