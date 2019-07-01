@@ -11,7 +11,7 @@ pub(crate) fn generate_trait_impl(
     trait_decl: &TraitDecl,
     parameters: &'_ GenerateMockParameters,
 ) -> TokenStream {
-    let trait_ident = &trait_decl.ident;
+    let trait_path = &parameters.trait_path;
     let unsafety = &trait_decl.unsafety;
     let mock_struct_ident = &parameters.mock_struct_ident;
 
@@ -25,7 +25,7 @@ pub(crate) fn generate_trait_impl(
     let (_, trait_ty_generics, _) = trait_decl.generics.split_for_impl();
 
     quote! {
-        #unsafety impl #impl_generics #trait_ident #trait_ty_generics for #mock_struct_ident #ty_generics #where_clause {
+        #unsafety impl #impl_generics #trait_path #trait_ty_generics for #mock_struct_ident #ty_generics #where_clause {
             #method_impls
         }
     }

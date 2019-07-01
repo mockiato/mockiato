@@ -162,6 +162,44 @@ pub use mockiato_codegen::mockable;
 ///     fn make_sound(&self);
 /// }
 /// ```
+///
+/// ## `remote`
+/// Allows mocking of a trait that is declared elsewhere.  
+/// The trait declaration will not result in a new trait, since it is only used as a blueprint for generating the mock.
+///
+/// The value for this parameter can be omitted if the trait's name is the same as the imported remote trait.
+///
+/// ### Examples
+///
+/// #### With value
+/// ```
+/// use mockiato::mockable;
+/// use std::io;
+///
+/// #[cfg(test)]
+/// #[mockable(remote = "io::Write")]
+/// trait Write {
+///     fn write(&mut self, buf: &[u8]) -> io::Result<usize>;
+///
+///     fn flush(&mut self) -> io::Result<()>;
+///
+///     // Methods with a default implementation can be omitted.
+/// }
+/// ```
+///
+/// #### Without value
+/// ```
+/// use mockiato::mockable;
+/// use std::io::{self, Write};
+///
+/// #[cfg(test)]
+/// #[mockable(remote)]
+/// trait Write {
+///     fn write(&mut self, buf: &[u8]) -> io::Result<usize>;
+///
+///     fn flush(&mut self) -> io::Result<()>;
+/// }
+/// ```
 macro_rules! mockable {
     () => {};
 }
