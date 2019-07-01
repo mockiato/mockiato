@@ -18,7 +18,7 @@
 extern crate proc_macro;
 
 mod constant;
-mod controller;
+mod controller_impl;
 mod diagnostic;
 mod emit_diagnostics;
 mod generate;
@@ -26,7 +26,7 @@ mod parse;
 mod result;
 mod syn_ext;
 
-use crate::controller::ControllerImpl;
+use crate::controller_impl::ControllerImpl;
 use crate::emit_diagnostics::emit_diagnostics;
 use crate::parse::mockable_attr_parser::MockableAttrParserImpl;
 use crate::result::Result;
