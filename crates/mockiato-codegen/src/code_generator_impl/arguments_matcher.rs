@@ -4,6 +4,7 @@ use super::constant::{
     mock_lifetime, mock_lifetime_as_generic_param,
 };
 use super::debug_impl::{generate_debug_impl, DebugImplField};
+use super::ArgumentsMatcherGenerator;
 use super::MethodDeclMetadata;
 use crate::code_generator_impl::util::ident_to_string_literal;
 use crate::parse::method_decl::MethodDecl;
@@ -13,44 +14,52 @@ use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::{Generics, Token, Visibility};
 
-pub(crate) fn generate_arguments_matcher(
-    method: &MethodDeclMetadata,
-    visibility: &Visibility,
-) -> TokenStream {
-    let MethodDeclMetadata {
-        method_decl,
-        generics,
-        ..
-    } = method;
-    let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
+#[derive(Debug)]
+pub(crate) struct ArgumentsMatcherGeneratorImpl;
 
-    let mut generics = generics.clone();
-    generics.params.push(mock_lifetime_as_generic_param());
+impl ArgumentsMatcherGeneratorImpl {
+    pub(crate) fn new() -> Self {
+        Self
+    }
+}
 
-    let arguments_matcher_fields = arguments_matcher_fields(&method_decl.inputs);
-    let (_, ty_generics, where_clause) = generics.split_for_impl();
+impl ArgumentsMatcherGenerator for ArgumentsMatcherGeneratorImpl {
+    fn generate(&self, method: &MethodDeclMetadata, visibility: &Visibility) -> TokenStream {
+        let MethodDeclMetadata {
+            method_decl,
+            generics,
+            ..
+        } = method;
+        let arguments_matcher_ident = arguments_matcher_ident(&method_decl.ident);
 
-    let display_impl = generate_display_impl(method_decl, &generics);
-    let arguments_matcher_impl = generate_arguments_matcher_impl(method, &generics);
+        let mut generics = generics.clone();
+        generics.params.push(mock_lifetime_as_generic_param());
 
-    let debug_impl = generate_debug_impl(
-        debug_impl_fields(method_decl),
-        &arguments_matcher_ident,
-        &generics,
-    );
+        let arguments_matcher_fields = arguments_matcher_fields(&method_decl.inputs);
+        let (_, ty_generics, where_clause) = generics.split_for_impl();
 
-    let mock_lifetime = mock_lifetime();
+        let display_impl = generate_display_impl(method_decl, &generics);
+        let arguments_matcher_impl = generate_arguments_matcher_impl(method, &generics);
 
-    quote! {
-        #[doc(hidden)]
-        #visibility struct #arguments_matcher_ident #ty_generics #where_clause {
-            #arguments_matcher_fields
-            pub(super) phantom_data: std::marker::PhantomData<&#mock_lifetime ()>,
+        let debug_impl = generate_debug_impl(
+            debug_impl_fields(method_decl),
+            &arguments_matcher_ident,
+            &generics,
+        );
+
+        let mock_lifetime = mock_lifetime();
+
+        quote! {
+            #[doc(hidden)]
+            #visibility struct #arguments_matcher_ident #ty_generics #where_clause {
+                #arguments_matcher_fields
+                pub(super) phantom_data: std::marker::PhantomData<&#mock_lifetime ()>,
+            }
+
+            #display_impl
+            #debug_impl
+            #arguments_matcher_impl
         }
-
-        #display_impl
-        #debug_impl
-        #arguments_matcher_impl
     }
 }
 

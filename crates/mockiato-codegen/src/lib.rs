@@ -27,7 +27,7 @@ mod parse;
 mod result;
 mod syn_ext;
 
-use crate::code_generator_impl::CodeGeneratorImpl;
+use crate::code_generator_impl::{ArgumentsMatcherGeneratorImpl, CodeGeneratorImpl};
 use crate::controller_impl::ControllerImpl;
 use crate::emit_diagnostics::emit_diagnostics;
 use crate::parse::mockable_attr_parser::MockableAttrParserImpl;
@@ -64,6 +64,7 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
 
 fn create_controller() -> impl Controller {
     let mockable_attr_parser = Box::new(MockableAttrParserImpl::new());
-    let code_generator = Box::new(CodeGeneratorImpl::new());
+    let arguments_matcher_generator = Box::new(ArgumentsMatcherGeneratorImpl::new());
+    let code_generator = Box::new(CodeGeneratorImpl::new(arguments_matcher_generator));
     ControllerImpl::new(mockable_attr_parser, code_generator)
 }

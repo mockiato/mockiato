@@ -1,6 +1,5 @@
 use crate::code_generator::{self, CodeGenerator};
 use crate::code_generator_impl::arguments::generate_arguments;
-use crate::code_generator_impl::arguments_matcher::generate_arguments_matcher;
 use crate::code_generator_impl::constant::{arguments_ident, arguments_matcher_ident};
 use crate::code_generator_impl::constant::{
     mock_lifetime, mock_lifetime_as_generic_param, mock_struct_ident, mod_ident,
@@ -14,10 +13,13 @@ use crate::parse::method_decl::MethodDecl;
 use crate::parse::trait_decl::TraitDecl;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{parse_quote, Generics, Ident, Path, ReturnType, Type, WherePredicate};
+use std::fmt::Debug;
+use syn::{parse_quote, Generics, Ident, Path, ReturnType, Type, Visibility, WherePredicate};
 
-pub(crate) mod arguments;
-pub(crate) mod arguments_matcher;
+pub(crate) use crate::code_generator_impl::arguments_matcher::*;
+
+mod arguments;
+mod arguments_matcher;
 mod bound_lifetimes;
 mod constant;
 mod debug_impl;
@@ -29,12 +31,20 @@ mod trait_impl;
 mod util;
 mod visibility;
 
+pub(crate) trait ArgumentsMatcherGenerator: Debug {
+    fn generate(&self, method: &MethodDeclMetadata, visibility: &Visibility) -> TokenStream;
+}
+
 #[derive(Debug)]
-pub(crate) struct CodeGeneratorImpl;
+pub(crate) struct CodeGeneratorImpl {
+    arguments_matcher_generator: Box<dyn ArgumentsMatcherGenerator>,
+}
 
 impl CodeGeneratorImpl {
-    pub(crate) fn new() -> Self {
-        Self
+    pub(crate) fn new(arguments_matcher_generator: Box<dyn ArgumentsMatcherGenerator>) -> Self {
+        Self {
+            arguments_matcher_generator,
+        }
     }
 }
 
@@ -80,7 +90,7 @@ impl CodeGenerator for CodeGeneratorImpl {
         let arguments: TokenStream = parameters
             .methods
             .iter()
-            .map(|method| generate_argument_structs(method, trait_decl))
+            .map(|method| self.generate_argument_structs(method, trait_decl))
             .collect();
 
         let drop_impl = generate_drop_impl(trait_decl, &parameters);
@@ -100,6 +110,25 @@ impl CodeGenerator for CodeGeneratorImpl {
 
                 #arguments
             }
+        }
+    }
+}
+
+impl CodeGeneratorImpl {
+    fn generate_argument_structs(
+        &self,
+        method: &MethodDeclMetadata,
+        trait_decl: &TraitDecl,
+    ) -> proc_macro2::TokenStream {
+        let visibility = raise_visibility_by_one_level(&trait_decl.visibility);
+        let arguments = generate_arguments(method, &visibility);
+        let arguments_matcher = self
+            .arguments_matcher_generator
+            .generate(method, &visibility);
+
+        quote! {
+            #arguments
+            #arguments_matcher
         }
     }
 }
@@ -165,20 +194,6 @@ fn generics_for_trait_decl(
 fn get_static_lifetime_restriction() -> WherePredicate {
     let mock_lifetime = mock_lifetime();
     parse_quote!(#mock_lifetime: 'static)
-}
-
-fn generate_argument_structs(
-    method: &MethodDeclMetadata,
-    trait_decl: &TraitDecl,
-) -> proc_macro2::TokenStream {
-    let visibility = raise_visibility_by_one_level(&trait_decl.visibility);
-    let arguments = generate_arguments(method, &visibility);
-    let arguments_matcher = generate_arguments_matcher(method, &visibility);
-
-    quote! {
-        #arguments
-        #arguments_matcher
-    }
 }
 
 fn return_type(method_decl: &MethodDecl) -> Type {
