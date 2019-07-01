@@ -68,17 +68,18 @@ fn parse_static_references_meta_item(
 }
 
 fn parse_remote_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<MockableAttr> {
-    if mockable_attr.remote_trait_path.is_some() {
-        Err(parameter_specified_more_than_once_error(
+    match mockable_attr.remote_trait_path {
+        Some(_) => Err(parameter_specified_more_than_once_error(
             REMOTE_ATTR_PARAM_NAME,
             &item,
-        ))
-    } else {
-        let remote_trait_path = Some(parse_remote_property(item)?);
-        Ok(MockableAttr {
-            remote_trait_path,
-            ..mockable_attr
-        })
+        )),
+        None => {
+            let remote_trait_path = Some(parse_remote_property(item)?);
+            Ok(MockableAttr {
+                remote_trait_path,
+                ..mockable_attr
+            })
+        }
     }
 }
 
