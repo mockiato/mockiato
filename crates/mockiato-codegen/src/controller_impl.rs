@@ -1,4 +1,4 @@
-use crate::code_generator::{CodeGenerator, self};
+use crate::code_generator::{self, CodeGenerator};
 use crate::diagnostic::DiagnosticBuilder;
 use crate::parse::mockable_attr_parser::{MockableAttrParser, RemoteTraitPath};
 use crate::parse::trait_decl::TraitDecl;

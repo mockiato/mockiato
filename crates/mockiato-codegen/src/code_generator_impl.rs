@@ -1,4 +1,4 @@
-use crate::code_generator::{CodeGenerator, self};
+use crate::code_generator::{self, CodeGenerator};
 use crate::code_generator_impl::arguments::generate_arguments;
 use crate::code_generator_impl::arguments_matcher::generate_arguments_matcher;
 use crate::code_generator_impl::constant::{arguments_ident, arguments_matcher_ident};
@@ -39,7 +39,11 @@ impl CodeGeneratorImpl {
 }
 
 impl CodeGenerator for CodeGeneratorImpl {
-    fn generate(&self, trait_decl: &TraitDecl, options: code_generator::GenerateOptions) -> TokenStream {
+    fn generate(
+        &self,
+        trait_decl: &TraitDecl,
+        options: code_generator::GenerateOptions,
+    ) -> TokenStream {
         let mock_struct_ident = options
             .custom_struct_ident
             .unwrap_or_else(|| mock_struct_ident(trait_decl));
