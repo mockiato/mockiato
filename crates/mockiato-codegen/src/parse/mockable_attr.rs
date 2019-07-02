@@ -29,6 +29,7 @@ pub(crate) enum RemoteTraitPath {
     Path(Path),
 }
 
+#[cfg_attr(test, mockiato::mockable)]
 pub(crate) trait MockableAttrParser: Debug {
     fn parse(&self, args: AttributeArgs) -> Result<MockableAttr>;
 }

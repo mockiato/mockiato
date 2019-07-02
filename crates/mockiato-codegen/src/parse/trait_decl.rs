@@ -19,6 +19,7 @@ pub(crate) struct TraitDecl {
     pub(crate) methods: Vec<MethodDecl>,
 }
 
+#[cfg_attr(test, mockiato::mockable)]
 pub(crate) trait TraitDeclParser: Debug {
     fn parse(&self, item: ItemTrait) -> Result<TraitDecl>;
 }

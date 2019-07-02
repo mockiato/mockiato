@@ -10,6 +10,7 @@ pub(crate) struct GenerateOptions {
     pub(crate) custom_trait_path: Option<Path>,
 }
 
+#[cfg_attr(test, mockiato::mockable)]
 pub(crate) trait CodeGenerator: Debug {
     fn generate(&self, trait_decl: &TraitDecl, options: GenerateOptions) -> TokenStream;
 }
