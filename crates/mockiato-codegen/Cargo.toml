@@ -21,7 +21,7 @@ quote = "0.6.12"
 heck = "0.3.1"
 
 [dev-dependencies]
-mockiato = "0.8.0"
+mockiato = { path = "../.." }
 
 [build-dependencies]
 rustc_version = "0.2.3"
