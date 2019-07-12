@@ -8,7 +8,7 @@ use super::generics::get_matching_generics_for_method_inputs;
 use super::lifetime_rewriter::{LifetimeRewriter, UniformLifetimeGenerator};
 use super::GenerateMockParameters;
 use super::MethodDeclMetadata;
-use crate::generate::util::doc_attribute;
+use crate::code_generator_impl::util::doc_attribute;
 use crate::parse::method_decl::MethodDecl;
 use crate::parse::method_inputs::MethodArg;
 use crate::parse::trait_decl::TraitDecl;
