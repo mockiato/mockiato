@@ -51,5 +51,5 @@
 ## 0.8.0
 - Allow specifying one-time return values (that do not need to be `Clone`) by using `.returns_once(value)`.
 
-## Unreleased
+## 0.9.0
 - Foreign-defined traits can be mocked using `#[mockable(remote = "...")]`.
