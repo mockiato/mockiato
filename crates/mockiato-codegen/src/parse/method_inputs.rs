@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
-use syn::{ArgCaptured, ArgSelf, ArgSelfRef, FnArg, Ident, Token, Type};
+use syn::{FnArg, Ident, PatType, Receiver, Token, Type};
 
 use quote::{quote, ToTokens};
 
@@ -23,11 +23,11 @@ pub(crate) trait MethodInputsParser: Debug {
 #[cfg_attr(feature = "debug-impls", derive(Debug))]
 pub(crate) enum MethodSelfArg {
     /// `self` is taken by reference: `&self` or `&mut self`
-    Ref(ArgSelfRef),
+    Ref(Receiver),
     /// `self` is consumed: `self`
-    Value(ArgSelf),
+    Value(Receiver),
     /// `self` has a type. Example: `self: Box<Self>`
-    Captured(Box<ArgCaptured>),
+    Captured(Box<PatType>),
 }
 
 impl ToTokens for MethodSelfArg {
