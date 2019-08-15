@@ -53,3 +53,8 @@
 
 ## 0.9.0
 - Foreign-defined traits can be mocked using `#[mockable(remote = "...")]`.
+
+## Unreleased
+- Update syn to version 1.0
+- Update quote to version 1.0
+- Update proc-macro2 to version 1.0
