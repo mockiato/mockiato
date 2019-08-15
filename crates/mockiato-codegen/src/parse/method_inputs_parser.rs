@@ -1,7 +1,7 @@
 use proc_macro2::Span;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{ArgCaptured, FnArg, Ident, Pat, PatIdent, Token};
+use syn::{FnArg, Ident, Pat, PatIdent, PatType, Token};
 
 use crate::constant::CREATE_ISSUE_LINK;
 use crate::diagnostic::DiagnosticBuilder;
@@ -67,18 +67,22 @@ impl MethodSelfArgParserImpl {
 impl MethodSelfArgParser for MethodSelfArgParserImpl {
     fn parse(&self, arg: FnArg) -> std::result::Result<MethodSelfArg, ()> {
         match arg {
-            FnArg::SelfRef(self_ref) => Ok(MethodSelfArg::Ref(self_ref)),
-            FnArg::SelfValue(self_value) => Ok(MethodSelfArg::Value(self_value)),
-            FnArg::Captured(captured_arg) => parse_captured_arg(captured_arg),
-            _ => Err(()),
+            FnArg::Receiver(receiver) => {
+                if receiver.reference.is_some() {
+                    Ok(MethodSelfArg::Ref(receiver))
+                } else {
+                    Ok(MethodSelfArg::Value(receiver))
+                }
+            }
+            FnArg::Typed(captured_arg) => parse_captured_arg(captured_arg),
         }
     }
 }
 
-fn parse_captured_arg(arg: ArgCaptured) -> std::result::Result<MethodSelfArg, ()> {
+fn parse_captured_arg(arg: PatType) -> std::result::Result<MethodSelfArg, ()> {
     const SELF_ARG_NAME: &str = "self";
 
-    match arg.pat {
+    match *arg.pat {
         Pat::Ident(PatIdent { ref ident, .. }) if ident == SELF_ARG_NAME => {
             Ok(MethodSelfArg::Captured(Box::new(arg)))
         }
@@ -103,10 +107,10 @@ impl MethodArgParser for MethodArgParserImpl {
             // A "captured" argument is the "normal" way of specifying an argument
             // with an explicit name and type.
             // E.g. `name: &str`
-            FnArg::Captured(captured) => {
+            FnArg::Typed(captured) => {
                 let span = captured.span();
 
-                match captured.pat {
+                match *captured.pat {
                     Pat::Ident(pat_ident) => {
                         // Subpat is the part behind the @ in a pattern match.
                         // See: https://docs.rs/syn/0.15.20/syn/struct.PatIdent.html#structfield.subpat
@@ -116,7 +120,7 @@ impl MethodArgParser for MethodArgParserImpl {
 
                         Ok(MethodArg {
                             ident: sanitize_method_ident(&pat_ident.ident),
-                            ty: captured.ty,
+                            ty: *captured.ty,
                             span,
                         })
                     }

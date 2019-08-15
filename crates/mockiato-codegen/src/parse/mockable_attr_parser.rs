@@ -26,17 +26,14 @@ impl MockableAttrParser for MockableAttrParserImpl {
 }
 
 fn parse_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<MockableAttr> {
-    match item.name() {
-        ref item_name if item_name == MOCK_STRUCT_NAME_ATTR_PARAM_NAME => {
-            parse_name_meta_item(mockable_attr, item)
-        }
-        ref item_name if item_name == STATIC_REFERENCES_ATTR_PARAM_NAME => {
-            parse_static_references_meta_item(mockable_attr, item)
-        }
-        ref item_name if item_name == REMOTE_ATTR_PARAM_NAME => {
-            parse_remote_meta_item(mockable_attr, item)
-        }
-        _ => Err(attribute_property_not_supported_error(&item)),
+    if item.path().is_ident(MOCK_STRUCT_NAME_ATTR_PARAM_NAME) {
+        parse_name_meta_item(mockable_attr, item)
+    } else if item.path().is_ident(STATIC_REFERENCES_ATTR_PARAM_NAME) {
+        parse_static_references_meta_item(mockable_attr, item)
+    } else if item.path().is_ident(REMOTE_ATTR_PARAM_NAME) {
+        parse_remote_meta_item(mockable_attr, item)
+    } else {
+        Err(attribute_property_not_supported_error(&item))
     }
 }
 
@@ -86,7 +83,7 @@ fn parse_remote_meta_item(mockable_attr: MockableAttr, item: Meta) -> Result<Moc
 fn get_meta_items(args: AttributeArgs) -> Result<impl Iterator<Item = Meta>> {
     let meta_items = args.into_iter().map(|nested| match nested {
         NestedMeta::Meta(meta) => Ok(meta),
-        NestedMeta::Literal(literal) => Err(unsupported_syntax_error(&literal)),
+        NestedMeta::Lit(literal) => Err(unsupported_syntax_error(&literal)),
     });
     merge_results(meta_items)
 }
@@ -107,7 +104,7 @@ fn parse_remote_property(meta_item: Meta) -> Result<RemoteTraitPath> {
     let meta_item_span = meta_item.span();
 
     match meta_item {
-        Meta::Word(_) => Ok(RemoteTraitPath::SameAsLocalIdent),
+        Meta::Path(_) => Ok(RemoteTraitPath::SameAsLocalIdent),
         Meta::NameValue(MetaNameValue {
             lit: Lit::Str(str_lit),
             ..
@@ -156,7 +153,7 @@ fn invalid_name_property_syntax_error(span: Span) -> Error {
 fn validate_static_references_property(meta_item: &Meta) -> Result<()> {
     let meta_item_span = meta_item.span();
 
-    if let Meta::Word(_ident) = meta_item {
+    if let Meta::Path(_) = meta_item {
         Ok(())
     } else {
         Err(invalid_static_references_property_syntax_error(

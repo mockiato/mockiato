@@ -4,9 +4,7 @@ use std::collections::HashSet;
 use proc_macro2::Ident;
 use syn::spanned::Spanned;
 use syn::visit::{visit_type, Visit};
-use syn::{
-    FnDecl, GenericParam, Generics, MethodSig, Path, TraitItem, TraitItemMethod, Type, TypePath,
-};
+use syn::{GenericParam, Generics, Path, Signature, TraitItem, TraitItemMethod, Type, TypePath};
 
 use crate::diagnostic::DiagnosticBuilder;
 use crate::parse::check_option_is_none;
@@ -54,23 +52,19 @@ impl MethodDeclParserImpl {
             sig: signature,
             ..
         } = method;
-        let MethodSig {
+
+        validate_usage_of_generic_types(&signature, generic_types_on_trait)?;
+
+        let Signature {
             constness,
             unsafety,
             asyncness,
             ident,
-            decl,
-            ..
-        } = signature;
-
-        validate_usage_of_generic_types(&decl, generic_types_on_trait)?;
-
-        let FnDecl {
             generics,
             inputs,
             output,
             ..
-        } = decl;
+        } = signature;
 
         validate_generic_type_parameters(&generics)?;
 
@@ -118,11 +112,11 @@ fn invalid_generic_param(generic_param: &GenericParam) -> Error {
 }
 
 fn validate_usage_of_generic_types(
-    fn_decl: &FnDecl,
+    signature: &Signature,
     generic_types_on_trait: &HashSet<Ident>,
 ) -> Result<()> {
     let references_to_generic_types =
-        find_references_to_generic_types(fn_decl, generic_types_on_trait);
+        find_references_to_generic_types(signature, generic_types_on_trait);
 
     if references_to_generic_types.is_empty() {
         Ok(())
@@ -141,7 +135,7 @@ fn error_for_reference_to_generic_type(ty: &Type) -> Error {
 }
 
 fn find_references_to_generic_types<'a>(
-    fn_decl: &'a FnDecl,
+    signature: &'a Signature,
     generic_types_on_trait: &'a HashSet<Ident>,
 ) -> Vec<&'a Type> {
     let mut visitor = TypeVisitor {
@@ -149,7 +143,7 @@ fn find_references_to_generic_types<'a>(
         references_to_generic_types: Vec::new(),
         state: TypeVisitorState::Initial,
     };
-    visitor.visit_fn_decl(fn_decl);
+    visitor.visit_signature(signature);
     visitor.references_to_generic_types
 }
 

@@ -17,7 +17,7 @@ license = "MIT"
 proc-macro = true
 
 [dependencies]
-quote = "0.6.12"
+quote = "1.0"
 heck = "0.3.1"
 
 [dev-dependencies]
@@ -27,11 +27,11 @@ mockiato = { path = "../.." }
 rustc_version = "0.2.3"
 
 [dependencies.syn]
-version = "0.15.39"
+version = "1.0"
 features = ["full", "visit", "visit-mut"]
 
 [dependencies.proc-macro2]
-version = "0.4.30"
+version = "1.0"
 features = ["nightly"]
 
 [features]
