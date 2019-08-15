@@ -2,7 +2,7 @@ error: Ignored arguments are not supported
  --> $DIR/ignored_arguments.rs:5:19
   |
 5 |     fn bar(&self, _: u64);
-  |                   ^
+  |                   ^^^^^^
   |
 note: Required for mockable traits
  --> $DIR/ignored_arguments.rs:3:1

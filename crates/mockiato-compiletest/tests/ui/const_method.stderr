@@ -2,7 +2,7 @@ error: `const` methods are not supported
  --> $DIR/const_method.rs:7:5
   |
 7 |     const fn bar(&self, baz: u64);
-  |     ^^^^^
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   |
 note: Required for mockable traits
  --> $DIR/const_method.rs:5:1
