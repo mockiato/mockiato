@@ -1,9 +1,9 @@
 # Mockiato
 
-[![Build Status](https://travis-ci.com/myelin-ai/mockiato.svg?branch=master)](https://travis-ci.com/myelin-ai/mockiato)
+[![Build Status](https://travis-ci.com/mockiato/mockiato.svg?branch=master)](https://travis-ci.com/mockiato/mockiato)
 [![Latest Version](https://img.shields.io/crates/v/mockiato.svg)](https://crates.io/crates/mockiato)
 [![Documentation](https://docs.rs/mockiato/badge.svg)](https://docs.rs/mockiato)
-[![dependency status](https://deps.rs/repo/github/myelin-ai/mockiato/status.svg)](https://deps.rs/repo/github/myelin-ai/mockiato)
+[![dependency status](https://deps.rs/repo/github/mockiato/mockiato/status.svg)](https://deps.rs/repo/github/mockiato/mockiato)
 [![Changelog](https://img.shields.io/badge/changelog-changelog.md-blue.svg)](changelog.md)
 
 A strict, yet friendly mocking library for Rust 2018
