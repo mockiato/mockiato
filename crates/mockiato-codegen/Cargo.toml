@@ -7,8 +7,8 @@ authors = [
     "Jeremy Stucki <jeremy@myelin.ch>",
     "Jan Nils Ferner <jan@myelin.ch>",
 ]
-repository = "https://github.com/myelin-ai/mockiato"
-homepage = "https://github.com/myelin-ai/mockiato"
+repository = "https://github.com/mockiato/mockiato"
+homepage = "https://github.com/mockiato/mockiato"
 documentation = "https://docs.rs/mockiato-codegen"
 edition = "2018"
 license = "MIT"
