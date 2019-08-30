@@ -57,6 +57,8 @@ where
         self
     }
 
+    /// Defines a return value for this method by passing an [`Fn`] that will be
+    /// called once for each call of the mocked method.
     pub fn returns_with<F>(&mut self, return_value_fn: F) -> &mut Self
     where
         F: (Fn(<A as ArgumentsMatcher<'_>>::Arguments) -> R) + 'mock,
