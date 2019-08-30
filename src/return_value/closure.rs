@@ -1,9 +1,9 @@
 use super::ReturnValueGenerator;
-use crate::fmt::MaybeDebug;
 use crate::matcher::ArgumentsMatcher;
+use nameof::name_of;
 use std::fmt::{self, Debug, Display};
 
-pub struct Closure<'mock, A, R>(
+pub(crate) struct Closure<'mock, A, R>(
     pub(crate) Box<dyn Fn(<A as ArgumentsMatcher<'_>>::Arguments) -> R + 'mock>,
 )
 where
@@ -37,4 +37,3 @@ where
         (self.0)(arguments)
     }
 }
-
