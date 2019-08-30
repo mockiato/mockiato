@@ -5,5 +5,5 @@ use std::fmt;
 trait Foo: fmt::Debug {}
 
 fn main() {
-    let _assert_debug: &fmt::Debug = &FooMock::new();
+    let _assert_debug: &dyn fmt::Debug = &FooMock::new();
 }

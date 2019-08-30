@@ -40,3 +40,21 @@
 
 ## 0.6.2
 - Quickstart example in the readme has been fixed.
+
+## 0.6.3
+- A typo in the documentation has been fixed.
+
+## 0.7.0
+- Support for stable rust has been added. (See [disclaimer in readme](https://github.com/myelin-ai/mockiato/tree/0.7.0))
+- Dependencies have been updated.
+
+## 0.8.0
+- Allow specifying one-time return values (that do not need to be `Clone`) by using `.returns_once(value)`.
+
+## 0.9.0
+- Foreign-defined traits can be mocked using `#[mockable(remote = "...")]`.
+
+## Unreleased
+- Update syn to version 1.0
+- Update quote to version 1.0
+- Update proc-macro2 to version 1.0

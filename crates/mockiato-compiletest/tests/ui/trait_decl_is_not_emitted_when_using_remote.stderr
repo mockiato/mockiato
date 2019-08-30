@@ -1,0 +1,17 @@
+error[E0405]: cannot find trait `Write` in this scope
+  --> $DIR/trait_decl_is_not_emitted_when_using_remote.rs:11:41
+   |
+11 | type _AssertTraitDeclIsNotEmitted = dyn Write;
+   |                                         ^^^^^ not found in this scope
+help: possible candidates are found in other modules, you can import them into scope
+   |
+1  | use core::fmt::Write;
+   |
+1  | use std::fmt::Write;
+   |
+1  | use std::io::Write;
+   |
+1  | use std::io::prelude::Write;
+   |
+
+For more information about this error, try `rustc --explain E0405`.

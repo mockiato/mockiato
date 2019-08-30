@@ -1,16 +1,8 @@
 //! Codegen for `mockiato`. Do not use this crate directly.
 
 #![recursion_limit = "128"]
-#![feature(
-    proc_macro_diagnostic,
-    proc_macro_span,
-    proc_macro_hygiene,
-    bind_by_move_pattern_guards,
-    decl_macro,
-    box_syntax,
-    box_patterns
-)]
-#![warn(clippy::dbg_macro, clippy::unimplemented)]
+#![cfg_attr(rustc_is_nightly, feature(proc_macro_diagnostic))]
+#![warn(clippy::dbg_macro, clippy::unimplemented, unreachable_pub)]
 #![deny(
     rust_2018_idioms,
     future_incompatible,
@@ -25,23 +17,33 @@
 
 extern crate proc_macro;
 
+mod code_generator;
+mod code_generator_impl;
 mod constant;
+mod controller_impl;
 mod diagnostic;
-mod generate;
-mod mockable;
+mod emit_diagnostics;
 mod parse;
 mod result;
 mod syn_ext;
 
-use self::mockable::Mockable;
-use crate::diagnostic::{Diagnostic, DiagnosticLevel, DiagnosticMessage};
-use crate::result::Error;
-use proc_macro::{
-    Diagnostic as ProcMacroDiagnostic, Level as ProcMacroLevel, Span as ProcMacroSpan,
-    TokenStream as ProcMacroTokenStream,
+use crate::code_generator_impl::{ArgumentsMatcherGeneratorImpl, CodeGeneratorImpl};
+use crate::controller_impl::ControllerImpl;
+use crate::emit_diagnostics::emit_diagnostics;
+use crate::parse::method_decl_parser::MethodDeclParserImpl;
+use crate::parse::method_inputs_parser::{
+    MethodArgParserImpl, MethodInputsParserImpl, MethodSelfArgParserImpl,
 };
-use proc_macro2::Span;
+use crate::parse::mockable_attr_parser::MockableAttrParserImpl;
+use crate::parse::trait_decl_parser::TraitDeclParserImpl;
+use crate::result::Result;
+use proc_macro::TokenStream as ProcMacroTokenStream;
+use proc_macro2::TokenStream;
 use syn::{parse_macro_input, AttributeArgs, Item};
+
+pub(crate) trait Controller {
+    fn expand_mockable_trait(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream>;
+}
 
 #[doc(hidden)]
 #[proc_macro_attribute]
@@ -51,62 +53,31 @@ pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> Proc
     let attr = parse_macro_input!(args as AttributeArgs);
     let item = parse_macro_input!(input as Item);
 
-    let mockable = Mockable::new();
-
-    match mockable.expand(attr, item) {
+    let controller = create_controller();
+    match controller.expand_mockable_trait(attr, item) {
         Ok(output) => ProcMacroTokenStream::from(output),
         Err(error) => {
-            emit_diagnostics(error);
-            original_input
+            let mut output = original_input;
+
+            let diagnostics_output = emit_diagnostics(error);
+            output.extend(ProcMacroTokenStream::from(diagnostics_output));
+
+            output
         }
     }
 }
 
-fn emit_diagnostics(error: Error) {
-    error
-        .diagnostics
-        .into_iter()
-        .map(to_proc_macro_diagnostic)
-        .for_each(ProcMacroDiagnostic::emit);
-}
-
-fn to_proc_macro_diagnostic(source: Diagnostic) -> ProcMacroDiagnostic {
-    let level = to_proc_macro_level(source.level);
-    let span = to_proc_macro_span(source.span);
-    let diagnostic = ProcMacroDiagnostic::spanned(span, level, source.message);
-    let diagnostic = add_notes_to_proc_macro_diagnostic(diagnostic, source.notes);
-    add_help_to_proc_macro_diagnostic(diagnostic, source.help)
-}
-
-fn add_help_to_proc_macro_diagnostic(
-    diagnostic: ProcMacroDiagnostic,
-    help: Vec<DiagnosticMessage>,
-) -> ProcMacroDiagnostic {
-    help.into_iter()
-        .fold(diagnostic, |diagnostic, help| match help.span {
-            Some(span) => diagnostic.span_help(to_proc_macro_span(span), help.message),
-            None => diagnostic.help(help.message),
-        })
-}
-
-fn add_notes_to_proc_macro_diagnostic(
-    diagnostic: ProcMacroDiagnostic,
-    notes: Vec<DiagnosticMessage>,
-) -> ProcMacroDiagnostic {
-    notes
-        .into_iter()
-        .fold(diagnostic, |diagnostic, note| match note.span {
-            Some(span) => diagnostic.span_note(to_proc_macro_span(span), note.message),
-            None => diagnostic.note(note.message),
-        })
-}
-
-fn to_proc_macro_span(span: Span) -> ProcMacroSpan {
-    span.unstable()
-}
-
-fn to_proc_macro_level(level: DiagnosticLevel) -> ProcMacroLevel {
-    match level {
-        DiagnosticLevel::Error => ProcMacroLevel::Error,
-    }
+fn create_controller() -> impl Controller {
+    let mockable_attr_parser = Box::new(MockableAttrParserImpl::new());
+    let method_self_arg_parser = Box::new(MethodSelfArgParserImpl::new());
+    let method_arg_parser = Box::new(MethodArgParserImpl::new());
+    let method_inputs_parser = Box::new(MethodInputsParserImpl::new(
+        method_self_arg_parser,
+        method_arg_parser,
+    ));
+    let method_decl_parser = Box::new(MethodDeclParserImpl::new(method_inputs_parser));
+    let trait_decl_parser = Box::new(TraitDeclParserImpl::new(method_decl_parser));
+    let arguments_matcher_generator = Box::new(ArgumentsMatcherGeneratorImpl::new());
+    let code_generator = Box::new(CodeGeneratorImpl::new(arguments_matcher_generator));
+    ControllerImpl::new(mockable_attr_parser, trait_decl_parser, code_generator)
 }

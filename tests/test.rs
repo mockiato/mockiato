@@ -1,5 +1,3 @@
-#![feature(custom_attribute, plugin)]
-
 use mockiato::mockable;
 use std::fmt::{self, Display};
 

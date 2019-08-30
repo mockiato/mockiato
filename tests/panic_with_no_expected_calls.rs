@@ -7,6 +7,7 @@ trait Greeter {
     fn greet_unknown_person(&self) -> String;
 }
 
+#[cfg(rustc_is_nightly)]
 #[test]
 #[should_panic(
     expected = "The call GreeterMock::greet_unknown_person() was not expected.\nNo calls to \
@@ -18,6 +19,7 @@ fn panics_with_no_expected_calls_with_no_arguments() {
     greeter.greet_unknown_person();
 }
 
+#[cfg(rustc_is_nightly)]
 #[test]
 #[should_panic(
     expected = "The call GreeterMock::greet(\"John\") was not expected.\nNo calls to \
@@ -29,6 +31,7 @@ fn panics_with_no_expected_calls_with_one_argument() {
     greeter.greet("John");
 }
 
+#[cfg(rustc_is_nightly)]
 #[test]
 #[should_panic(
     expected = "The call GreeterMock::greet_two_people(\"John\", \"Adam\") was not expected.\nNo \

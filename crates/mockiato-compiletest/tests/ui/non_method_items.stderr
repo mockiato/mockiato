@@ -2,7 +2,7 @@ error: Traits are only allowed to contain methods
   --> $DIR/non_method_items.rs:10:5
    |
 10 |     const BAR: usize;
-   |     ^^^^^
+   |     ^^^^^^^^^^^^^^^^^
    |
 note: Required for mockable traits
   --> $DIR/non_method_items.rs:8:1
@@ -14,7 +14,7 @@ error: Traits are only allowed to contain methods
   --> $DIR/non_method_items.rs:12:5
    |
 12 |     type Baz;
-   |     ^^^^
+   |     ^^^^^^^^^
    |
 note: Required for mockable traits
   --> $DIR/non_method_items.rs:8:1
@@ -26,7 +26,7 @@ error: Traits are only allowed to contain methods
   --> $DIR/non_method_items.rs:14:5
    |
 14 |     macro_in_trait!();
-   |     ^^^^^^^^^^^^^^
+   |     ^^^^^^^^^^^^^^^^^^
    |
 note: Required for mockable traits
   --> $DIR/non_method_items.rs:8:1

@@ -5,7 +5,10 @@
 //! ```
 //! use mockiato::mockable;
 //!
+//! # const IGNORED: &str = "
 //! #[cfg_attr(test, mockable)]
+//! # ";
+//! # #[mockable]
 //! trait Greeter {
 //!     fn greet(&self, name: &str) -> String;
 //! }
@@ -38,7 +41,10 @@
 //! ```
 //! use mockiato::mockable;
 //!
-//! #[mockable]
+//! # const IGNORED: &str = "
+//! #[cfg_attr(test, mockable)]
+//! # ";
+//! # #[mockable]
 //! trait MessageSender {
 //!     fn send_message(&self, recipient: &str, message: &str);
 //! }
@@ -46,7 +52,8 @@
 //! let mut message_sender = MessageSenderMock::new();
 //! message_sender
 //!     .expect_send_message(|arg| arg.partial_eq("Paul"), |arg| arg.any())
-//!     .times(..);
+//!     .times(..)
+//!     .returns(());
 //! ```
 //!
 //! ## `expect_<method_name>_calls_in_order`
@@ -57,6 +64,9 @@
 //! ```
 //! # use mockiato::mockable;
 //! #
+//! # const IGNORED: &str = "
+//! #[cfg_attr(test, mockable)]
+//! # ";
 //! # #[mockable]
 //! # trait MessageSender {
 //! #     fn send_message(&self, recipient: &str, message: &str);
@@ -72,7 +82,10 @@
 //! ```no_run
 //! use mockiato::mockable;
 //!
+//! # const IGNORED: &str = "
 //! #[cfg_attr(test, mockable)]
+//! # ";
+//! # #[mockable]
 //! trait Greeter {
 //!     fn greet(&self, name: &str) -> String;
 //! }
@@ -94,10 +107,13 @@
 //! }
 //! ```
 
-#![feature(specialization)]
-#![feature(doc_cfg, external_doc)]
-#![feature(trait_alias)]
-#![warn(missing_docs, clippy::dbg_macro, clippy::unimplemented)]
+#![cfg_attr(rustc_is_nightly, feature(doc_cfg, external_doc, specialization))]
+#![warn(
+    missing_docs,
+    clippy::dbg_macro,
+    clippy::unimplemented,
+    unreachable_pub
+)]
 #![deny(
     rust_2018_idioms,
     future_incompatible,
@@ -110,10 +126,10 @@
     clippy::explicit_into_iter_loop
 )]
 
-#[cfg(not(rustdoc))]
+#[cfg(any(not(rustc_is_nightly), not(rustdoc)))]
 pub use mockiato_codegen::mockable;
 
-#[cfg(rustdoc)]
+#[cfg(all(rustc_is_nightly, rustdoc))]
 #[macro_export]
 /// Generates a mock struct from a trait.
 ///
@@ -146,16 +162,63 @@ pub use mockiato_codegen::mockable;
 ///     fn make_sound(&self);
 /// }
 /// ```
+///
+/// ## `remote`
+/// Allows mocking of a trait that is declared elsewhere.  
+/// The trait declaration will not result in a new trait, since it is only used as a blueprint for generating the mock.
+///
+/// The value for this parameter can be omitted if the trait's name is the same as the imported remote trait.
+///
+/// ### Examples
+///
+/// #### With value
+/// ```
+/// use mockiato::mockable;
+/// use std::io;
+///
+/// #[cfg(test)]
+/// #[mockable(remote = "io::Write")]
+/// trait Write {
+///     fn write(&mut self, buf: &[u8]) -> io::Result<usize>;
+///
+///     fn flush(&mut self) -> io::Result<()>;
+///
+///     // Methods with a default implementation can be omitted.
+/// }
+/// ```
+///
+/// #### Without value
+/// ```
+/// use mockiato::mockable;
+/// use std::io::{self, Write};
+///
+/// #[cfg(test)]
+/// #[mockable(remote)]
+/// trait Write {
+///     fn write(&mut self, buf: &[u8]) -> io::Result<usize>;
+///
+///     fn flush(&mut self) -> io::Result<()>;
+/// }
+/// ```
 macro_rules! mockable {
     () => {};
 }
 
-#[doc(include = "../readme.md")]
+#[cfg_attr(rustc_is_nightly, doc(include = "../readme.md"))]
 mod test_readme {}
 
-pub use crate::internal::argument::Argument;
-pub use crate::internal::expected_calls::ExpectedCalls;
-pub use crate::internal::MethodCallBuilder;
+pub use crate::argument::Argument;
+pub use crate::expected_calls::ExpectedCalls;
+pub use crate::method_call::MethodCallBuilder;
 
+mod argument;
+mod arguments;
+mod default_return_value;
+mod expected_calls;
+mod fmt;
 #[doc(hidden)]
 pub mod internal;
+mod matcher;
+mod method;
+mod method_call;
+mod return_value;

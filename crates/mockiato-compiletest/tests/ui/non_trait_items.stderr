@@ -2,7 +2,7 @@ error: Only traits can be made mockable
  --> $DIR/non_trait_items.rs:4:1
   |
 4 | struct Struct {}
-  | ^^^^^^
+  | ^^^^^^^^^^^^^^^^
   |
 note: Required because of this attribute
  --> $DIR/non_trait_items.rs:3:1
@@ -14,7 +14,7 @@ error: Only traits can be made mockable
  --> $DIR/non_trait_items.rs:7:1
   |
 7 | enum Enum {}
-  | ^^^^
+  | ^^^^^^^^^^^^
   |
 note: Required because of this attribute
  --> $DIR/non_trait_items.rs:6:1
@@ -26,7 +26,7 @@ error: Only traits can be made mockable
   --> $DIR/non_trait_items.rs:10:1
    |
 10 | fn function() {}
-   | ^^
+   | ^^^^^^^^^^^^^^^^
    |
 note: Required because of this attribute
   --> $DIR/non_trait_items.rs:9:1
@@ -38,7 +38,7 @@ error: Only traits can be made mockable
   --> $DIR/non_trait_items.rs:13:1
    |
 13 | type TypeAlias = usize;
-   | ^^^^
+   | ^^^^^^^^^^^^^^^^^^^^^^^
    |
 note: Required because of this attribute
   --> $DIR/non_trait_items.rs:12:1
