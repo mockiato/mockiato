@@ -59,3 +59,6 @@
 - Update quote to version 1.0
 - Update proc-macro2 to version 1.0
 - Links to the repository have been updated to point to [mockiato/mockiato](https://github.com/mockiato/mockiato).
+
+## 0.9.2
+- No changes
