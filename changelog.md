@@ -61,4 +61,7 @@
 - Links to the repository have been updated to point to [mockiato/mockiato](https://github.com/mockiato/mockiato).
 
 ## 0.9.2
-- No changes
+No changes.
+
+## 0.9.3
+No changes.
