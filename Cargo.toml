@@ -17,7 +17,7 @@ keywords = ["test", "testing", "mock", "mocking"]
 categories = ["development-tools::testing"]
 
 [dependencies]
-mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.9.2" }
+mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.9.3" }
 nearly_eq = "0.2.4"
 nameof = "1.1.0"
 
