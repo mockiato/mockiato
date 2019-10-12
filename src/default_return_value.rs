@@ -1,3 +1,4 @@
+#[cfg(rustc_is_nightly)]
 use crate::matcher::ArgumentsMatcher;
 use crate::return_value::ReturnValueGenerator;
 use std::rc::Rc;
