@@ -68,3 +68,6 @@ No changes.
 
 ## 0.9.4
 No changes.
+
+## 0.9.5
+- Fix uses of specialization for latest nightly.
