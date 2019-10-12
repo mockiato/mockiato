@@ -60,10 +60,10 @@
 - Update proc-macro2 to version 1.0
 - Links to the repository have been updated to point to [mockiato/mockiato](https://github.com/mockiato/mockiato).
 
-## 0.9.2
+## 0.9.2 (yanked)
 No changes.
 
-## 0.9.3
+## 0.9.3 (yanked)
 No changes.
 
 ## 0.9.4
