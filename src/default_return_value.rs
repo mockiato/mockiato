@@ -11,7 +11,15 @@ pub(crate) trait DefaultReturnValue<A>: Sized {
     }
 }
 
-impl<A, T> DefaultReturnValue<A> for T where A: for<'args> ArgumentsMatcher<'args> {}
+#[cfg(not(rustc_is_nightly))]
+impl<A, T> DefaultReturnValue<A> for T {}
+
+#[cfg(rustc_is_nightly)]
+impl<A, T> DefaultReturnValue<A> for T {
+    default fn default_return_value() -> Option<Rc<dyn ReturnValueGenerator<A, Self>>> {
+        None
+    }
+}
 
 #[cfg(rustc_is_nightly)]
 impl<A> DefaultReturnValue<A> for ()

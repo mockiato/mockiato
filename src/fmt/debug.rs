@@ -17,7 +17,15 @@ pub trait MaybeDebug {
     }
 }
 
+#[cfg(not(rustc_is_nightly))]
 impl<T> MaybeDebug for T where T: ?Sized {}
+
+#[cfg(rustc_is_nightly)]
+impl<T> MaybeDebug for T where T: ?Sized {
+    default fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "?")
+    }
+}
 
 #[cfg(rustc_is_nightly)]
 impl<T> MaybeDebug for T
