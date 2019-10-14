@@ -30,7 +30,7 @@ impl Argument {
         PartialEqArgumentMatcher { value }
     }
 
-    #[allow(clippy::needless_doctest_main)]
+    #[cfg_attr(rustc_is_nightly, allow(clippy::needless_doctest_main))]
     /// Creates an argument matcher that matches an owned value against references of itself using [`PartialEq`].
     ///
     /// # Examples
