@@ -126,11 +126,6 @@
     clippy::explicit_into_iter_loop
 )]
 
-#[cfg(any(not(rustc_is_nightly), not(rustdoc)))]
-pub use mockiato_codegen::mockable;
-
-#[cfg(all(rustc_is_nightly, rustdoc))]
-#[macro_export]
 /// Generates a mock struct from a trait.
 ///
 /// # Parameters
@@ -200,9 +195,7 @@ pub use mockiato_codegen::mockable;
 ///     fn flush(&mut self) -> io::Result<()>;
 /// }
 /// ```
-macro_rules! mockable {
-    () => {};
-}
+pub use mockiato_codegen::mockable;
 
 #[cfg_attr(rustc_is_nightly, doc(include = "../readme.md"))]
 mod test_readme {}

@@ -45,7 +45,6 @@ pub(crate) trait Controller {
     fn expand_mockable_trait(&self, attr: AttributeArgs, item: Item) -> Result<TokenStream>;
 }
 
-#[doc(hidden)]
 #[proc_macro_attribute]
 pub fn mockable(args: ProcMacroTokenStream, input: ProcMacroTokenStream) -> ProcMacroTokenStream {
     let original_input = input.clone();
