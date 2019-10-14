@@ -1,14 +1,14 @@
 [package]
 name = "mockiato-codegen"
 description = "Internally used by mockiato for code generation. This crate should never be used directly"
-version = "0.9.0"
+version = "0.9.5"
 authors = [
     "Ruben Schmidmeister <ruben@myelin.ch>",
     "Jeremy Stucki <jeremy@myelin.ch>",
     "Jan Nils Ferner <jan@myelin.ch>",
 ]
-repository = "https://github.com/myelin-ai/mockiato"
-homepage = "https://github.com/myelin-ai/mockiato"
+repository = "https://github.com/mockiato/mockiato"
+homepage = "https://github.com/mockiato/mockiato"
 documentation = "https://docs.rs/mockiato-codegen"
 edition = "2018"
 license = "MIT"

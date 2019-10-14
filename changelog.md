@@ -45,7 +45,7 @@
 - A typo in the documentation has been fixed.
 
 ## 0.7.0
-- Support for stable rust has been added. (See [disclaimer in readme](https://github.com/myelin-ai/mockiato/tree/0.7.0))
+- Support for stable rust has been added. (See [disclaimer in readme](https://github.com/mockiato/mockiato/tree/0.7.0))
 - Dependencies have been updated.
 
 ## 0.8.0
@@ -54,7 +54,20 @@
 ## 0.9.0
 - Foreign-defined traits can be mocked using `#[mockable(remote = "...")]`.
 
-## Unreleased
+## 0.9.1
 - Update syn to version 1.0
 - Update quote to version 1.0
 - Update proc-macro2 to version 1.0
+- Links to the repository have been updated to point to [mockiato/mockiato](https://github.com/mockiato/mockiato).
+
+## 0.9.2 (yanked)
+No changes.
+
+## 0.9.3 (yanked)
+No changes.
+
+## 0.9.4
+No changes.
+
+## 0.9.5
+- Fix uses of specialization for latest nightly.
