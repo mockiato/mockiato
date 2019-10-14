@@ -48,8 +48,8 @@ impl TraitDeclParser for TraitDeclParserImpl {
             ident,
             span,
             unsafety,
-            generics: generics.clone(),
-            supertraits: supertraits.clone(),
+            generics,
+            supertraits,
             methods: merge_results(methods)?.collect(),
         })
     }
