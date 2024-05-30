@@ -2,11 +2,6 @@
 name = "mockiato"
 description = "A strict, yet friendly mocking library for Rust 2018"
 version = "0.9.5"
-authors = [
-    "Ruben Schmidmeister <ruben@myelin.ch>",
-    "Jeremy Stucki <jeremy@myelin.ch>",
-    "Jan Nils Ferner <jan@myelin.ch>",
-]
 repository = "https://github.com/mockiato/mockiato"
 readme = "readme.md"
 homepage = "https://github.com/mockiato/mockiato"

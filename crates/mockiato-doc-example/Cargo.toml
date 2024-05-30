@@ -1,11 +1,6 @@
 [package]
 name = "mockiato-doc-example"
 version = "0.1.0"
-authors = [
-    "Ruben Schmidmeister <ruben@myelin.ch>",
-    "Jeremy Stucki <jeremy@myelin.ch>",
-    "Jan Nils Ferner <jan@myelin.ch>",
-]
 edition = "2018"
 license = "MIT"
 publish = false
