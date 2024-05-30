@@ -1,7 +1,7 @@
 [package]
 name = "mockiato-codegen"
 description = "Internally used by mockiato for code generation. This crate should never be used directly"
-version = "0.9.5"
+version = "0.9.6"
 repository = "https://github.com/mockiato/mockiato"
 documentation = "https://docs.rs/mockiato-codegen"
 edition = "2018"
