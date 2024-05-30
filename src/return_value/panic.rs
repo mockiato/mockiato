@@ -18,7 +18,7 @@ where
 {
     fn generate_return_value(&self, _: <A as ArgumentsMatcher<'_>>::Arguments) -> R {
         match self.0 {
-            Some(message) => panic!(message),
+            Some(message) => panic!("{}", message),
             None => panic!(),
         }
     }
