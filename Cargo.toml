@@ -20,7 +20,7 @@ nearly_eq = "0.2.4"
 nameof = "1.1.0"
 
 [build-dependencies]
-rustc_version = "0.2.3"
+rustc_version = "0.4.0"
 
 [[example]]
 name = "downcasting"
