@@ -9,6 +9,7 @@ edition = "2018"
 license = "MIT"
 keywords = ["test", "testing", "mock", "mocking"]
 categories = ["development-tools::testing"]
+exclude = [".github/**", ".editorconfig", ".mailmap", ".gitignore"]
 
 [badges.maintenance]
 status = "deprecated"
