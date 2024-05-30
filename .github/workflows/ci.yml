@@ -1,0 +1,27 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust-version: [stable, nightly]
+
+    steps:
+    - uses: actions/checkout@v4
+    - run: rustup override set ${{matrix.rust-version}}
+      if: matrix.rust-version != 'stable'
+    - name: Build
+      run: cargo build --all --all-features
+    - name: Run tests
+      run: cargo test --all --all-features
+
