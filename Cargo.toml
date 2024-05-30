@@ -10,6 +10,9 @@ license = "MIT"
 keywords = ["test", "testing", "mock", "mocking"]
 categories = ["development-tools::testing"]
 
+[badges.maintenance]
+status = "deprecated"
+
 [dependencies]
 mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.9.5" }
 nearly_eq = "0.2.4"

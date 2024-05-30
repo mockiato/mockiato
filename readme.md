@@ -1,5 +1,8 @@
 # Mockiato
 
+> [!WARNING]
+> Mockiato is no longer maintained and thus the repository has been archived.
+
 A strict, yet friendly mocking library for Rust 2018
 
 ## ⚠️ Disclaimer for working with stable rust
