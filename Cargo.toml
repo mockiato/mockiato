@@ -1,20 +1,18 @@
 [package]
 name = "mockiato"
 description = "A strict, yet friendly mocking library for Rust 2018"
-version = "0.9.5"
-authors = [
-    "Ruben Schmidmeister <ruben@myelin.ch>",
-    "Jeremy Stucki <jeremy@myelin.ch>",
-    "Jan Nils Ferner <jan@myelin.ch>",
-]
+version = "0.9.6"
 repository = "https://github.com/mockiato/mockiato"
 readme = "readme.md"
-homepage = "https://github.com/mockiato/mockiato"
 documentation = "https://docs.rs/mockiato"
 edition = "2018"
 license = "MIT"
 keywords = ["test", "testing", "mock", "mocking"]
 categories = ["development-tools::testing"]
+exclude = [".github/**", ".editorconfig", ".mailmap", ".gitignore"]
+
+[badges.maintenance]
+status = "deprecated"
 
 [dependencies]
 mockiato-codegen = { path = "crates/mockiato-codegen", version = "0.9.5" }
@@ -22,7 +20,7 @@ nearly_eq = "0.2.4"
 nameof = "1.1.0"
 
 [build-dependencies]
-rustc_version = "0.2.3"
+rustc_version = "0.4.0"
 
 [[example]]
 name = "downcasting"

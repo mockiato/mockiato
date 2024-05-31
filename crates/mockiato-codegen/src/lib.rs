@@ -15,8 +15,6 @@
     clippy::explicit_into_iter_loop
 )]
 
-extern crate proc_macro;
-
 mod code_generator;
 mod code_generator_impl;
 mod constant;

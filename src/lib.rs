@@ -107,7 +107,8 @@
 //! }
 //! ```
 
-#![cfg_attr(rustc_is_nightly, feature(doc_cfg, external_doc, specialization))]
+#![cfg_attr(rustc_is_nightly, feature(doc_cfg, specialization))]
+#![cfg_attr(rustc_is_nightly, allow(incomplete_features))]
 #![warn(
     missing_docs,
     clippy::dbg_macro,
@@ -197,7 +198,8 @@
 /// ```
 pub use mockiato_codegen::mockable;
 
-#[cfg_attr(rustc_is_nightly, doc(include = "../readme.md"))]
+#[cfg(doctest)]
+#[doc = include_str!("../readme.md")]
 mod test_readme {}
 
 pub use crate::argument::Argument;

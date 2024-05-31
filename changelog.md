@@ -71,3 +71,6 @@ No changes.
 
 ## 0.9.5
 - Fix uses of specialization for latest nightly.
+
+## 0.9.6
+* Mark as deprecated.
